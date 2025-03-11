@@ -1,0 +1,82 @@
+use crate::actions::{Action, ActionOption};
+use std::{
+    collections::HashMap,
+    fmt::{self},
+};
+
+#[derive(Copy, Clone, Debug)]
+pub struct Location {
+    pub line: usize,
+    pub column: usize,
+}
+
+impl fmt::Display for Location {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "Line:{} column:{}", self.line, self.column,)
+    }
+}
+
+impl Location {
+    pub fn new(line: usize, column: usize) -> Self {
+        Location { line, column }
+    }
+
+    pub fn next_column(&mut self) -> Self {
+        self.column += 1;
+        *self
+    }
+}
+
+#[derive(Debug)]
+#[allow(unused)]
+pub struct TestStep {
+    start: Location,
+    end: Location,
+    pub action: Action,
+    option: ActionOption,
+    pub arguments: Vec<String>,
+}
+
+impl TestStep {
+    pub fn new(
+        start: Location,
+        end: Location,
+        action: Action,
+        option: ActionOption,
+        arguments: Vec<String>,
+    ) -> TestStep {
+        TestStep {
+            start,
+            end,
+            action,
+            option,
+            arguments,
+        }
+    }
+}
+
+#[derive(Debug)]
+#[allow(unused)]
+pub struct Testcase {
+    capabilities: HashMap<String, String>,
+    prerequisites: Vec<Testcase>,
+    test_steps: Vec<TestStep>,
+}
+
+impl Testcase {
+    pub fn init() -> Testcase {
+        Testcase {
+            capabilities: HashMap::new(),
+            prerequisites: vec![],
+            test_steps: vec![],
+        }
+    }
+
+    pub fn insert_teststep(&mut self, test_step: TestStep) {
+        self.test_steps.push(test_step);
+    }
+
+    pub fn get_teststeps(&self) -> &Vec<TestStep> {
+        &self.test_steps
+    }
+}

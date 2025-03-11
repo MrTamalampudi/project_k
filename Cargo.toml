@@ -1,0 +1,9 @@
+[package]
+name = "project_k"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+thirtyfour = "0.35.0"
+tokio = { version = "1", features = ["full"] }
+unicode-ident = { version = "1.0.18" }
