@@ -6,6 +6,8 @@ use parser::parse_test_case;
 use std::env;
 use std::fs;
 use std::process::Command;
+use std::process::Output;
+use std::str::FromStr;
 
 mod actions;
 mod ast;
@@ -35,7 +37,7 @@ impl CompilationContext {
 }
 
 fn read_file_to_string(path: &String) -> String {
-    println!("{}", path);
+    println!("hooo {}", path);
     match fs::read_to_string(path) {
         Ok(string) => string,
         Err(error) => panic!("{:#?}", error),
@@ -59,8 +61,17 @@ fn compile(entry_point: &String) {
 
     let testcase: Testcase = match file_type_token {
         TokenType::TESTCASE => {
+            let project_root = Command::new("dirname")
+                .args([entry_point])
+                .output()
+                .expect("Error")
+                .stdout;
+            let project_root = String::from_utf8(project_root)
+                .expect("error")
+                .trim()
+                .to_string();
             let compilation_context =
-                CompilationContext::new(String::from("./"), ExecutionType::TESTCASE);
+                CompilationContext::new(project_root, ExecutionType::TESTCASE);
             parse_test_case(&mut lexer, &compilation_context)
         }
         _ => panic!("testcase"),
@@ -77,7 +88,6 @@ fn main() {
         Some(path) => path,
         None => panic!("please provide a file path"),
     };
-    println!("{:#?}", source_path);
     compile(source_path);
     //env::set_var("RUST_BACKTRACE", "1");
     //println!("{:#?}", status);

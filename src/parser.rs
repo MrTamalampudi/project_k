@@ -40,7 +40,8 @@ fn parse_prerequisite(
         match token {
             TokenType::IDENTIFIER(string) => {
                 let prerequisite_path =
-                    compilation_context.project_root.to_owned() + string.as_str() + ".ll";
+                    compilation_context.project_root.to_owned() + "/" + string.as_str() + ".ll";
+                println!("{:#?}", prerequisite_path);
                 let source_code = read_file_to_string(&prerequisite_path);
                 let mut prerequiste_lexer = source_code_to_lexer(source_code);
                 let prerequisite_testcase =
