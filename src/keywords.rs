@@ -72,7 +72,7 @@ define_tokens!(
     //High level tokens
     TESTSTEPS,
     CAPABILITIES,
-    PREREQUISITES,
+    PREREQUISITE,
     GENERATE,
     UNIQUE_EMAIL,
     EOF

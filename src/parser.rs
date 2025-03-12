@@ -1,27 +1,60 @@
 use crate::{
     actions::{Action, ActionOption},
     ast::{TestStep, Testcase},
+    compile,
     keywords::TokenType,
-    lexer::Lexer,
+    lexer::{self, Lexer},
+    read_file_to_string, source_code_to_lexer, CompilationContext, ExecutionType,
 };
 
-pub fn parse_test_case(lexer: &mut Lexer) -> Testcase {
+pub fn parse_test_case(lexer: &mut Lexer, compilation_context: &CompilationContext) -> Testcase {
     let mut testcase: Testcase = Testcase::init();
-    parse_top_level_items(lexer, &mut testcase);
+    lexer.next_token(); //consume TESTCASE token
+    parse_top_level_items(lexer, &mut testcase, compilation_context);
     testcase
 }
 
-pub fn parse_top_level_items(lexer: &mut Lexer, testcase: &mut Testcase) {
+pub fn parse_top_level_items(
+    lexer: &mut Lexer,
+    testcase: &mut Testcase,
+    compilation_context: &CompilationContext,
+) {
     while let token = lexer.peek_token() {
         match token {
             TokenType::TESTSTEPS => parse_test_step(lexer, testcase),
+            TokenType::PREREQUISITE => parse_prerequisite(lexer, &compilation_context, testcase),
             TokenType::EOF => break,
             _ => break,
         }
     }
 }
 
-pub fn parse_test_step(lexer: &mut Lexer, testcase: &mut Testcase) {
+fn parse_prerequisite(
+    lexer: &mut Lexer,
+    compilation_context: &CompilationContext,
+    testcase: &mut Testcase,
+) {
+    lexer.next_token(); //consume PREREQUISITE token
+    loop {
+        let token = lexer.peek_token();
+        match token {
+            TokenType::IDENTIFIER(string) => {
+                let prerequisite_path =
+                    compilation_context.project_root.to_owned() + string.as_str() + ".ll";
+                let source_code = read_file_to_string(&prerequisite_path);
+                let mut prerequiste_lexer = source_code_to_lexer(source_code);
+                let prerequisite_testcase =
+                    parse_test_case(&mut prerequiste_lexer, &compilation_context);
+                println!("{:#?}", testcase);
+                testcase.insert_prerequisite(prerequisite_testcase);
+                lexer.next_token(); // consume current token
+            }
+            _ => break,
+        }
+    }
+}
+
+fn parse_test_step(lexer: &mut Lexer, testcase: &mut Testcase) {
     let _ = lexer.next_token(); //consume "TestSteps" token
     while let token = lexer.peek_token() {
         match token {

@@ -9,7 +9,7 @@ pub enum Action {
     NONE,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 #[allow(non_camel_case_types, unused)]
 pub enum ActionOption {
     UNIQUE_EMAIL,

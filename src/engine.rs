@@ -5,15 +5,26 @@ use thirtyfour::prelude::*;
 #[tokio::main]
 pub async fn execute_test_case(test_case: Testcase) {
     let caps = DesiredCapabilities::chrome();
-    let driver_result = WebDriver::new("http://localhost:33917", caps).await;
+    let driver_result = WebDriver::new("http://localhost:46079", caps).await;
 
     let driver = match driver_result {
         Ok(result) => result,
         Err(result) => panic!("there was an error{}", result),
     };
 
+    let prerequiste: &Vec<Testcase> = test_case.get_prerequisite();
+
+    for testcase in prerequiste.iter() {
+        let teststeps = testcase.get_teststeps();
+        execute_teststeps(&driver, teststeps).await;
+    }
+
     let teststeps: &Vec<TestStep> = test_case.get_teststeps();
 
+    execute_teststeps(&driver, teststeps).await;
+}
+
+async fn execute_teststeps(driver: &WebDriver, teststeps: &Vec<TestStep>) {
     for teststep in teststeps.iter() {
         let action = teststep.action.clone();
         match action {

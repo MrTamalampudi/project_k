@@ -27,7 +27,7 @@ impl Location {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 #[allow(unused)]
 pub struct TestStep {
     start: Location,
@@ -55,7 +55,7 @@ impl TestStep {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 #[allow(unused)]
 pub struct Testcase {
     capabilities: HashMap<String, String>,
@@ -78,5 +78,13 @@ impl Testcase {
 
     pub fn get_teststeps(&self) -> &Vec<TestStep> {
         &self.test_steps
+    }
+
+    pub fn get_prerequisite(&self) -> &Vec<Testcase> {
+        &self.prerequisites
+    }
+
+    pub fn insert_prerequisite(&mut self, testcase: Testcase) {
+        self.prerequisites.push(testcase);
     }
 }
