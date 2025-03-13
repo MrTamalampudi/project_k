@@ -1,8 +1,9 @@
 use crate::ast::Location;
-use crate::keywords::TokenType;
+use crate::keywords::{match_lexing_mode_token_type, LexingMode, TokenType};
 use std::fmt;
 use std::iter::Peekable;
 use std::str::Chars;
+use std::thread::panicking;
 use unicode_ident::{is_xid_continue, is_xid_start};
 
 const WHITESPACE: char = ' ';
@@ -19,6 +20,12 @@ pub struct Token {
     token_type: TokenType,
     start: Location,
     end: Location,
+}
+
+impl fmt::Display for TokenType {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{:#?}", self)
+    }
 }
 
 impl fmt::Display for Token {
@@ -106,16 +113,12 @@ impl<'a> Tokenizer<'a> {
         Ok(tokens)
     }
 
+    //tokenization starts from here
     pub fn get_token(state: &mut State, tokens: &mut Vec<Token>) -> TokenizerResult {
         while let Some(cha) = state.peek() {
             match cha {
-                &WHITESPACE => Tokenizer::counsume_unwanted_token(state)?,
-                &NEW_LINE => Tokenizer::counsume_unwanted_token(state)?,
-                &DOUBLE_QUOTE => Tokenizer::consume_string_token(state, tokens)?,
-                &HASH_TAG => Tokenizer::consume_highlevel_tokens(state, tokens)?,
-                &DOLLAR => Tokenizer::consume_identifier(state, tokens)?,
-                &ASSIGN => Tokenizer::consume_operator_token(TokenType::ASSIGN_OP, state, tokens),
-                'A'..='Z' | 'a'..='z' => Tokenizer::consume_keyword(state, tokens)?,
+                &WHITESPACE | &NEW_LINE => Tokenizer::counsume_unwanted_token(state),
+                &HASH_TAG => Tokenizer::consume_highlevel_tokens(state, tokens),
                 _ => Tokenizer::consume_eof(state, tokens),
             };
         }
@@ -131,9 +134,9 @@ impl<'a> Tokenizer<'a> {
         ));
     }
 
-    fn consume_identifier(state: &mut State, tokens: &mut Vec<Token>) -> TokenizerResult {
+    //using this fn for consuming both prerequisite testcase and variable identifiers
+    fn consume_identifier(state: &mut State, tokens: &mut Vec<Token>) {
         let start = state.location;
-        state.next(); //consume $
         let mut string: String = String::new();
         match state.peek() {
             Some(ch) => {
@@ -167,63 +170,78 @@ impl<'a> Tokenizer<'a> {
                 state.location,
             ));
         }
-
-        Ok(())
     }
 
     fn consume_eof(state: &mut State, tokens: &mut Vec<Token>) {
         tokens.push(Token::new(TokenType::EOF, state.location, state.location));
     }
 
-    fn consume_highlevel_tokens(
-        state: &mut State,
-        tokens: &mut Vec<Token>,
-    ) -> Result<(), TokenizerError> {
+    fn consume_highlevel_tokens(state: &mut State, tokens: &mut Vec<Token>) {
         let start_location = state.location;
         state.next(); // consume '#' token
         let mut string: String = String::new();
-        let mut token_type = TokenType::NONE;
+        let mut lexing_mode = LexingMode::NONE;
         while let Some(ch) = state.peek() {
-            match token_type {
-                TokenType::NONE => {
-                    if !('a'..='z').contains(&ch) {
-                        return Err(TokenizerError {
-                            message: String::from("unexpected tokenfcdff"),
-                            location: state.location,
-                        });
+            match lexing_mode {
+                LexingMode::NONE => {
+                    if ch == &DOUBLE_QUOTE || ch == &NEW_LINE {
+                        panic!("Unexpected Token")
                     }
                     string.push(*ch);
                     state.next();
-                    token_type = TokenType::from_string(string.to_lowercase().as_str());
+                    lexing_mode = LexingMode::from_string(string.to_lowercase().as_str());
                 }
-                _ => match ch {
-                    'a'..='z' | 'A'..='Z' => {
-                        return Err(TokenizerError {
-                            message: format!("Expected nested space {string} before EOF."),
-                            location: state.location,
-                        });
-                    }
-                    _ => break,
-                },
+                _ => break,
             }
         }
+        let token_type = match_lexing_mode_token_type(&lexing_mode);
         tokens.push(Token {
             token_type,
             end: state.location,
             start: start_location,
         });
-        Ok(())
+
+        match lexing_mode {
+            LexingMode::PREREQUISITE => Tokenizer::consume_prerequisite_tokens(state, tokens),
+            LexingMode::TESTSTEPS => Tokenizer::consume_teststep_tokens(state, tokens),
+            _ => {}
+        }
     }
 
-    fn counsume_unwanted_token(state: &mut State) -> Result<(), TokenizerError> {
+    fn consume_teststep_tokens(state: &mut State, tokens: &mut Vec<Token>) {
+        while let Some(cha) = state.peek() {
+            match cha {
+                &WHITESPACE | &NEW_LINE => Tokenizer::counsume_unwanted_token(state),
+                &DOUBLE_QUOTE => Tokenizer::consume_string_token(state, tokens),
+                &HASH_TAG => break,
+                &DOLLAR => {
+                    state.next(); // consume dollar sign
+                    Tokenizer::consume_identifier(state, tokens)
+                }
+                &ASSIGN => Tokenizer::consume_operator_token(TokenType::ASSIGN_OP, state, tokens),
+                'A'..='Z' | 'a'..='z' => Tokenizer::consume_keyword(state, tokens),
+                _ => Tokenizer::consume_eof(state, tokens),
+            };
+        }
+    }
+
+    fn consume_prerequisite_tokens(state: &mut State, tokens: &mut Vec<Token>) {
+        while let Some(ch) = state.peek() {
+            if is_xid_start(*ch) {
+                Tokenizer::consume_identifier(state, tokens)
+            } else if ch == &WHITESPACE || ch == &NEW_LINE {
+                Tokenizer::counsume_unwanted_token(state)
+            } else {
+                break;
+            };
+        }
+    }
+
+    fn counsume_unwanted_token(state: &mut State) {
         state.next();
-        Ok(())
     }
 
-    fn consume_string_token(
-        state: &mut State,
-        tokens: &mut Vec<Token>,
-    ) -> Result<(), TokenizerError> {
+    fn consume_string_token(state: &mut State, tokens: &mut Vec<Token>) {
         let start_location = state.location;
         state.next(); //consume starting quote
         let mut string: String = String::new();
@@ -245,11 +263,9 @@ impl<'a> Tokenizer<'a> {
             start_location,
             state.location,
         ));
-
-        Ok(())
     }
 
-    fn consume_keyword(state: &mut State, tokens: &mut Vec<Token>) -> Result<(), TokenizerError> {
+    fn consume_keyword(state: &mut State, tokens: &mut Vec<Token>) {
         let start: Location = state.location;
         let mut string: String = String::new();
         let mut token_type: TokenType = TokenType::NONE;
@@ -257,10 +273,7 @@ impl<'a> Tokenizer<'a> {
             match token_type {
                 TokenType::NONE => {
                     if s == DOUBLE_QUOTE || s == NEW_LINE {
-                        return Err(TokenizerError {
-                            message: String::from("unexpected"),
-                            location: state.location,
-                        });
+                        panic!("Unexpected")
                     }
                     string.push(s);
                     token_type = TokenType::from_string(string.to_lowercase().as_str());
@@ -269,7 +282,6 @@ impl<'a> Tokenizer<'a> {
             }
         }
         tokens.push(Token::new(token_type, start, state.location));
-        Ok(())
     }
 }
 

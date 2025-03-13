@@ -59,6 +59,7 @@ impl TestStep {
 #[allow(unused)]
 pub struct Testcase {
     capabilities: HashMap<String, String>,
+    variables: HashMap<String, String>,
     prerequisites: Vec<Testcase>,
     test_steps: Vec<TestStep>,
 }
@@ -67,9 +68,14 @@ impl Testcase {
     pub fn init() -> Testcase {
         Testcase {
             capabilities: HashMap::new(),
+            variables: HashMap::new(),
             prerequisites: vec![],
             test_steps: vec![],
         }
+    }
+
+    pub fn insert_variable(&mut self, identifier: &String, value: &String) {
+        self.variables.insert(identifier.clone(), value.clone());
     }
 
     pub fn insert_teststep(&mut self, test_step: TestStep) {

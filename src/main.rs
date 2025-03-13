@@ -37,7 +37,6 @@ impl CompilationContext {
 }
 
 fn read_file_to_string(path: &String) -> String {
-    println!("hooo {}", path);
     match fs::read_to_string(path) {
         Ok(string) => string,
         Err(error) => panic!("{:#?}", error),
@@ -79,17 +78,17 @@ fn compile(entry_point: &String) {
 
     println!("{:#?}", testcase);
 
-    execute_test_case(testcase);
+    //execute_test_case(testcase);
 }
 
 fn main() {
+    env::set_var("RUST_BACKTRACE", "1");
     let argss: Vec<String> = env::args().collect();
     let source_path = match argss.get(1) {
         Some(path) => path,
         None => panic!("please provide a file path"),
     };
     compile(source_path);
-    //env::set_var("RUST_BACKTRACE", "1");
     //println!("{:#?}", status);
     //compile(String::from("./new.ll"));
 }
