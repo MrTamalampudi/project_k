@@ -1,4 +1,7 @@
-use crate::actions::{Action, ActionOption};
+use crate::{
+    actions::{Action, ActionOption},
+    enums::IdentifierValue,
+};
 use std::{
     collections::HashMap,
     fmt::{self},
@@ -59,7 +62,7 @@ impl TestStep {
 #[allow(unused)]
 pub struct Testcase {
     capabilities: HashMap<String, String>,
-    variables: HashMap<String, String>,
+    variables: HashMap<String, IdentifierValue>,
     prerequisites: Vec<Testcase>,
     test_steps: Vec<TestStep>,
 }
@@ -74,7 +77,7 @@ impl Testcase {
         }
     }
 
-    pub fn insert_variable(&mut self, identifier: &String, value: &String) {
+    pub fn insert_variable(&mut self, identifier: &String, value: &IdentifierValue) {
         self.variables.insert(identifier.clone(), value.clone());
     }
 

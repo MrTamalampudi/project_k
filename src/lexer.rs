@@ -1,9 +1,9 @@
 use crate::ast::Location;
-use crate::keywords::{match_lexing_mode_token_type, LexingMode, TokenType};
+use crate::enums::LexingMode;
+use crate::keywords::TokenType;
 use std::fmt;
 use std::iter::Peekable;
 use std::str::Chars;
-use std::thread::panicking;
 use unicode_ident::{is_xid_continue, is_xid_start};
 
 const WHITESPACE: char = ' ';
@@ -45,6 +45,10 @@ impl Token {
 
     pub fn get_start_location(&self) -> Location {
         self.start
+    }
+
+    pub fn get_end_location(&self) -> Location {
+        self.end
     }
 
     pub fn get_token_type(&self) -> TokenType {
@@ -114,7 +118,7 @@ impl<'a> Tokenizer<'a> {
     }
 
     //tokenization starts from here
-    pub fn get_token(state: &mut State, tokens: &mut Vec<Token>) -> TokenizerResult {
+    pub fn get_token(state: &mut State, tokens: &mut Vec<Token>) {
         while let Some(cha) = state.peek() {
             match cha {
                 &WHITESPACE | &NEW_LINE => Tokenizer::counsume_unwanted_token(state),
@@ -122,7 +126,6 @@ impl<'a> Tokenizer<'a> {
                 _ => Tokenizer::consume_eof(state, tokens),
             };
         }
-        Ok(())
     }
 
     fn consume_operator_token(token_type: TokenType, state: &mut State, tokens: &mut Vec<Token>) {
@@ -194,7 +197,7 @@ impl<'a> Tokenizer<'a> {
                 _ => break,
             }
         }
-        let token_type = match_lexing_mode_token_type(&lexing_mode);
+        let token_type = lexing_mode.match_token_type();
         tokens.push(Token {
             token_type,
             end: state.location,

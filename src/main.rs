@@ -12,6 +12,7 @@ use std::str::FromStr;
 mod actions;
 mod ast;
 mod engine;
+pub mod enums;
 pub mod keywords;
 pub mod lexer;
 mod parser;

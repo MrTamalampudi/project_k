@@ -77,10 +77,7 @@ fn parse_variable_initalization(lexer: &mut Lexer, testcase: &mut Testcase) {
         x @ _ => panic!("Expected Assign token got {x}"),
     };
     lexer.next_token(); // consume Assign token
-    let value = match lexer.next_token().get_token_type() {
-        TokenType::STRING(value) => value,
-        x @ _ => panic!("Expected String token got {x}"),
-    };
+    let value = lexer.next_token().get_token_type().match_identifier_value();
     testcase.insert_variable(&identifier, &value);
 }
 
