@@ -1,6 +1,6 @@
-use crate::ast::Location;
-use crate::enums::LexingMode;
+use crate::enums::{Browser, LexingMode};
 use crate::keywords::TokenType;
+use crate::{ast::Location, enums::Capabilities};
 use std::fmt;
 use std::iter::Peekable;
 use std::str::Chars;
@@ -70,6 +70,7 @@ impl fmt::Display for TokenizerError {
 
 impl std::error::Error for TokenizerError {}
 
+#[derive(Debug)]
 pub struct State<'a> {
     peekable: Peekable<Chars<'a>>,
     pub location: Location,
@@ -207,8 +208,83 @@ impl<'a> Tokenizer<'a> {
         match lexing_mode {
             LexingMode::PREREQUISITE => Tokenizer::consume_prerequisite_tokens(state, tokens),
             LexingMode::TESTSTEPS => Tokenizer::consume_teststep_tokens(state, tokens),
+            LexingMode::CAPABILITIES => Tokenizer::consume_capabilities_tokens(state, tokens),
             _ => {}
         }
+    }
+
+    fn consume_capabilities_tokens(state: &mut State, tokens: &mut Vec<Token>) {
+        while let Some(cha) = state.peek() {
+            match cha {
+                &WHITESPACE | &NEW_LINE => Tokenizer::counsume_unwanted_token(state),
+                &HASH_TAG => break,
+                'A'..='Z' | 'a'..='z' => Tokenizer::consume_capability(state, tokens),
+                _ => Tokenizer::consume_eof(state, tokens),
+            };
+        }
+    }
+
+    fn consume_capability(state: &mut State, tokens: &mut Vec<Token>) {
+        let start: Location = state.location;
+        let mut capability_string: String = String::new();
+        let mut capability_type: Capabilities = Capabilities::NONE;
+        while let Some(s) = state.next() {
+            match capability_type {
+                Capabilities::NONE => {
+                    if s == DOUBLE_QUOTE || s == NEW_LINE {
+                        panic!("Unexpected")
+                    }
+                    capability_string.push(s);
+                    capability_type =
+                        Capabilities::from_string(capability_string.to_lowercase().as_str());
+                }
+                _ => break,
+            }
+        }
+        let token_type = capability_type.match_token_type();
+        tokens.push(Token::new(token_type, start, state.location));
+
+        //consume till capability value
+        //browser = chrome
+        //          ^ consume upto here
+        while let Some(cha) = state.peek() {
+            match cha {
+                &WHITESPACE | &NEW_LINE => Tokenizer::counsume_unwanted_token(state),
+                &ASSIGN => Tokenizer::consume_operator_token(TokenType::ASSIGN_OP, state, tokens),
+                'A'..='Z' | 'a'..='z' | &DOUBLE_QUOTE => break,
+                _ => Tokenizer::consume_eof(state, tokens),
+            };
+        }
+
+        match capability_type {
+            Capabilities::BROWSER => Tokenizer::consume_browser_capability_token(state, tokens),
+            Capabilities::DRIVERURL => Tokenizer::consume_driverurl_capability_token(state, tokens),
+            _ => todo!(),
+        }
+    }
+
+    fn consume_driverurl_capability_token(state: &mut State, tokens: &mut Vec<Token>) {
+        Tokenizer::consume_string_token(state, tokens);
+    }
+
+    fn consume_browser_capability_token(state: &mut State, tokens: &mut Vec<Token>) {
+        let start: Location = state.location;
+        let mut browser_string: String = String::new();
+        let mut browser_type: Browser = Browser::NONE;
+        while let Some(s) = state.next() {
+            match browser_type {
+                Browser::NONE => {
+                    if s == DOUBLE_QUOTE || s == NEW_LINE {
+                        panic!("Unexpected")
+                    }
+                    browser_string.push(s);
+                    browser_type = Browser::from_string(browser_string.to_lowercase().as_str());
+                }
+                _ => break,
+            }
+        }
+        let token_type = browser_type.match_token_type();
+        tokens.push(Token::new(token_type, start, state.location));
     }
 
     fn consume_teststep_tokens(state: &mut State, tokens: &mut Vec<Token>) {

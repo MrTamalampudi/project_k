@@ -1,11 +1,14 @@
 use crate::actions::Action;
 use crate::ast::{TestStep, Testcase};
+use crate::enums::{Browser, CapabilityValue};
+use crate::keywords::TokenType;
 use thirtyfour::prelude::*;
 
 #[tokio::main]
 pub async fn execute_test_case(test_case: Testcase) {
     let caps = DesiredCapabilities::chrome();
-    let driver_result = WebDriver::new("http://localhost:46079", caps).await;
+    let driver_url = get_driver_url(&test_case);
+    let driver_result = WebDriver::new(driver_url, caps).await;
 
     let driver = match driver_result {
         Ok(result) => result,
@@ -22,6 +25,30 @@ pub async fn execute_test_case(test_case: Testcase) {
     let teststeps: &Vec<TestStep> = test_case.get_teststeps();
 
     execute_teststeps(&driver, teststeps).await;
+}
+
+fn get_driver_url(test_case: &Testcase) -> String {
+    let result = test_case.get_capability(
+        &TokenType::CAPS(crate::enums::Capabilities::DRIVERURL)
+            .to_string()
+            .to_string(),
+    );
+    match result {
+        CapabilityValue::STRING(string) => string,
+        _ => panic!("Expecting Driver url"),
+    }
+}
+
+fn get_browser_capabilites(test_case: Testcase) -> Browser {
+    let browser = test_case.get_capability(
+        &TokenType::CAPS(crate::enums::Capabilities::BROWSER)
+            .to_string()
+            .to_string(),
+    );
+    match browser {
+        CapabilityValue::BROWSER(browser) => browser,
+        _ => panic!("Expecting Browser capability value"),
+    }
 }
 
 async fn execute_teststeps(driver: &WebDriver, teststeps: &Vec<TestStep>) {

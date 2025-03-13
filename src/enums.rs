@@ -39,18 +39,14 @@ macro_rules! define_enums {
 }
 
 define_enums!(
-    //Enum name
+    //EnumName
     LexingMode,
     //Mode
     TESTSTEPS,
     PREREQUISITE,
-    TESTCASE
+    TESTCASE,
+    CAPABILITIES
 );
-
-#[derive(Debug, Clone)]
-pub enum IdentifierValue {
-    STRING(String),
-}
 
 impl LexingMode {
     pub fn match_token_type(&self) -> TokenType {
@@ -58,7 +54,58 @@ impl LexingMode {
             LexingMode::TESTSTEPS => TokenType::TESTSTEPS,
             LexingMode::TESTCASE => TokenType::TESTCASE,
             LexingMode::PREREQUISITE => TokenType::PREREQUISITE,
+            LexingMode::CAPABILITIES => TokenType::CAPABILITIES,
             LexingMode::NONE => TokenType::NONE,
         }
     }
+}
+
+#[derive(Debug, Clone)]
+pub enum IdentifierValue {
+    STRING(String),
+}
+
+define_enums!(
+    //EnumName
+    Capabilities,
+    //caps
+    BROWSER,
+    DRIVERURL
+);
+
+impl Capabilities {
+    pub fn match_token_type(&self) -> TokenType {
+        match self {
+            Capabilities::BROWSER => TokenType::CAPS(Capabilities::BROWSER),
+            Capabilities::DRIVERURL => TokenType::CAPS(Capabilities::DRIVERURL),
+            Capabilities::NONE => TokenType::NONE,
+        }
+    }
+}
+
+define_enums!(
+    //EnumName
+    Browser, CHROME, FIREFOX, EDGE
+);
+
+impl Browser {
+    pub fn match_token_type(&self) -> TokenType {
+        match self {
+            Browser::CHROME => TokenType::BROWSER(Browser::CHROME),
+            Browser::FIREFOX => TokenType::BROWSER(Browser::FIREFOX),
+            Browser::EDGE => TokenType::BROWSER(Browser::EDGE),
+            Browser::NONE => TokenType::NONE,
+        }
+    }
+
+    pub fn is_equal(&self, browser: Browser) -> bool {
+        matches!(self, Browser)
+    }
+}
+
+#[derive(Debug, Clone)]
+pub enum CapabilityValue {
+    BROWSER(Browser),
+    STRING(String),
+    NONE,
 }

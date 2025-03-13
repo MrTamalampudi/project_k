@@ -1,6 +1,6 @@
 use crate::{
     actions::{Action, ActionOption},
-    enums::IdentifierValue,
+    enums::{CapabilityValue, IdentifierValue},
 };
 use std::{
     collections::HashMap,
@@ -61,7 +61,7 @@ impl TestStep {
 #[derive(Debug, Clone)]
 #[allow(unused)]
 pub struct Testcase {
-    capabilities: HashMap<String, String>,
+    capabilities: HashMap<String, CapabilityValue>,
     variables: HashMap<String, IdentifierValue>,
     prerequisites: Vec<Testcase>,
     test_steps: Vec<TestStep>,
@@ -75,6 +75,18 @@ impl Testcase {
             prerequisites: vec![],
             test_steps: vec![],
         }
+    }
+
+    pub fn get_capability(&self, capability: &String) -> CapabilityValue {
+        self.capabilities
+            .get(capability)
+            .map_or(CapabilityValue::NONE, |capability_value| {
+                capability_value.clone()
+            })
+    }
+
+    pub fn insert_capability(&mut self, capability: &String, value: &CapabilityValue) {
+        self.capabilities.insert(capability.clone(), value.clone());
     }
 
     pub fn insert_variable(&mut self, identifier: &String, value: &IdentifierValue) {

@@ -23,7 +23,29 @@ pub fn parse_top_level_items(
         match token {
             TokenType::TESTSTEPS => parse_test_step(lexer, testcase),
             TokenType::PREREQUISITE => parse_prerequisite(lexer, &compilation_context, testcase),
+            TokenType::CAPABILITIES => parse_capbilities(lexer, testcase),
             TokenType::EOF => break,
+            _ => break,
+        }
+    }
+}
+
+fn parse_capbilities(lexer: &mut Lexer, testcase: &mut Testcase) {
+    lexer.next_token(); // consume capability token
+    loop {
+        let token = lexer.peek_token();
+        match token {
+            TokenType::CAPS(capability) => {
+                let capbility_string = lexer.next_token().get_token_type().to_string().to_string();
+                match lexer.peek_token() {
+                    TokenType::ASSIGN_OP => {
+                        lexer.next_token();
+                    } // consume assign token
+                    x @ _ => panic!("Expected Assign token got {}", x),
+                }
+                let capbility_value = lexer.next_token().get_token_type().match_capability_value();
+                testcase.insert_capability(&capbility_string, &capbility_value);
+            }
             _ => break,
         }
     }

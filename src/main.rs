@@ -79,7 +79,7 @@ fn compile(entry_point: &String) {
 
     println!("{:#?}", testcase);
 
-    //execute_test_case(testcase);
+    execute_test_case(testcase);
 }
 
 fn main() {

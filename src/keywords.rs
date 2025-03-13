@@ -1,4 +1,5 @@
-use crate::enums::IdentifierValue;
+use crate::enums::{Browser, Capabilities};
+use crate::enums::{CapabilityValue, IdentifierValue};
 use std::collections::HashMap;
 
 macro_rules! define_tokens {
@@ -8,6 +9,9 @@ macro_rules! define_tokens {
         pub enum TokenType {
             STRING(String),
             IDENTIFIER(String),
+            CAPS(Capabilities),
+            //capbilities
+            BROWSER(Browser),
             NONE,
             $($keyword),*
         }
@@ -46,6 +50,8 @@ macro_rules! define_tokens {
                 match self {
                     TokenType::STRING(string) | TokenType::IDENTIFIER(string) => string,
                     TokenType::NONE => "none",
+                    TokenType::CAPS(caps) => caps.to_string(),
+                    TokenType::BROWSER(browser) => browser.to_string(),
                     $(TokenType::$keyword => Box::leak(
                         stringify!($keyword).replace("_"," ").to_lowercase().into_boxed_str()
                     ),)*
@@ -60,6 +66,14 @@ impl TokenType {
         match self {
             Self::STRING(string) => IdentifierValue::STRING(string),
             _ => panic!("Not a valid IdentifierValue"),
+        }
+    }
+
+    pub fn match_capability_value(self) -> CapabilityValue {
+        match self {
+            Self::BROWSER(browser) => CapabilityValue::BROWSER(browser),
+            Self::STRING(string) => CapabilityValue::STRING(string),
+            _ => panic!("Not a valid CapabilityValue"),
         }
     }
 }
@@ -83,6 +97,7 @@ define_tokens!(
     TESTSTEPS,
     CAPABILITIES,
     PREREQUISITE,
+    //
     GENERATE,
     UNIQUE_EMAIL,
     EOF
