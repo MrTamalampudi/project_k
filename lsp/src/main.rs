@@ -9,6 +9,12 @@ struct Backend {
 #[tower_lsp::async_trait(?Send)]
 impl LanguageServer for Backend {
     async fn initialize(&self, params: InitializeParams) -> LspResult<InitializeResult> {
+        self.client
+            .show_message(
+                MessageType::INFO,
+                format!("{:#?}", params.workspace_folders),
+            )
+            .await;
         Ok(InitializeResult {
             capabilities: ServerCapabilities {
                 definition_provider: Some(OneOf::Right(DefinitionOptions {
@@ -30,7 +36,26 @@ impl LanguageServer for Backend {
 
     async fn did_change(&self, params: DidChangeTextDocumentParams) {
         self.client
-            .show_message(MessageType::ERROR, format!("{:#?}", params.content_changes))
+            .publish_diagnostics(
+                params.text_document.uri,
+                vec![
+                    (Diagnostic {
+                        range: Range {
+                            start: Position {
+                                line: 0,
+                                character: 0,
+                            },
+                            end: Position {
+                                line: 0,
+                                character: 10,
+                            },
+                        },
+                        message: String::from("value"),
+                        ..Default::default()
+                    }),
+                ],
+                Some(params.text_document.version),
+            )
             .await
     }
 }

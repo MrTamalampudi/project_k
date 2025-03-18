@@ -1,5 +1,6 @@
 use ast::Testcase;
 use engine::execute_test_case;
+use error_handling::ErrorManager;
 use keywords::TokenType;
 use lexer::{Lexer, Tokenizer};
 use parser::parse_test_case;
@@ -8,9 +9,10 @@ use std::fs;
 use std::process::Command;
 
 mod actions;
-mod ast;
+pub mod ast;
 mod engine;
 pub mod enums;
+pub mod error_handling;
 pub mod keywords;
 pub mod lexer;
 mod parser;
@@ -21,17 +23,22 @@ enum ExecutionType {
     TESTPLAN,
 }
 
-struct CompilationContext {
-    execution_type: ExecutionType,
-    project_root: String,
+#[derive(Debug)]
+pub struct CompilationContext {
+    path: String,
+    errors: ErrorManager,
 }
 
 impl CompilationContext {
-    fn new(project_root: String, execution_type: ExecutionType) -> Self {
+    pub fn new(path: String) -> Self {
         Self {
-            execution_type,
-            project_root,
+            path,
+            errors: ErrorManager::new(),
         }
+    }
+
+    pub fn set_project_root(&mut self, path: String) {
+        self.path = path;
     }
 }
 
@@ -42,8 +49,12 @@ fn read_file_to_string(path: &String) -> String {
     }
 }
 
-fn source_code_to_lexer(source_code: String, source_path: &String) -> Lexer {
-    let tokens = match Tokenizer::new(source_code, source_path.clone()).tokenize() {
+fn source_code_to_lexer(
+    source_code: String,
+    source_path: &String,
+    ctx: &mut CompilationContext,
+) -> Lexer {
+    let tokens = match Tokenizer::new(source_code, source_path.clone(), ctx).tokenize() {
         Ok(tokenss) => tokenss,
         Err(tokenss) => panic!("error, {:#?}", tokenss),
     };
@@ -51,9 +62,9 @@ fn source_code_to_lexer(source_code: String, source_path: &String) -> Lexer {
     Lexer::from_tokens(tokens)
 }
 
-fn compile(entry_point: &String) {
+fn compile(entry_point: &String, ctx: &mut CompilationContext) {
     let source_code = read_file_to_string(entry_point);
-    let mut lexer = source_code_to_lexer(source_code, entry_point);
+    let mut lexer = source_code_to_lexer(source_code, entry_point, ctx);
 
     let file_type_token = lexer.peek_token();
 
@@ -68,12 +79,13 @@ fn compile(entry_point: &String) {
                 .expect("error")
                 .trim()
                 .to_string();
-            let compilation_context =
-                CompilationContext::new(project_root, ExecutionType::TESTCASE);
-            parse_test_case(&mut lexer, &compilation_context)
+            ctx.set_project_root(project_root);
+            parse_test_case(&mut lexer, ctx)
         }
         _ => panic!("testcase"),
     };
+
+    println!("{:#?}", ctx.errors);
 
     //println!("{:#?}", testcase);
 
@@ -87,7 +99,8 @@ fn main() {
         Some(path) => path,
         None => panic!("please provide a file path"),
     };
-    compile(source_path);
+    let mut ctx = CompilationContext::new(source_path.clone());
+    compile(source_path, &mut ctx);
     //println!("{:#?}", status);
     //compile(String::from("./new.ll"));
 }

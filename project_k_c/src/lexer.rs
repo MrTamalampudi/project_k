@@ -1,5 +1,7 @@
 use crate::enums::{Browser, LexingMode};
+use crate::error_handling::{ErrorInfo, ErrorManager};
 use crate::keywords::TokenType;
+use crate::CompilationContext;
 use crate::{ast::Location, enums::Capabilities};
 use std::fmt;
 use std::iter::Peekable;
@@ -128,23 +130,26 @@ impl State<'_> {
     }
 }
 
-pub struct Tokenizer {
+pub struct Tokenizer<'a> {
     source_code: String,
     source_path: String,
+    ctx: &'a mut CompilationContext,
 }
 
 type TokenizerResult = Result<(), TokenizerError>;
 
-impl Tokenizer {
-    pub fn new(source_code: String, source_path: String) -> Self {
+impl<'a> Tokenizer<'a> {
+    pub fn new(source_code: String, source_path: String, ctx: &'a mut CompilationContext) -> Self {
         Self {
             source_code,
             source_path,
+            ctx,
         }
     }
-    pub fn tokenize(&self) -> Result<Vec<Token>, ()> {
+    pub fn tokenize(&mut self) -> Result<Vec<Token>, ()> {
+        let source_code = self.source_code.clone();
         let mut state = State {
-            peekable: self.source_code.chars().peekable(),
+            peekable: source_code.chars().peekable(),
             location: Location::new(1, 1),
         };
 
@@ -154,7 +159,7 @@ impl Tokenizer {
     }
 
     //tokenization starts from here
-    pub fn get_token(&self, state: &mut State, tokens: &mut Vec<Token>) {
+    pub fn get_token(&mut self, state: &mut State, tokens: &mut Vec<Token>) {
         while let Some(cha) = state.peek() {
             match cha {
                 &WHITESPACE | &NEW_LINE => Tokenizer::counsume_unwanted_token(state),
@@ -229,7 +234,7 @@ impl Tokenizer {
         ));
     }
 
-    fn consume_highlevel_tokens(&self, state: &mut State, tokens: &mut Vec<Token>) {
+    fn consume_highlevel_tokens(&mut self, state: &mut State, tokens: &mut Vec<Token>) {
         let start_location = state.location;
         state.next(); // consume '#' token
         let mut string: String = String::new();
@@ -238,7 +243,7 @@ impl Tokenizer {
             match lexing_mode {
                 LexingMode::NONE => {
                     if ch == &DOUBLE_QUOTE || ch == &NEW_LINE {
-                        panic!("Unexpected Token")
+                        panic!("Unexpected token");
                     }
                     string.push(*ch);
                     state.next();

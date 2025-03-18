@@ -28,6 +28,10 @@ impl Location {
         self.column += 1;
         *self
     }
+
+    pub fn get_location(&self) -> Location {
+        self.clone()
+    }
 }
 
 #[derive(Debug, Clone)]
