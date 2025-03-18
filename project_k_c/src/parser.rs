@@ -64,7 +64,7 @@ fn parse_prerequisite(
                 let prerequisite_path =
                     compilation_context.project_root.to_owned() + "/" + string.as_str() + ".ll";
                 let source_code = read_file_to_string(&prerequisite_path);
-                let mut prerequiste_lexer = source_code_to_lexer(source_code);
+                let mut prerequiste_lexer = source_code_to_lexer(source_code, &prerequisite_path);
                 let prerequisite_testcase =
                     parse_test_case(&mut prerequiste_lexer, &compilation_context);
                 testcase.insert_prerequisite(prerequisite_testcase);

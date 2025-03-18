@@ -18,7 +18,8 @@ macro_rules! consume_keyword_token {
     (
         $token_enum:ident,
         $state:ident,
-        $tokens:ident
+        $tokens:ident,
+        $source_path:ident
     ) => {
         let start: Location = $state.location;
         let mut string: String = String::new();
@@ -38,7 +39,7 @@ macro_rules! consume_keyword_token {
         }
 
         let token_type = provided_type.match_token_type();
-        $tokens.push(Token::new(token_type, start, $state.location));
+        $tokens.push(Token::new(token_type, start, $state.location, $source_path));
     };
 }
 
@@ -48,6 +49,7 @@ pub struct Token {
     token_type: TokenType,
     start: Location,
     end: Location,
+    source_path: String,
 }
 
 impl fmt::Display for TokenType {
@@ -63,11 +65,12 @@ impl fmt::Display for Token {
 }
 
 impl Token {
-    fn new(token_type: TokenType, start: Location, end: Location) -> Self {
+    fn new(token_type: TokenType, start: Location, end: Location, source_path: String) -> Self {
         Self {
             token_type,
             start,
             end,
+            source_path,
         }
     }
 
@@ -125,47 +128,61 @@ impl State<'_> {
     }
 }
 
-pub struct Tokenizer<'a> {
-    source_code: &'a String,
+pub struct Tokenizer {
+    source_code: String,
+    source_path: String,
 }
 
 type TokenizerResult = Result<(), TokenizerError>;
 
-impl<'a> Tokenizer<'a> {
-    pub fn new(source_code: &'a String) -> Self {
-        Self { source_code }
+impl Tokenizer {
+    pub fn new(source_code: String, source_path: String) -> Self {
+        Self {
+            source_code,
+            source_path,
+        }
     }
-    pub fn tokenize(&mut self) -> Result<Vec<Token>, ()> {
+    pub fn tokenize(&self) -> Result<Vec<Token>, ()> {
         let mut state = State {
             peekable: self.source_code.chars().peekable(),
             location: Location::new(1, 1),
         };
 
         let mut tokens: Vec<Token> = vec![];
-        Tokenizer::get_token(&mut state, &mut tokens);
+        self.get_token(&mut state, &mut tokens);
         Ok(tokens)
     }
 
     //tokenization starts from here
-    pub fn get_token(state: &mut State, tokens: &mut Vec<Token>) {
+    pub fn get_token(&self, state: &mut State, tokens: &mut Vec<Token>) {
         while let Some(cha) = state.peek() {
             match cha {
                 &WHITESPACE | &NEW_LINE => Tokenizer::counsume_unwanted_token(state),
-                &HASH_TAG => Tokenizer::consume_highlevel_tokens(state, tokens),
-                _ => Tokenizer::consume_eof(state, tokens),
+                &HASH_TAG => self.consume_highlevel_tokens(state, tokens),
+                _ => self.consume_eof(state, tokens),
             };
         }
     }
 
-    fn consume_operator_token(token_type: TokenType, state: &mut State, tokens: &mut Vec<Token>) {
-        tokens.push(Token::new(token_type, state.location, {
-            state.next();
-            state.location
-        }));
+    fn consume_operator_token(
+        &self,
+        token_type: TokenType,
+        state: &mut State,
+        tokens: &mut Vec<Token>,
+    ) {
+        tokens.push(Token::new(
+            token_type,
+            state.location,
+            {
+                state.next();
+                state.location
+            },
+            self.source_path.clone(),
+        ));
     }
 
     //using this fn for consuming both prerequisite testcase and variable identifiers
-    fn consume_identifier(state: &mut State, tokens: &mut Vec<Token>) {
+    fn consume_identifier(&self, state: &mut State, tokens: &mut Vec<Token>) {
         let start = state.location;
         let mut string: String = String::new();
         match state.peek() {
@@ -198,15 +215,21 @@ impl<'a> Tokenizer<'a> {
                 TokenType::IDENTIFIER(string),
                 start,
                 state.location,
+                self.source_path.clone(),
             ));
         }
     }
 
-    fn consume_eof(state: &mut State, tokens: &mut Vec<Token>) {
-        tokens.push(Token::new(TokenType::EOF, state.location, state.location));
+    fn consume_eof(&self, state: &mut State, tokens: &mut Vec<Token>) {
+        tokens.push(Token::new(
+            TokenType::EOF,
+            state.location,
+            state.location,
+            self.source_path.clone(),
+        ));
     }
 
-    fn consume_highlevel_tokens(state: &mut State, tokens: &mut Vec<Token>) {
+    fn consume_highlevel_tokens(&self, state: &mut State, tokens: &mut Vec<Token>) {
         let start_location = state.location;
         state.next(); // consume '#' token
         let mut string: String = String::new();
@@ -229,28 +252,30 @@ impl<'a> Tokenizer<'a> {
             token_type,
             end: state.location,
             start: start_location,
+            source_path: self.source_path.clone(),
         });
 
         match lexing_mode {
-            LexingMode::PREREQUISITE => Tokenizer::consume_prerequisite_tokens(state, tokens),
-            LexingMode::TESTSTEPS => Tokenizer::consume_teststep_tokens(state, tokens),
-            LexingMode::CAPABILITIES => Tokenizer::consume_capabilities_tokens(state, tokens),
+            LexingMode::PREREQUISITE => self.consume_prerequisite_tokens(state, tokens),
+            LexingMode::TESTSTEPS => self.consume_teststep_tokens(state, tokens),
+            LexingMode::CAPABILITIES => self.consume_capabilities_tokens(state, tokens),
             _ => {}
         }
     }
 
-    fn consume_capabilities_tokens(state: &mut State, tokens: &mut Vec<Token>) {
+    fn consume_capabilities_tokens(&self, state: &mut State, tokens: &mut Vec<Token>) {
         while let Some(cha) = state.peek() {
             match cha {
                 &WHITESPACE | &NEW_LINE => Tokenizer::counsume_unwanted_token(state),
                 &HASH_TAG => break,
-                'A'..='Z' | 'a'..='z' => Tokenizer::consume_capability(state, tokens),
-                _ => Tokenizer::consume_eof(state, tokens),
+                'A'..='Z' | 'a'..='z' => self.consume_capability(state, tokens),
+                _ => self.consume_eof(state, tokens),
             };
         }
     }
 
-    fn consume_capability(state: &mut State, tokens: &mut Vec<Token>) {
+    fn consume_capability(&self, state: &mut State, tokens: &mut Vec<Token>) {
+        //didnt use consume_keyword_token macro beacause we need capability_type further
         let start: Location = state.location;
         let mut capability_string: String = String::new();
         let mut capability_type: Capabilities = Capabilities::NONE;
@@ -269,7 +294,12 @@ impl<'a> Tokenizer<'a> {
             }
         }
         let token_type = capability_type.match_token_type();
-        tokens.push(Token::new(token_type, start, state.location));
+        tokens.push(Token::new(
+            token_type,
+            start,
+            state.location,
+            self.source_path.clone(),
+        ));
 
         //consume till capability value
         //browser = chrome
@@ -277,48 +307,49 @@ impl<'a> Tokenizer<'a> {
         while let Some(cha) = state.peek() {
             match cha {
                 &WHITESPACE | &NEW_LINE => Tokenizer::counsume_unwanted_token(state),
-                &ASSIGN => Tokenizer::consume_operator_token(TokenType::ASSIGN_OP, state, tokens),
+                &ASSIGN => self.consume_operator_token(TokenType::ASSIGN_OP, state, tokens),
                 'A'..='Z' | 'a'..='z' | &DOUBLE_QUOTE => break,
-                _ => Tokenizer::consume_eof(state, tokens),
+                _ => self.consume_eof(state, tokens),
             };
         }
 
         match capability_type {
-            Capabilities::BROWSER => Tokenizer::consume_browser_capability_token(state, tokens),
-            Capabilities::DRIVERURL => Tokenizer::consume_driverurl_capability_token(state, tokens),
+            Capabilities::BROWSER => self.consume_browser_capability_token(state, tokens),
+            Capabilities::DRIVERURL => self.consume_driverurl_capability_token(state, tokens),
             _ => todo!(),
         }
     }
 
-    fn consume_driverurl_capability_token(state: &mut State, tokens: &mut Vec<Token>) {
-        Tokenizer::consume_string_token(state, tokens);
+    fn consume_driverurl_capability_token(&self, state: &mut State, tokens: &mut Vec<Token>) {
+        self.consume_string_token(state, tokens);
     }
 
-    fn consume_browser_capability_token(state: &mut State, tokens: &mut Vec<Token>) {
-        consume_keyword_token!(Browser, state, tokens);
+    fn consume_browser_capability_token(&self, state: &mut State, tokens: &mut Vec<Token>) {
+        let source_path = self.source_path.clone();
+        consume_keyword_token!(Browser, state, tokens, source_path);
     }
 
-    fn consume_teststep_tokens(state: &mut State, tokens: &mut Vec<Token>) {
+    fn consume_teststep_tokens(&self, state: &mut State, tokens: &mut Vec<Token>) {
         while let Some(cha) = state.peek() {
             match cha {
                 &WHITESPACE | &NEW_LINE => Tokenizer::counsume_unwanted_token(state),
-                &DOUBLE_QUOTE => Tokenizer::consume_string_token(state, tokens),
+                &DOUBLE_QUOTE => self.consume_string_token(state, tokens),
                 &HASH_TAG => break,
                 &DOLLAR => {
                     state.next(); // consume dollar sign
-                    Tokenizer::consume_identifier(state, tokens)
+                    self.consume_identifier(state, tokens)
                 }
-                &ASSIGN => Tokenizer::consume_operator_token(TokenType::ASSIGN_OP, state, tokens),
-                'A'..='Z' | 'a'..='z' => Tokenizer::consume_keyword(state, tokens),
-                _ => Tokenizer::consume_eof(state, tokens),
+                &ASSIGN => self.consume_operator_token(TokenType::ASSIGN_OP, state, tokens),
+                'A'..='Z' | 'a'..='z' => self.consume_keyword(state, tokens),
+                _ => self.consume_eof(state, tokens),
             };
         }
     }
 
-    fn consume_prerequisite_tokens(state: &mut State, tokens: &mut Vec<Token>) {
+    fn consume_prerequisite_tokens(&self, state: &mut State, tokens: &mut Vec<Token>) {
         while let Some(ch) = state.peek() {
             if is_xid_start(*ch) {
-                Tokenizer::consume_identifier(state, tokens)
+                self.consume_identifier(state, tokens)
             } else if ch == &WHITESPACE || ch == &NEW_LINE {
                 Tokenizer::counsume_unwanted_token(state)
             } else {
@@ -331,7 +362,7 @@ impl<'a> Tokenizer<'a> {
         state.next();
     }
 
-    fn consume_string_token(state: &mut State, tokens: &mut Vec<Token>) {
+    fn consume_string_token(&self, state: &mut State, tokens: &mut Vec<Token>) {
         let start_location = state.location;
         state.next(); //consume starting quote
         let mut string: String = String::new();
@@ -352,27 +383,13 @@ impl<'a> Tokenizer<'a> {
             TokenType::STRING(string),
             start_location,
             state.location,
+            self.source_path.clone(),
         ));
     }
 
-    fn consume_keyword(state: &mut State, tokens: &mut Vec<Token>) {
-        // let start: Location = state.location;
-        // let mut string: String = String::new();
-        // let mut token_type: TokenType = TokenType::NONE;
-        // while let Some(s) = state.next() {
-        //     match token_type {
-        //         TokenType::NONE => {
-        //             if s == DOUBLE_QUOTE || s == NEW_LINE {
-        //                 panic!("Unexpected")
-        //             }
-        //             string.push(s);
-        //             token_type = TokenType::from_string(string.to_lowercase().as_str());
-        //         }
-        //         _ => break,
-        //     }
-        // }
-        // tokens.push(Token::new(token_type, start, state.location));
-        consume_keyword_token!(TokenType, state, tokens);
+    fn consume_keyword(&self, state: &mut State, tokens: &mut Vec<Token>) {
+        let source_path = self.source_path.clone();
+        consume_keyword_token!(TokenType, state, tokens, source_path);
     }
 }
 
@@ -397,7 +414,12 @@ impl Lexer {
 
     pub fn next_token(&mut self) -> Token {
         if self.cursor_position >= self.tokens.len() {
-            Token::new(TokenType::EOF, Location::new(0, 0), Location::new(0, 0))
+            Token::new(
+                TokenType::EOF,
+                Location::new(0, 0),
+                Location::new(0, 0),
+                String::from(""),
+            )
         } else {
             self.cursor_position += 1;
             self.tokens[self.cursor_position - 1].clone()

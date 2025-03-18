@@ -42,8 +42,8 @@ fn read_file_to_string(path: &String) -> String {
     }
 }
 
-fn source_code_to_lexer(source_code: String) -> Lexer {
-    let tokens = match Tokenizer::new(&source_code).tokenize() {
+fn source_code_to_lexer(source_code: String, source_path: &String) -> Lexer {
+    let tokens = match Tokenizer::new(source_code, source_path.clone()).tokenize() {
         Ok(tokenss) => tokenss,
         Err(tokenss) => panic!("error, {:#?}", tokenss),
     };
@@ -53,7 +53,7 @@ fn source_code_to_lexer(source_code: String) -> Lexer {
 
 fn compile(entry_point: &String) {
     let source_code = read_file_to_string(entry_point);
-    let mut lexer = source_code_to_lexer(source_code);
+    let mut lexer = source_code_to_lexer(source_code, entry_point);
 
     let file_type_token = lexer.peek_token();
 
