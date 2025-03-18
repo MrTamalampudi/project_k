@@ -14,6 +14,34 @@ const BACKSLASH: char = '\\';
 const DOLLAR: char = '$';
 const ASSIGN: char = '=';
 
+macro_rules! consume_keyword_token {
+    (
+        $token_enum:ident,
+        $state:ident,
+        $tokens:ident
+    ) => {
+        let start: Location = $state.location;
+        let mut string: String = String::new();
+        let mut provided_type: $token_enum = $token_enum::NONE;
+        while let Some(s) = $state.peek() {
+            match provided_type {
+                $token_enum::NONE => {
+                    if s == &DOUBLE_QUOTE || s == &NEW_LINE {
+                        panic!("Unexpected")
+                    }
+                    string.push(*s);
+                    $state.next();
+                    provided_type = $token_enum::from_string(string.to_lowercase().as_str());
+                }
+                _ => break,
+            }
+        }
+
+        let token_type = provided_type.match_token_type();
+        $tokens.push(Token::new(token_type, start, $state.location));
+    };
+}
+
 #[derive(Clone, Debug)]
 #[allow(unused)]
 pub struct Token {
@@ -130,12 +158,10 @@ impl<'a> Tokenizer<'a> {
     }
 
     fn consume_operator_token(token_type: TokenType, state: &mut State, tokens: &mut Vec<Token>) {
-        state.next(); //consume token
-        tokens.push(Token::new(
-            token_type,
-            state.location,
-            state.location.next_column(),
-        ));
+        tokens.push(Token::new(token_type, state.location, {
+            state.next();
+            state.location
+        }));
     }
 
     //using this fn for consuming both prerequisite testcase and variable identifiers
@@ -228,13 +254,14 @@ impl<'a> Tokenizer<'a> {
         let start: Location = state.location;
         let mut capability_string: String = String::new();
         let mut capability_type: Capabilities = Capabilities::NONE;
-        while let Some(s) = state.next() {
+        while let Some(s) = state.peek() {
             match capability_type {
                 Capabilities::NONE => {
-                    if s == DOUBLE_QUOTE || s == NEW_LINE {
+                    if s == &DOUBLE_QUOTE || s == &NEW_LINE {
                         panic!("Unexpected")
                     }
-                    capability_string.push(s);
+                    capability_string.push(*s);
+                    state.next();
                     capability_type =
                         Capabilities::from_string(capability_string.to_lowercase().as_str());
                 }
@@ -268,23 +295,7 @@ impl<'a> Tokenizer<'a> {
     }
 
     fn consume_browser_capability_token(state: &mut State, tokens: &mut Vec<Token>) {
-        let start: Location = state.location;
-        let mut browser_string: String = String::new();
-        let mut browser_type: Browser = Browser::NONE;
-        while let Some(s) = state.next() {
-            match browser_type {
-                Browser::NONE => {
-                    if s == DOUBLE_QUOTE || s == NEW_LINE {
-                        panic!("Unexpected")
-                    }
-                    browser_string.push(s);
-                    browser_type = Browser::from_string(browser_string.to_lowercase().as_str());
-                }
-                _ => break,
-            }
-        }
-        let token_type = browser_type.match_token_type();
-        tokens.push(Token::new(token_type, start, state.location));
+        consume_keyword_token!(Browser, state, tokens);
     }
 
     fn consume_teststep_tokens(state: &mut State, tokens: &mut Vec<Token>) {
@@ -345,22 +356,23 @@ impl<'a> Tokenizer<'a> {
     }
 
     fn consume_keyword(state: &mut State, tokens: &mut Vec<Token>) {
-        let start: Location = state.location;
-        let mut string: String = String::new();
-        let mut token_type: TokenType = TokenType::NONE;
-        while let Some(s) = state.next() {
-            match token_type {
-                TokenType::NONE => {
-                    if s == DOUBLE_QUOTE || s == NEW_LINE {
-                        panic!("Unexpected")
-                    }
-                    string.push(s);
-                    token_type = TokenType::from_string(string.to_lowercase().as_str());
-                }
-                _ => break,
-            }
-        }
-        tokens.push(Token::new(token_type, start, state.location));
+        // let start: Location = state.location;
+        // let mut string: String = String::new();
+        // let mut token_type: TokenType = TokenType::NONE;
+        // while let Some(s) = state.next() {
+        //     match token_type {
+        //         TokenType::NONE => {
+        //             if s == DOUBLE_QUOTE || s == NEW_LINE {
+        //                 panic!("Unexpected")
+        //             }
+        //             string.push(s);
+        //             token_type = TokenType::from_string(string.to_lowercase().as_str());
+        //         }
+        //         _ => break,
+        //     }
+        // }
+        // tokens.push(Token::new(token_type, start, state.location));
+        consume_keyword_token!(TokenType, state, tokens);
     }
 }
 

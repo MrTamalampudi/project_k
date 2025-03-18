@@ -6,8 +6,6 @@ use parser::parse_test_case;
 use std::env;
 use std::fs;
 use std::process::Command;
-use std::process::Output;
-use std::str::FromStr;
 
 mod actions;
 mod ast;
@@ -77,9 +75,9 @@ fn compile(entry_point: &String) {
         _ => panic!("testcase"),
     };
 
-    println!("{:#?}", testcase);
+    //println!("{:#?}", testcase);
 
-    execute_test_case(testcase);
+    //execute_test_case(testcase);
 }
 
 fn main() {

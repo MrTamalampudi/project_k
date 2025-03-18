@@ -76,6 +76,11 @@ impl TokenType {
             _ => panic!("Not a valid CapabilityValue"),
         }
     }
+
+    //Dummy function need to satisy consume_keyword_token macro
+    pub fn match_token_type(self) -> Self {
+        self
+    }
 }
 
 define_tokens!(

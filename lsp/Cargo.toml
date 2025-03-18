@@ -4,11 +4,14 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-unicode-ident = { version = "1.0.18" }
-tower-lsp = "0.20"
 tokio = { version = "1", features = [
     "io-std",
     "rt",
     "rt-multi-thread",
     "macros",
+    "net",
+] }
+unicode-ident = { version = "1.0.18" }
+tower-lsp = { package = "deno_tower_lsp", version = "=0.4.3", features = [
+    "proposed",
 ] }
