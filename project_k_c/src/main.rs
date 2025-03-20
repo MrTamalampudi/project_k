@@ -68,26 +68,26 @@ fn compile(entry_point: &String, ctx: &mut CompilationContext) {
 
     let file_type_token = lexer.peek_token();
 
-    let testcase: Testcase = match file_type_token {
-        TokenType::TESTCASE => {
-            let project_root = Command::new("dirname")
-                .args([entry_point])
-                .output()
-                .expect("Error")
-                .stdout;
-            let project_root = String::from_utf8(project_root)
-                .expect("error")
-                .trim()
-                .to_string();
-            ctx.set_project_root(project_root);
-            parse_test_case(&mut lexer, ctx)
-        }
-        _ => panic!("testcase"),
-    };
+    // let testcase: Testcase = match file_type_token {
+    //     TokenType::TESTCASE => {
+    //         let project_root = Command::new("dirname")
+    //             .args([entry_point])
+    //             .output()
+    //             .expect("Error")
+    //             .stdout;
+    //         let project_root = String::from_utf8(project_root)
+    //             .expect("error")
+    //             .trim()
+    //             .to_string();
+    //         ctx.set_project_root(project_root);
+    //         parse_test_case(&mut lexer, ctx)
+    //     }
+    //     _ => panic!("testcase"),
+    // };
 
     println!("{:#?}", ctx.errors);
 
-    //println!("{:#?}", testcase);
+    // println!("{:#?}", testcase);
 
     //execute_test_case(testcase);
 }

@@ -15,6 +15,7 @@ const HASH_TAG: char = '#';
 const BACKSLASH: char = '\\';
 const DOLLAR: char = '$';
 const ASSIGN: char = '=';
+const UNDERLINE: char = '_';
 
 macro_rules! consume_keyword_token {
     (
@@ -163,10 +164,52 @@ impl<'a> Tokenizer<'a> {
         while let Some(cha) = state.peek() {
             match cha {
                 &WHITESPACE | &NEW_LINE => Tokenizer::counsume_unwanted_token(state),
-                &HASH_TAG => self.consume_highlevel_tokens(state, tokens),
-                _ => self.consume_eof(state, tokens),
+                &DOUBLE_QUOTE => self.consume_string_token(state, tokens),
+                &ASSIGN => self.consume_operator_token(TokenType::ASSIGN_OP, state, tokens, 1),
+                &HASH_TAG => {
+                    state.next(); // consume # token
+                    self.consume_identifier(state, tokens);
+                }
+                ch if is_xid_start(*ch) || ch == &UNDERLINE => {
+                    self.consume_identifier(state, tokens)
+                }
+                _ => {}
             };
         }
+    }
+
+    fn consume_identifier(&self, state: &mut State, tokens: &mut Vec<Token>) {
+        let start = state.location;
+        let mut string: String = String::new();
+        let mut token_type: TokenType = TokenType::NONE;
+
+        if let Some(ch) = state.peek() {
+            if is_xid_start(*ch) || *ch == '_' {
+                string.push(*ch);
+                state.next(); //consume first char of ident
+            }
+        }
+
+        while let Some(ch) = state.peek() {
+            match token_type {
+                TokenType::NONE => {
+                    if is_xid_continue(*ch) {
+                        string.push(*ch);
+                        state.next();
+                    } else {
+                        token_type = TokenType::from_string(string.as_str())
+                    }
+                }
+                _ => break,
+            }
+        }
+
+        tokens.push(Token::new(
+            token_type,
+            start,
+            state.location,
+            self.source_path.clone(),
+        ))
     }
 
     fn consume_operator_token(
@@ -174,55 +217,19 @@ impl<'a> Tokenizer<'a> {
         token_type: TokenType,
         state: &mut State,
         tokens: &mut Vec<Token>,
+        token_length: u8,
     ) {
+        let start = state.location;
+        //consume until token length
+        for i in 1..=token_length {
+            state.next();
+        }
         tokens.push(Token::new(
             token_type,
+            start,
             state.location,
-            {
-                state.next();
-                state.location
-            },
             self.source_path.clone(),
         ));
-    }
-
-    //using this fn for consuming both prerequisite testcase and variable identifiers
-    fn consume_identifier(&self, state: &mut State, tokens: &mut Vec<Token>) {
-        let start = state.location;
-        let mut string: String = String::new();
-        match state.peek() {
-            Some(ch) => {
-                if is_xid_start(*ch) {
-                    string.push(*ch);
-                    state.next(); //consume char
-                }
-            }
-            None => {}
-        }
-
-        loop {
-            let ch = state.peek();
-            match ch {
-                Some(ch) => {
-                    if is_xid_continue(*ch) && string.len() > 0 {
-                        string.push(*ch);
-                        state.next(); // consume char
-                    } else {
-                        break;
-                    }
-                }
-                None => {}
-            }
-        }
-
-        if string.len() > 0 {
-            tokens.push(Token::new(
-                TokenType::IDENTIFIER(string),
-                start,
-                state.location,
-                self.source_path.clone(),
-            ));
-        }
     }
 
     fn consume_eof(&self, state: &mut State, tokens: &mut Vec<Token>) {
@@ -232,135 +239,6 @@ impl<'a> Tokenizer<'a> {
             state.location,
             self.source_path.clone(),
         ));
-    }
-
-    fn consume_highlevel_tokens(&mut self, state: &mut State, tokens: &mut Vec<Token>) {
-        let start_location = state.location;
-        state.next(); // consume '#' token
-        let mut string: String = String::new();
-        let mut lexing_mode = LexingMode::NONE;
-        while let Some(ch) = state.peek() {
-            match lexing_mode {
-                LexingMode::NONE => {
-                    if ch == &DOUBLE_QUOTE || ch == &NEW_LINE {
-                        panic!("Unexpected token");
-                    }
-                    string.push(*ch);
-                    state.next();
-                    lexing_mode = LexingMode::from_string(string.to_lowercase().as_str());
-                }
-                _ => break,
-            }
-        }
-        let token_type = lexing_mode.match_token_type();
-        tokens.push(Token {
-            token_type,
-            end: state.location,
-            start: start_location,
-            source_path: self.source_path.clone(),
-        });
-
-        match lexing_mode {
-            LexingMode::PREREQUISITE => self.consume_prerequisite_tokens(state, tokens),
-            LexingMode::TESTSTEPS => self.consume_teststep_tokens(state, tokens),
-            LexingMode::CAPABILITIES => self.consume_capabilities_tokens(state, tokens),
-            _ => {}
-        }
-    }
-
-    fn consume_capabilities_tokens(&self, state: &mut State, tokens: &mut Vec<Token>) {
-        while let Some(cha) = state.peek() {
-            match cha {
-                &WHITESPACE | &NEW_LINE => Tokenizer::counsume_unwanted_token(state),
-                &HASH_TAG => break,
-                'A'..='Z' | 'a'..='z' => self.consume_capability(state, tokens),
-                _ => self.consume_eof(state, tokens),
-            };
-        }
-    }
-
-    fn consume_capability(&self, state: &mut State, tokens: &mut Vec<Token>) {
-        //didnt use consume_keyword_token macro beacause we need capability_type further
-        let start: Location = state.location;
-        let mut capability_string: String = String::new();
-        let mut capability_type: Capabilities = Capabilities::NONE;
-        while let Some(s) = state.peek() {
-            match capability_type {
-                Capabilities::NONE => {
-                    if s == &DOUBLE_QUOTE || s == &NEW_LINE {
-                        panic!("Unexpected")
-                    }
-                    capability_string.push(*s);
-                    state.next();
-                    capability_type =
-                        Capabilities::from_string(capability_string.to_lowercase().as_str());
-                }
-                _ => break,
-            }
-        }
-        let token_type = capability_type.match_token_type();
-        tokens.push(Token::new(
-            token_type,
-            start,
-            state.location,
-            self.source_path.clone(),
-        ));
-
-        //consume till capability value
-        //browser = chrome
-        //          ^ consume upto here
-        while let Some(cha) = state.peek() {
-            match cha {
-                &WHITESPACE | &NEW_LINE => Tokenizer::counsume_unwanted_token(state),
-                &ASSIGN => self.consume_operator_token(TokenType::ASSIGN_OP, state, tokens),
-                'A'..='Z' | 'a'..='z' | &DOUBLE_QUOTE => break,
-                _ => self.consume_eof(state, tokens),
-            };
-        }
-
-        match capability_type {
-            Capabilities::BROWSER => self.consume_browser_capability_token(state, tokens),
-            Capabilities::DRIVERURL => self.consume_driverurl_capability_token(state, tokens),
-            _ => todo!(),
-        }
-    }
-
-    fn consume_driverurl_capability_token(&self, state: &mut State, tokens: &mut Vec<Token>) {
-        self.consume_string_token(state, tokens);
-    }
-
-    fn consume_browser_capability_token(&self, state: &mut State, tokens: &mut Vec<Token>) {
-        let source_path = self.source_path.clone();
-        consume_keyword_token!(Browser, state, tokens, source_path);
-    }
-
-    fn consume_teststep_tokens(&self, state: &mut State, tokens: &mut Vec<Token>) {
-        while let Some(cha) = state.peek() {
-            match cha {
-                &WHITESPACE | &NEW_LINE => Tokenizer::counsume_unwanted_token(state),
-                &DOUBLE_QUOTE => self.consume_string_token(state, tokens),
-                &HASH_TAG => break,
-                &DOLLAR => {
-                    state.next(); // consume dollar sign
-                    self.consume_identifier(state, tokens)
-                }
-                &ASSIGN => self.consume_operator_token(TokenType::ASSIGN_OP, state, tokens),
-                'A'..='Z' | 'a'..='z' => self.consume_keyword(state, tokens),
-                _ => self.consume_eof(state, tokens),
-            };
-        }
-    }
-
-    fn consume_prerequisite_tokens(&self, state: &mut State, tokens: &mut Vec<Token>) {
-        while let Some(ch) = state.peek() {
-            if is_xid_start(*ch) {
-                self.consume_identifier(state, tokens)
-            } else if ch == &WHITESPACE || ch == &NEW_LINE {
-                Tokenizer::counsume_unwanted_token(state)
-            } else {
-                break;
-            };
-        }
     }
 
     fn counsume_unwanted_token(state: &mut State) {
@@ -390,11 +268,6 @@ impl<'a> Tokenizer<'a> {
             state.location,
             self.source_path.clone(),
         ));
-    }
-
-    fn consume_keyword(&self, state: &mut State, tokens: &mut Vec<Token>) {
-        let source_path = self.source_path.clone();
-        consume_keyword_token!(TokenType, state, tokens, source_path);
     }
 }
 

@@ -43,7 +43,7 @@ macro_rules! define_tokens {
                     }
                 )*
 
-                    keyword_map.get(token_string).cloned().unwrap_or(TokenType::NONE)
+                    keyword_map.get(token_string).cloned().unwrap_or(TokenType::IDENTIFIER(token_string.to_string()))
             }
 
             pub fn to_string(&self) -> &str {
