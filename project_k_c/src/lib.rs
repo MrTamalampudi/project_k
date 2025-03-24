@@ -5,7 +5,9 @@ use keywords::TokenType;
 use lexer::{Lexer, Tokenizer};
 use parser::parse_test_case;
 use std::env;
+use std::fmt;
 use std::fs;
+use std::path::Display;
 use std::process::Command;
 
 mod actions;
@@ -27,6 +29,12 @@ enum ExecutionType {
 pub struct CompilationContext {
     path: String,
     errors: ErrorManager,
+}
+
+impl fmt::Display for CompilationContext {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{:#?}", self)
+    }
 }
 
 impl CompilationContext {
@@ -62,7 +70,7 @@ fn source_code_to_lexer(
     Lexer::from_tokens(tokens)
 }
 
-fn compile(entry_point: &String, ctx: &mut CompilationContext) {
+pub fn compile(entry_point: &String, ctx: &mut CompilationContext) {
     let source_code = read_file_to_string(entry_point);
     let mut lexer = source_code_to_lexer(source_code, entry_point, ctx);
 
@@ -92,15 +100,15 @@ fn compile(entry_point: &String, ctx: &mut CompilationContext) {
     //execute_test_case(testcase);
 }
 
-fn main() {
-    env::set_var("RUST_BACKTRACE", "1");
-    let argss: Vec<String> = env::args().collect();
-    let source_path = match argss.get(1) {
-        Some(path) => path,
-        None => panic!("please provide a file path"),
-    };
-    let mut ctx = CompilationContext::new(source_path.clone());
-    compile(source_path, &mut ctx);
-    //println!("{:#?}", status);
-    //compile(String::from("./new.ll"));
-}
+// fn main() {
+//     env::set_var("RUST_BACKTRACE", "1");
+//     let argss: Vec<String> = env::args().collect();
+//     let source_path = match argss.get(1) {
+//         Some(path) => path,
+//         None => panic!("please provide a file path"),
+//     };
+//     let mut ctx = CompilationContext::new(source_path.clone());
+//     compile(source_path, &mut ctx);
+//     //println!("{:#?}", status);
+//     //compile(String::from("./new.ll"));
+// }
