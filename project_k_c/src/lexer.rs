@@ -61,20 +61,6 @@ impl Token {
 }
 
 #[derive(Debug)]
-pub struct TokenizerError {
-    pub message: String,
-    pub location: Location,
-}
-
-impl fmt::Display for TokenizerError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{:?}{:?}", self.message, self.location,)
-    }
-}
-
-impl std::error::Error for TokenizerError {}
-
-#[derive(Debug)]
 pub struct State<'a> {
     peekable: Peekable<Chars<'a>>,
     pub location: Location,
@@ -106,8 +92,6 @@ pub struct Tokenizer<'a> {
     source_path: String,
     ctx: &'a mut CompilationContext,
 }
-
-type TokenizerResult = Result<(), TokenizerError>;
 
 impl<'a> Tokenizer<'a> {
     pub fn new(source_code: String, source_path: String, ctx: &'a mut CompilationContext) -> Self {
