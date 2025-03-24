@@ -1,8 +1,6 @@
-use crate::enums::{Browser, LexingMode};
-use crate::error_handling::{ErrorInfo, ErrorManager};
+use crate::ast::Location;
 use crate::keywords::TokenType;
 use crate::CompilationContext;
-use crate::{ast::Location, enums::Capabilities};
 use std::fmt;
 use std::iter::Peekable;
 use std::str::Chars;
@@ -13,38 +11,10 @@ const NEW_LINE: char = '\n';
 const DOUBLE_QUOTE: char = '\"';
 const HASH_TAG: char = '#';
 const BACKSLASH: char = '\\';
+const FORWARDSLASH: char = '/';
 const DOLLAR: char = '$';
 const ASSIGN: char = '=';
 const UNDERLINE: char = '_';
-
-macro_rules! consume_keyword_token {
-    (
-        $token_enum:ident,
-        $state:ident,
-        $tokens:ident,
-        $source_path:ident
-    ) => {
-        let start: Location = $state.location;
-        let mut string: String = String::new();
-        let mut provided_type: $token_enum = $token_enum::NONE;
-        while let Some(s) = $state.peek() {
-            match provided_type {
-                $token_enum::NONE => {
-                    if s == &DOUBLE_QUOTE || s == &NEW_LINE {
-                        panic!("Unexpected")
-                    }
-                    string.push(*s);
-                    $state.next();
-                    provided_type = $token_enum::from_string(string.to_lowercase().as_str());
-                }
-                _ => break,
-            }
-        }
-
-        let token_type = provided_type.match_token_type();
-        $tokens.push(Token::new(token_type, start, $state.location, $source_path));
-    };
-}
 
 #[derive(Clone, Debug)]
 #[allow(unused)]
@@ -166,6 +136,7 @@ impl<'a> Tokenizer<'a> {
                 &WHITESPACE | &NEW_LINE => Tokenizer::counsume_unwanted_token(state),
                 &DOUBLE_QUOTE => self.consume_string_token(state, tokens),
                 &ASSIGN => self.consume_operator_token(TokenType::ASSIGN_OP, state, tokens, 1),
+                &FORWARDSLASH => self.consume_comments(state),
                 &HASH_TAG => {
                     state.next(); // consume # token
                     self.consume_identifier(state, tokens);
@@ -175,6 +146,26 @@ impl<'a> Tokenizer<'a> {
                 }
                 _ => {}
             };
+        }
+    }
+
+    fn consume_comments(&self, state: &mut State) {
+        let start = state.location;
+        state.next(); //consume first '/' of a comment
+        if let Some(ch) = state.peek() {
+            match ch {
+                &FORWARDSLASH => {
+                    state.next();
+                } //consume second '/' of a comment
+                _ => todo!("need to implement error"),
+            }
+        }
+
+        //consume till it notices a line end '\n'
+        while let Some(ch) = state.next() {
+            if ch == NEW_LINE {
+                break;
+            }
         }
     }
 
