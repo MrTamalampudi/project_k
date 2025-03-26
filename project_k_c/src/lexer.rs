@@ -133,9 +133,8 @@ impl<'a> Tokenizer<'a> {
     pub fn get_token(&mut self, state: &mut State, tokens: &mut Vec<Token>) {
         while let Some(cha) = state.peek() {
             match cha {
-                &WHITESPACE => Tokenizer::counsume_unwanted_token(state),
+                &WHITESPACE | &NEW_LINE => Tokenizer::counsume_unwanted_token(state),
                 &DOUBLE_QUOTE => self.consume_string_token(state, tokens),
-                &NEW_LINE => self.consume_operator_token(TokenType::NEW_LINE, state, tokens, 1),
                 &ASSIGN => self.consume_operator_token(TokenType::ASSIGN_OP, state, tokens, 1),
                 &FORWARDSLASH => self.consume_comments(state),
                 &HASH_TAG => {
@@ -288,8 +287,9 @@ impl<'a> Tokenizer<'a> {
     }
 }
 
+#[derive(Debug, Clone)]
 pub struct Lexer {
-    tokens: Vec<Token>,
+    pub tokens: Vec<Token>,
     cursor_position: usize,
 }
 

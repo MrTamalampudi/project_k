@@ -11,4 +11,5 @@ fn main() {
     };
     let mut ctx = CompilationContext::new(source_path.clone());
     compile(source_path, &mut ctx);
+    println!("{:#?}", ctx.program);
 }

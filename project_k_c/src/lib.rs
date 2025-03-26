@@ -30,10 +30,10 @@ enum ExecutionType {
 
 #[derive(Debug, Clone)]
 pub struct CompilationContext {
-    entry_path: String,
+    parent_path: String,
     path: String,
     errors: ErrorManager,
-    program: Program,
+    pub program: Program,
 }
 
 impl fmt::Display for CompilationContext {
@@ -45,7 +45,7 @@ impl fmt::Display for CompilationContext {
 impl CompilationContext {
     pub fn new(entry_path: String) -> CompilationContext {
         CompilationContext {
-            entry_path: entry_path.clone(),
+            parent_path: entry_path.clone(),
             path: entry_path,
             errors: ErrorManager::new(),
             program: Program::new(),
@@ -70,7 +70,6 @@ fn source_code_to_tokens(source_code: String, ctx: &mut CompilationContext) -> V
 
 fn source_code_to_lexer(source_code: String, ctx: &mut CompilationContext) -> Lexer {
     let tokens = source_code_to_tokens(source_code, ctx);
-    println!("{:#?}", tokens);
     Lexer::from_tokens(tokens)
 }
 
