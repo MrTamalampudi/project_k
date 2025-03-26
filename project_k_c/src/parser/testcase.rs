@@ -60,23 +60,13 @@ fn parse_capbilities(testcase: &mut TestCase, parser: &mut Parser) {
 
                 capbility
             }
-            TokenType::TESTSTEPS => break,
-            _ => {
-                let token = parser.lexer.next_token();
-                parser.ctx.errors.insert_error(
-                    format!("Expected a valid capability key"),
-                    token.get_start_location(),
-                    token.get_end_location(),
-                    token.get_source_path(),
-                );
-                Capabilities::NONE
-            }
+            _ => break,
         };
 
         match capability {
             Capabilities::BROWSER => parse_browser_capability(testcase, parser),
             Capabilities::DRIVERURL => todo!(),
-            Capabilities::NONE => {}
+            Capabilities::NONE => break,
         }
     }
 }
