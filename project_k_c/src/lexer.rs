@@ -58,6 +58,10 @@ impl Token {
     pub fn get_token_type(&self) -> TokenType {
         self.token_type.clone()
     }
+
+    pub fn get_source_path(&self) -> String {
+        self.source_path.clone()
+    }
 }
 
 #[derive(Debug)]
@@ -94,14 +98,14 @@ pub struct Tokenizer<'a> {
 }
 
 impl<'a> Tokenizer<'a> {
-    pub fn new(source_code: String, source_path: String, ctx: &'a mut CompilationContext) -> Self {
-        Self {
+    pub fn new(source_code: String, ctx: &'a mut CompilationContext) -> Tokenizer<'a> {
+        Tokenizer {
             source_code,
-            source_path,
+            source_path: ctx.path.clone(),
             ctx,
         }
     }
-    pub fn tokenize(&mut self) -> Result<Vec<Token>, ()> {
+    pub fn tokenize(&mut self) -> Vec<Token> {
         let source_code = self.source_code.clone();
         let mut state = State {
             peekable: source_code.chars().peekable(),
@@ -110,30 +114,60 @@ impl<'a> Tokenizer<'a> {
 
         let mut tokens: Vec<Token> = vec![];
         self.get_token(&mut state, &mut tokens);
-        Ok(tokens)
+        tokens
+    }
+
+    fn error(
+        &mut self,
+        message: String,
+        start_location: Location,
+        end_location: Location,
+        source_path: String,
+    ) {
+        self.ctx
+            .errors
+            .insert_error(message, start_location, end_location, source_path);
     }
 
     //tokenization starts from here
     pub fn get_token(&mut self, state: &mut State, tokens: &mut Vec<Token>) {
         while let Some(cha) = state.peek() {
             match cha {
-                &WHITESPACE | &NEW_LINE => Tokenizer::counsume_unwanted_token(state),
+                &WHITESPACE => Tokenizer::counsume_unwanted_token(state),
                 &DOUBLE_QUOTE => self.consume_string_token(state, tokens),
+                &NEW_LINE => self.consume_operator_token(TokenType::NEW_LINE, state, tokens, 1),
                 &ASSIGN => self.consume_operator_token(TokenType::ASSIGN_OP, state, tokens, 1),
                 &FORWARDSLASH => self.consume_comments(state),
                 &HASH_TAG => {
-                    state.next(); // consume # token
+                    state.next(); // consume '#' token
                     self.consume_identifier(state, tokens);
                 }
                 ch if is_xid_start(*ch) || ch == &UNDERLINE => {
                     self.consume_identifier(state, tokens)
                 }
-                _ => {}
+                _ => {
+                    self.error(
+                        "Unexpected character".to_string(),
+                        state.location,
+                        {
+                            state.next(); //consume unexpected char
+                            state.location
+                        },
+                        self.source_path.clone(),
+                    );
+                }
             };
         }
+        //after file reaching eod we are explicitly adding eof token here
+        tokens.push(Token::new(
+            TokenType::EOF,
+            Location::dummy(),
+            Location::dummy(),
+            self.source_path.clone(),
+        ));
     }
 
-    fn consume_comments(&self, state: &mut State) {
+    fn consume_comments(&mut self, state: &mut State) {
         let start = state.location;
         state.next(); //consume first '/' of a comment
         if let Some(ch) = state.peek() {
@@ -141,7 +175,15 @@ impl<'a> Tokenizer<'a> {
                 &FORWARDSLASH => {
                     state.next();
                 } //consume second '/' of a comment
-                _ => todo!("need to implement error"),
+                _ => self.error(
+                    "Expected '/'".to_string(),
+                    start,
+                    {
+                        state.next();
+                        state.location
+                    },
+                    self.source_path.clone(),
+                ),
             }
         }
 
@@ -277,5 +319,9 @@ impl Lexer {
             self.cursor_position += 1;
             self.tokens[self.cursor_position - 1].clone()
         }
+    }
+
+    pub fn shift_tokens(&mut self, tokens: Vec<Token>) {
+        self.tokens.splice(0..0, tokens);
     }
 }

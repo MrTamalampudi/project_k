@@ -7,6 +7,7 @@ macro_rules! define_tokens {
         #[derive(Debug,Clone)]
         #[allow(non_camel_case_types)]
         pub enum TokenType {
+            NEW_LINE,
             STRING(String),
             IDENTIFIER(String),
             CAPS(Capabilities),
@@ -55,6 +56,7 @@ macro_rules! define_tokens {
                     $(TokenType::$keyword => Box::leak(
                         stringify!($keyword).replace("_"," ").to_lowercase().into_boxed_str()
                     ),)*
+                    TokenType::NEW_LINE => "new line"
                 }
             }
         }

@@ -2,7 +2,7 @@ use std::collections::HashSet;
 
 use crate::ast::Location;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct ErrorInfo {
     message: String,
     start_location: Location,
@@ -10,7 +10,7 @@ pub struct ErrorInfo {
     source_path: String,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct ErrorManager {
     pub errors: Vec<ErrorInfo>,
 }

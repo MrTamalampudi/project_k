@@ -1,9 +1,12 @@
-use ast::Testcase;
+use ast::Program;
+use ast::TestCase;
 use engine::execute_test_case;
 use error_handling::ErrorManager;
 use keywords::TokenType;
+use lexer::Token;
 use lexer::{Lexer, Tokenizer};
-use parser::parse_test_case;
+use parser::testcase;
+use parser::Parser;
 use std::env;
 use std::fmt;
 use std::fs;
@@ -25,10 +28,12 @@ enum ExecutionType {
     TESTPLAN,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct CompilationContext {
+    entry_path: String,
     path: String,
     errors: ErrorManager,
+    program: Program,
 }
 
 impl fmt::Display for CompilationContext {
@@ -38,10 +43,12 @@ impl fmt::Display for CompilationContext {
 }
 
 impl CompilationContext {
-    pub fn new(path: String) -> Self {
-        Self {
-            path,
+    pub fn new(entry_path: String) -> CompilationContext {
+        CompilationContext {
+            entry_path: entry_path.clone(),
+            path: entry_path,
             errors: ErrorManager::new(),
+            program: Program::new(),
         }
     }
 
@@ -57,58 +64,18 @@ fn read_file_to_string(path: &String) -> String {
     }
 }
 
-fn source_code_to_lexer(
-    source_code: String,
-    source_path: &String,
-    ctx: &mut CompilationContext,
-) -> Lexer {
-    let tokens = match Tokenizer::new(source_code, source_path.clone(), ctx).tokenize() {
-        Ok(tokenss) => tokenss,
-        Err(tokenss) => panic!("error, {:#?}", tokenss),
-    };
+fn source_code_to_tokens(source_code: String, ctx: &mut CompilationContext) -> Vec<Token> {
+    Tokenizer::new(source_code, ctx).tokenize()
+}
+
+fn source_code_to_lexer(source_code: String, ctx: &mut CompilationContext) -> Lexer {
+    let tokens = source_code_to_tokens(source_code, ctx);
     println!("{:#?}", tokens);
     Lexer::from_tokens(tokens)
 }
 
 pub fn compile(entry_point: &String, ctx: &mut CompilationContext) {
     let source_code = read_file_to_string(entry_point);
-    let mut lexer = source_code_to_lexer(source_code, entry_point, ctx);
-
-    let file_type_token = lexer.peek_token();
-
-    // let testcase: Testcase = match file_type_token {
-    //     TokenType::TESTCASE => {
-    //         let project_root = Command::new("dirname")
-    //             .args([entry_point])
-    //             .output()
-    //             .expect("Error")
-    //             .stdout;
-    //         let project_root = String::from_utf8(project_root)
-    //             .expect("error")
-    //             .trim()
-    //             .to_string();
-    //         ctx.set_project_root(project_root);
-    //         parse_test_case(&mut lexer, ctx)
-    //     }
-    //     _ => panic!("testcase"),
-    // };
-
-    println!("{:#?}", ctx.errors);
-
-    // println!("{:#?}", testcase);
-
-    //execute_test_case(testcase);
+    let mut lexer = source_code_to_lexer(source_code, ctx);
+    Parser::new(&mut lexer, ctx).parse();
 }
-
-// fn main() {
-//     env::set_var("RUST_BACKTRACE", "1");
-//     let argss: Vec<String> = env::args().collect();
-//     let source_path = match argss.get(1) {
-//         Some(path) => path,
-//         None => panic!("please provide a file path"),
-//     };
-//     let mut ctx = CompilationContext::new(source_path.clone());
-//     compile(source_path, &mut ctx);
-//     //println!("{:#?}", status);
-//     //compile(String::from("./new.ll"));
-// }

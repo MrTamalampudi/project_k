@@ -81,6 +81,14 @@ impl Capabilities {
             Capabilities::NONE => TokenType::NONE,
         }
     }
+
+    pub fn is_capability_key_valid(key: &String) -> bool {
+        let capability = Capabilities::from_string(key);
+        match capability {
+            Capabilities::NONE => false,
+            _ => true,
+        }
+    }
 }
 
 define_enums!(
@@ -95,6 +103,15 @@ impl Browser {
             Browser::FIREFOX => TokenType::BROWSER(Browser::FIREFOX),
             Browser::EDGE => TokenType::BROWSER(Browser::EDGE),
             Browser::NONE => TokenType::NONE,
+        }
+    }
+
+    pub fn match_capability_value(&self) -> CapabilityValue {
+        match self {
+            Browser::CHROME => CapabilityValue::BROWSER(Browser::CHROME),
+            Browser::FIREFOX => CapabilityValue::BROWSER(Browser::FIREFOX),
+            Browser::EDGE => CapabilityValue::BROWSER(Browser::EDGE),
+            Browser::NONE => CapabilityValue::NONE,
         }
     }
 

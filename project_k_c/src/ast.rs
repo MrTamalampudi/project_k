@@ -32,6 +32,10 @@ impl Location {
     pub fn get_location(&self) -> Location {
         self.clone()
     }
+
+    pub fn dummy() -> Location {
+        Location { line: 0, column: 0 }
+    }
 }
 
 #[derive(Debug, Clone)]
@@ -64,16 +68,16 @@ impl TestStep {
 
 #[derive(Debug, Clone)]
 #[allow(unused)]
-pub struct Testcase {
+pub struct TestCase {
     capabilities: HashMap<String, CapabilityValue>,
     variables: HashMap<String, IdentifierValue>,
-    prerequisites: Vec<Testcase>,
+    prerequisites: Vec<TestCase>,
     test_steps: Vec<TestStep>,
 }
 
-impl Testcase {
-    pub fn init() -> Testcase {
-        Testcase {
+impl<'a> TestCase {
+    pub fn init() -> TestCase {
+        TestCase {
             capabilities: HashMap::new(),
             variables: HashMap::new(),
             prerequisites: vec![],
@@ -105,11 +109,64 @@ impl Testcase {
         &self.test_steps
     }
 
-    pub fn get_prerequisite(&self) -> &Vec<Testcase> {
-        &self.prerequisites
+    pub fn get_prerequisite(&self) -> Vec<TestCase> {
+        self.prerequisites.clone()
     }
 
-    pub fn insert_prerequisite(&mut self, testcase: Testcase) {
-        self.prerequisites.push(testcase);
+    pub fn insert_prerequisite(&mut self, testcase: TestCase) {
+        self.prerequisites.push(testcase.clone());
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct TestSuite {
+    testcases: Vec<TestCase>,
+}
+
+#[derive(Debug, Clone)]
+pub struct TestPlan {
+    testsuites: Vec<TestSuite>,
+}
+
+impl TestPlan {
+    pub fn new() -> TestPlan {
+        TestPlan {
+            testsuites: Vec::new(),
+        }
+    }
+}
+
+#[derive(Debug, Clone)]
+pub enum EntryPoint {
+    TESTCASE(TestCase),
+    TESTSUITE(TestSuite),
+    TESTPLAN(TestPlan),
+    NONE,
+}
+
+#[derive(Debug, Clone)]
+pub struct Program {
+    entrypoint: EntryPoint,
+    testcases: Vec<TestCase>,
+    testsuites: Vec<TestSuite>,
+    testplan: TestPlan,
+}
+
+impl Program {
+    pub fn new() -> Program {
+        Program {
+            entrypoint: EntryPoint::NONE,
+            testcases: Vec::new(),
+            testsuites: Vec::new(),
+            testplan: TestPlan::new(),
+        }
+    }
+
+    pub fn push_testcase(&mut self, testcase: &TestCase) {
+        self.testcases.push(testcase.clone())
+    }
+
+    pub fn set_entrypoint(&mut self, entrypoint: EntryPoint) {
+        self.entrypoint = entrypoint;
     }
 }
