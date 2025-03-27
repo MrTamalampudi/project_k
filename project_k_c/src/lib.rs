@@ -1,5 +1,6 @@
 use ast::Program;
 use ast::TestCase;
+use engine::execute;
 use engine::execute_test_case;
 use error_handling::ErrorManager;
 use keywords::TokenType;
@@ -77,4 +78,5 @@ pub fn compile(entry_point: &String, ctx: &mut CompilationContext) {
     let source_code = read_file_to_string(entry_point);
     let mut lexer = source_code_to_lexer(source_code, ctx);
     Parser::new(&mut lexer, ctx).parse();
+    execute(ctx.program.clone());
 }

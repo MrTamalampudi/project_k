@@ -148,7 +148,7 @@ pub enum EntryPoint {
 
 #[derive(Debug, Clone)]
 pub struct Program {
-    entrypoint: EntryPoint,
+    pub entrypoint: EntryPoint,
     testcases: Vec<Rc<RefCell<TestCase>>>,
     testsuites: Vec<TestSuite>,
     testplan: TestPlan,
@@ -174,7 +174,8 @@ impl Program {
         self.entrypoint = entrypoint;
     }
 
-    pub fn get_tes(&self) {
+    //test
+    fn get_test(&self) {
         let mut t = self.testcases.get(0).expect("yes").borrow_mut();
         t.insert_variable(
             &"hi".to_string(),

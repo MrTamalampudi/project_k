@@ -1,7 +1,7 @@
 use super::Parser;
 use crate::actions::{Action, ActionOption};
 use crate::ast::{TestCase, TestStep};
-use crate::enums::{Browser, Capabilities};
+use crate::enums::{Browser, Capabilities, CapabilityValue};
 use crate::keywords::TokenType;
 use crate::{read_file_to_string, source_code_to_tokens};
 use crate::{source_code_to_lexer, Lexer};
@@ -66,10 +66,28 @@ fn parse_capbilities(testcase: &mut TestCase, parser: &mut Parser) {
 
         match capability {
             Capabilities::BROWSER => parse_browser_capability(testcase, parser),
-            Capabilities::DRIVERURL => todo!(),
+            Capabilities::DRIVERURL => parse_driver_url_capability(testcase, parser),
             Capabilities::NONE => break,
         }
     }
+}
+
+fn parse_driver_url_capability(testcase: &mut TestCase, parser: &mut Parser) {
+    let token = parser.lexer.next_token();
+    let url = match token.get_token_type() {
+        //both chrome and "chrome" with and without quotes are considered valid
+        TokenType::STRING(string) => CapabilityValue::STRING(string),
+        _ => {
+            parser.ctx.errors.insert_error(
+                "Expected a valid browser".to_string(),
+                token.get_start_location(),
+                token.get_end_location(),
+                token.get_source_path(),
+            );
+            return;
+        }
+    };
+    testcase.insert_capability(&Capabilities::DRIVERURL.to_string().to_string(), &url);
 }
 
 fn parse_browser_capability(testcase: &mut TestCase, parser: &mut Parser) {

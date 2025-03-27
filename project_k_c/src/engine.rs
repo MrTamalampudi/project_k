@@ -2,15 +2,23 @@ use std::cell::RefCell;
 use std::rc::Rc;
 
 use crate::actions::Action;
-use crate::ast::{TestCase, TestStep};
+use crate::ast::{Program, TestCase, TestStep};
 use crate::enums::{Browser, CapabilityValue};
 use crate::keywords::TokenType;
 use thirtyfour::prelude::*;
 
+pub fn execute(program: Program) {
+    match program.entrypoint {
+        crate::ast::EntryPoint::TESTCASE(testcase) => execute_test_case(testcase),
+        _ => todo!(),
+    }
+}
+
 #[tokio::main]
-pub async fn execute_test_case(test_case: TestCase) {
+pub async fn execute_test_case(test_case: Rc<RefCell<TestCase>>) {
     let caps = DesiredCapabilities::chrome();
-    let driver_url = get_driver_url(&test_case);
+    let testcase = test_case.borrow_mut();
+    let driver_url = get_driver_url(&testcase);
     let driver_result = WebDriver::new(driver_url, caps).await;
 
     let driver = match driver_result {
@@ -18,14 +26,14 @@ pub async fn execute_test_case(test_case: TestCase) {
         Err(result) => panic!("there was an error{}", result),
     };
 
-    let prerequiste: &Vec<Rc<RefCell<TestCase>>> = test_case.get_prerequisite();
+    let prerequiste: &Vec<Rc<RefCell<TestCase>>> = testcase.get_prerequisite();
 
     for testcase in prerequiste.iter() {
         let teststeps = testcase.borrow_mut().get_teststeps().clone();
         execute_teststeps(&driver, &teststeps).await;
     }
 
-    let teststeps: &Vec<TestStep> = test_case.get_teststeps();
+    let teststeps: &Vec<TestStep> = testcase.get_teststeps();
 
     execute_teststeps(&driver, teststeps).await;
 }
