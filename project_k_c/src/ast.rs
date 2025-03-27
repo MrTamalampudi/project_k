@@ -3,8 +3,10 @@ use crate::{
     enums::{CapabilityValue, IdentifierValue},
 };
 use std::{
+    cell::RefCell,
     collections::HashMap,
     fmt::{self},
+    rc::Rc,
 };
 
 #[derive(Copy, Clone, Debug)]
@@ -71,7 +73,7 @@ impl TestStep {
 pub struct TestCase {
     capabilities: HashMap<String, CapabilityValue>,
     variables: HashMap<String, IdentifierValue>,
-    prerequisites: Vec<TestCase>,
+    prerequisites: Vec<Rc<RefCell<TestCase>>>,
     test_steps: Vec<TestStep>,
 }
 
@@ -109,12 +111,12 @@ impl<'a> TestCase {
         &self.test_steps
     }
 
-    pub fn get_prerequisite(&self) -> Vec<TestCase> {
-        self.prerequisites.clone()
+    pub fn get_prerequisite(&self) -> &Vec<Rc<RefCell<TestCase>>> {
+        &self.prerequisites
     }
 
-    pub fn insert_prerequisite(&mut self, testcase: TestCase) {
-        self.prerequisites.push(testcase.clone());
+    pub fn insert_prerequisite(&mut self, testcase: Rc<RefCell<TestCase>>) {
+        self.prerequisites.push(testcase);
     }
 }
 
@@ -138,7 +140,7 @@ impl TestPlan {
 
 #[derive(Debug, Clone)]
 pub enum EntryPoint {
-    TESTCASE(TestCase),
+    TESTCASE(Rc<RefCell<TestCase>>),
     TESTSUITE(TestSuite),
     TESTPLAN(TestPlan),
     NONE,
@@ -147,7 +149,7 @@ pub enum EntryPoint {
 #[derive(Debug, Clone)]
 pub struct Program {
     entrypoint: EntryPoint,
-    testcases: Vec<TestCase>,
+    testcases: Vec<Rc<RefCell<TestCase>>>,
     testsuites: Vec<TestSuite>,
     testplan: TestPlan,
 }
@@ -162,11 +164,22 @@ impl Program {
         }
     }
 
-    pub fn push_testcase(&mut self, testcase: &TestCase) {
-        self.testcases.push(testcase.clone())
+    pub fn push_testcase(&mut self, testcase: &TestCase) -> Rc<RefCell<TestCase>> {
+        let ref_testcase = Rc::new(RefCell::new(testcase.clone()));
+        self.testcases.push(Rc::clone(&ref_testcase));
+        ref_testcase
     }
 
     pub fn set_entrypoint(&mut self, entrypoint: EntryPoint) {
         self.entrypoint = entrypoint;
+    }
+
+    pub fn get_tes(&self) {
+        let mut t = self.testcases.get(0).expect("yes").borrow_mut();
+        t.insert_variable(
+            &"hi".to_string(),
+            &IdentifierValue::STRING("check".to_string()),
+        );
+        println!("{:#?}", t);
     }
 }

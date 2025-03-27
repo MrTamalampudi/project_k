@@ -5,13 +5,14 @@ use crate::enums::{Browser, Capabilities};
 use crate::keywords::TokenType;
 use crate::{read_file_to_string, source_code_to_tokens};
 use crate::{source_code_to_lexer, Lexer};
+use std::cell::RefCell;
+use std::rc::Rc;
 
-pub fn parse_test_case(parser: &mut Parser) -> TestCase {
+pub fn parse_test_case(parser: &mut Parser) -> Rc<RefCell<TestCase>> {
     let mut testcase: TestCase = TestCase::init();
     parser.lexer.next_token(); //consume "#TESTCASE" token
     parse_top_level_items(&mut testcase, parser);
-    parser.ctx.program.push_testcase(&testcase);
-    testcase
+    parser.ctx.program.push_testcase(&testcase)
 }
 
 fn parse_top_level_items(testcase: &mut TestCase, parser: &mut Parser) {

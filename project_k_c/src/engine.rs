@@ -1,3 +1,6 @@
+use std::cell::RefCell;
+use std::rc::Rc;
+
 use crate::actions::Action;
 use crate::ast::{TestCase, TestStep};
 use crate::enums::{Browser, CapabilityValue};
@@ -15,11 +18,11 @@ pub async fn execute_test_case(test_case: TestCase) {
         Err(result) => panic!("there was an error{}", result),
     };
 
-    let prerequiste: Vec<TestCase> = test_case.get_prerequisite();
+    let prerequiste: &Vec<Rc<RefCell<TestCase>>> = test_case.get_prerequisite();
 
     for testcase in prerequiste.iter() {
-        let teststeps = testcase.get_teststeps();
-        execute_teststeps(&driver, teststeps).await;
+        let teststeps = testcase.borrow_mut().get_teststeps().clone();
+        execute_teststeps(&driver, &teststeps).await;
     }
 
     let teststeps: &Vec<TestStep> = test_case.get_teststeps();
