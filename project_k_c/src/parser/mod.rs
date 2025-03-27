@@ -1,4 +1,5 @@
-use testcase::parse_test_case;
+use testcase::parse_testcase;
+use testsuite::parse_testsuite;
 
 use crate::ast::EntryPoint;
 use crate::lexer::Lexer;
@@ -21,11 +22,8 @@ impl<'a, 'b> Parser<'a, 'b> {
     pub fn parse(&mut self) {
         let token_type = self.lexer.peek_token();
         let entrypoint = match token_type {
-            TokenType::TESTCASE => {
-                self.ctx.parent_path = "./".to_string();
-                EntryPoint::TESTCASE(parse_test_case(self))
-            }
-            TokenType::TESTSUITE => todo!(),
+            TokenType::TESTCASE => EntryPoint::TESTCASE(parse_testcase(self)),
+            TokenType::TESTSUITE => EntryPoint::TESTSUITE(parse_testsuite(self)),
             TokenType::TESTPLAN => todo!(),
             _ => return,
         };

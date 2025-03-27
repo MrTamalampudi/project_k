@@ -1,3 +1,3 @@
-fn testplan() {
-    println!("testplan");
+fn testsuite() {
+    println!("testsuite");
 }

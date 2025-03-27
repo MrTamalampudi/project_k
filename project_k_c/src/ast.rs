@@ -77,8 +77,8 @@ pub struct TestCase {
     test_steps: Vec<TestStep>,
 }
 
-impl<'a> TestCase {
-    pub fn init() -> TestCase {
+impl TestCase {
+    pub fn new() -> TestCase {
         TestCase {
             capabilities: HashMap::new(),
             variables: HashMap::new(),
@@ -122,7 +122,19 @@ impl<'a> TestCase {
 
 #[derive(Debug, Clone)]
 pub struct TestSuite {
-    testcases: Vec<TestCase>,
+    testcases: Vec<Rc<RefCell<TestCase>>>,
+}
+
+impl TestSuite {
+    pub fn new() -> TestSuite {
+        TestSuite {
+            testcases: Vec::new(),
+        }
+    }
+
+    pub fn push_testcase(&mut self, testcase: Rc<RefCell<TestCase>>) {
+        self.testcases.push(testcase);
+    }
 }
 
 #[derive(Debug, Clone)]
@@ -141,7 +153,7 @@ impl TestPlan {
 #[derive(Debug, Clone)]
 pub enum EntryPoint {
     TESTCASE(Rc<RefCell<TestCase>>),
-    TESTSUITE(TestSuite),
+    TESTSUITE(Rc<TestSuite>),
     TESTPLAN(TestPlan),
     NONE,
 }
@@ -150,7 +162,7 @@ pub enum EntryPoint {
 pub struct Program {
     pub entrypoint: EntryPoint,
     testcases: Vec<Rc<RefCell<TestCase>>>,
-    testsuites: Vec<TestSuite>,
+    testsuites: Vec<Rc<TestSuite>>,
     testplan: TestPlan,
 }
 
@@ -162,6 +174,12 @@ impl Program {
             testsuites: Vec::new(),
             testplan: TestPlan::new(),
         }
+    }
+
+    pub fn push_testsuite(&mut self, testsuite: &TestSuite) -> Rc<TestSuite> {
+        let ref_testsuite = Rc::new(testsuite.clone());
+        self.testsuites.push(Rc::clone(&ref_testsuite));
+        ref_testsuite
     }
 
     pub fn push_testcase(&mut self, testcase: &TestCase) -> Rc<RefCell<TestCase>> {

@@ -22,6 +22,7 @@ pub mod error_handling;
 pub mod keywords;
 pub mod lexer;
 mod parser;
+pub mod utils;
 
 enum ExecutionType {
     TESTCASE,
@@ -31,7 +32,6 @@ enum ExecutionType {
 
 #[derive(Debug, Clone)]
 pub struct CompilationContext {
-    parent_path: String,
     path: String,
     errors: ErrorManager,
     pub program: Program,
@@ -46,15 +46,14 @@ impl fmt::Display for CompilationContext {
 impl CompilationContext {
     pub fn new(entry_path: String) -> CompilationContext {
         CompilationContext {
-            parent_path: entry_path.clone(),
             path: entry_path,
             errors: ErrorManager::new(),
             program: Program::new(),
         }
     }
 
-    pub fn set_project_root(&mut self, path: String) {
-        self.path = path;
+    pub fn set_path(&mut self, path: &String) {
+        self.path = path.clone();
     }
 }
 
@@ -78,5 +77,6 @@ pub fn compile(entry_point: &String, ctx: &mut CompilationContext) {
     let source_code = read_file_to_string(entry_point);
     let mut lexer = source_code_to_lexer(source_code, ctx);
     Parser::new(&mut lexer, ctx).parse();
-    execute(ctx.program.clone());
+    println!("{:#?}", ctx.program);
+    //execute(ctx.program.clone());
 }

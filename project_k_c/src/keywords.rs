@@ -96,6 +96,7 @@ define_tokens!(
     ACTION_UPLOAD,
     ACTION_BACK,
     ACTION_FORWARD,
+    ACTION_RUN,
     //options
     OPTION_TO,
     //Operators

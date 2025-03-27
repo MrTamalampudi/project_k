@@ -3,13 +3,14 @@ use crate::actions::{Action, ActionOption};
 use crate::ast::{TestCase, TestStep};
 use crate::enums::{Browser, Capabilities, CapabilityValue};
 use crate::keywords::TokenType;
+use crate::utils::get_parent;
 use crate::{read_file_to_string, source_code_to_tokens};
 use crate::{source_code_to_lexer, Lexer};
 use std::cell::RefCell;
 use std::rc::Rc;
 
-pub fn parse_test_case(parser: &mut Parser) -> Rc<RefCell<TestCase>> {
-    let mut testcase: TestCase = TestCase::init();
+pub fn parse_testcase(parser: &mut Parser) -> Rc<RefCell<TestCase>> {
+    let mut testcase: TestCase = TestCase::new();
     parser.lexer.next_token(); //consume "#TESTCASE" token
     parse_top_level_items(&mut testcase, parser);
     parser.ctx.program.push_testcase(&testcase)
@@ -219,13 +220,15 @@ fn parse_click_action(testcase: &mut TestCase, parser: &mut Parser) {
     ));
 }
 
+//todo solve circular prerequisite dependency
 fn parse_prerequisite(testcase: &mut TestCase, parser: &mut Parser) {
     parser.lexer.next_token(); //consume PREREQUISITE token
     loop {
         let token = parser.lexer.peek_token();
         match token {
             TokenType::IDENTIFIER(string) => {
-                let prerequisite_path = parser.ctx.parent_path.to_owned() + string.as_str() + ".ll";
+                let prerequisite_path =
+                    get_parent(&parser.ctx.path) + "/" + string.as_str() + ".ll";
                 let path = parser.ctx.path.clone();
                 parser.ctx.path = prerequisite_path; // assign prerequisite path
                 let source_code = read_file_to_string(&parser.ctx.path);
@@ -234,7 +237,7 @@ fn parse_prerequisite(testcase: &mut TestCase, parser: &mut Parser) {
                 parser.set_lexer(prerequiste_lexer); // assign preruqisite lexer
 
                 //println!("{:#?}", parser.lexer.tokens);
-                let prerequisite_testcase = parse_test_case(parser);
+                let prerequisite_testcase = parse_testcase(parser);
                 parser.ctx.path = path; //reassign current path
                 testcase.insert_prerequisite(prerequisite_testcase);
                 parser.set_lexer(current_lexer);
