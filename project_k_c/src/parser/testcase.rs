@@ -1,3 +1,4 @@
+use super::errors::collect_capability_key_error;
 use super::Parser;
 use crate::actions::{Action, ActionOption};
 use crate::ast::{TestCase, TestStep};
@@ -36,21 +37,13 @@ fn parse_top_level_items(testcase: &mut TestCase, parser: &mut Parser) {
 fn parse_capbilities(testcase: &mut TestCase, parser: &mut Parser) {
     parser.lexer.next_token(); // consume capability token
     loop {
-        println!("sdddddddddddddd");
         let token = parser.lexer.peek_token().clone();
         let capability = match token {
             TokenType::IDENTIFIER(string) => {
-                let token = parser.lexer.next_token(); //consume capabilitity key
+                //consume capabilitity key
+                let token = parser.lexer.next_token();
                 if !Capabilities::is_capability_key_valid(&string) {
-                    parser.ctx.errors.insert_error(
-                        format!("Expected a valid capability key"),
-                        token.get_start_location(),
-                        token.get_end_location(),
-                        token.get_source_path(),
-                    );
-                    //consume till new line token
-                    consume_till_new_line_token(parser.lexer);
-
+                    collect_capability_key_error(&token, parser);
                     continue;
                 }
                 let capbility = Capabilities::from_string(string.as_str());
@@ -81,12 +74,10 @@ fn parse_driver_url_capability(testcase: &mut TestCase, parser: &mut Parser) {
         //both chrome and "chrome" with and without quotes are considered valid
         TokenType::STRING(string) => CapabilityValue::STRING(string),
         _ => {
-            parser.ctx.errors.insert_error(
-                "Expected a valid browser".to_string(),
-                token.get_start_location(),
-                token.get_end_location(),
-                token.get_source_path(),
-            );
+            parser
+                .ctx
+                .errors
+                .insert_parsing_error("Expected a valid browser".to_string(), &token);
             return;
         }
     };
@@ -100,12 +91,10 @@ fn parse_browser_capability(testcase: &mut TestCase, parser: &mut Parser) {
         TokenType::IDENTIFIER(string) => Browser::from_string(string.as_str()),
         TokenType::STRING(string) => Browser::from_string(string.as_str()),
         _ => {
-            parser.ctx.errors.insert_error(
-                "Expected a valid browser".to_string(),
-                token.get_start_location(),
-                token.get_end_location(),
-                token.get_source_path(),
-            );
+            parser
+                .ctx
+                .errors
+                .insert_parsing_error("Expected a valid browser".to_string(), &token);
             return;
         }
     };
@@ -115,7 +104,6 @@ fn parse_browser_capability(testcase: &mut TestCase, parser: &mut Parser) {
 
 fn consume_till_new_line_token(lexer: &mut Lexer) {
     loop {
-        println!("sdddddddddddddd");
         let token = lexer.next_token();
         let token_type = token.get_token_type();
         match token_type {

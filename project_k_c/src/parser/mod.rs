@@ -5,6 +5,7 @@ use crate::ast::EntryPoint;
 use crate::lexer::Lexer;
 use crate::{CompilationContext, TokenType};
 
+pub mod errors;
 pub mod testcase;
 pub mod testplan;
 pub mod testsuite;

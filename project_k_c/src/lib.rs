@@ -34,7 +34,7 @@ enum ExecutionType {
 #[derive(Debug, Clone)]
 pub struct CompilationContext {
     path: String,
-    errors: ErrorManager,
+    pub errors: ErrorManager,
     pub program: Program,
 }
 
