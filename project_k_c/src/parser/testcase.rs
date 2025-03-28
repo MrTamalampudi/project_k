@@ -12,13 +12,15 @@ use std::rc::Rc;
 
 pub fn parse_testcase(parser: &mut Parser) -> Rc<RefCell<TestCase>> {
     let mut testcase: TestCase = TestCase::new();
-    parser.lexer.next_token(); //consume "#TESTCASE" token
+    //consume "#TESTCASE" token
+    parser.lexer.next_token();
     parse_top_level_items(&mut testcase, parser);
     parser.ctx.program.push_testcase(&testcase)
 }
 
 fn parse_top_level_items(testcase: &mut TestCase, parser: &mut Parser) {
-    while let token = parser.lexer.peek_token() {
+    loop {
+        let token = parser.lexer.peek_token();
         match token {
             TokenType::TESTSTEPS => parse_test_step(testcase, parser),
             TokenType::PREREQUISITE => parse_prerequisite(testcase, parser),
@@ -48,12 +50,18 @@ fn parse_capbilities(testcase: &mut TestCase, parser: &mut Parser) {
                 }
                 let capbility = Capabilities::from_string(string.as_str());
 
+                // consume assign token
                 match parser.lexer.peek_token() {
                     TokenType::ASSIGN_OP => {
                         parser.lexer.next_token();
-                    } // consume assign token
-                    x @ _ => panic!("Expected Assign token got {}", x),
-                }
+                    }
+                    x @ _ => {
+                        parser.ctx.errors.insert_parsing_error(
+                            format!("Expected Assign token got {}", x),
+                            &token,
+                        );
+                    }
+                };
 
                 capbility
             }
@@ -102,20 +110,10 @@ fn parse_browser_capability(testcase: &mut TestCase, parser: &mut Parser) {
     testcase.insert_capability(&String::from("browser"), &capability_value);
 }
 
-fn consume_till_new_line_token(lexer: &mut Lexer) {
-    loop {
-        let token = lexer.next_token();
-        let token_type = token.get_token_type();
-        match token_type {
-            TokenType::NEW_LINE => break,
-            _ => continue,
-        }
-    }
-}
-
 fn parse_test_step(testcase: &mut TestCase, parser: &mut Parser) {
     let _ = parser.lexer.next_token(); //consume "TestSteps" token
-    while let token = parser.lexer.peek_token() {
+    loop {
+        let token = parser.lexer.peek_token();
         match token {
             TokenType::ACTION_NAVIGATE => parse_navigate_action(testcase, parser),
             TokenType::ACTION_CLICK => parse_click_action(testcase, parser),
