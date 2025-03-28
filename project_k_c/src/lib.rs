@@ -13,6 +13,7 @@ use std::fmt;
 use std::fs;
 use std::path::Display;
 use std::process::Command;
+use utils::correct_the_file_path;
 
 mod actions;
 pub mod ast;
@@ -55,9 +56,14 @@ impl CompilationContext {
     pub fn set_path(&mut self, path: &String) {
         self.path = path.clone();
     }
+
+    pub fn get_parent_path(&self) -> String {
+        correct_the_file_path(&self.path)
+    }
 }
 
 fn read_file_to_string(path: &String) -> String {
+    println!("{path} =========");
     match fs::read_to_string(path) {
         Ok(string) => string,
         Err(error) => panic!("{:#?}", error),

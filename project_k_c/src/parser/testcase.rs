@@ -32,9 +32,11 @@ fn parse_top_level_items(testcase: &mut TestCase, parser: &mut Parser) {
 }
 
 //@todo write better logic
+//handle errors properly
 fn parse_capbilities(testcase: &mut TestCase, parser: &mut Parser) {
     parser.lexer.next_token(); // consume capability token
     loop {
+        println!("sdddddddddddddd");
         let token = parser.lexer.peek_token().clone();
         let capability = match token {
             TokenType::IDENTIFIER(string) => {
@@ -113,6 +115,7 @@ fn parse_browser_capability(testcase: &mut TestCase, parser: &mut Parser) {
 
 fn consume_till_new_line_token(lexer: &mut Lexer) {
     loop {
+        println!("sdddddddddddddd");
         let token = lexer.next_token();
         let token_type = token.get_token_type();
         match token_type {
@@ -227,8 +230,7 @@ fn parse_prerequisite(testcase: &mut TestCase, parser: &mut Parser) {
         let token = parser.lexer.peek_token();
         match token {
             TokenType::IDENTIFIER(string) => {
-                let prerequisite_path =
-                    get_parent(&parser.ctx.path) + "/" + string.as_str() + ".ll";
+                let prerequisite_path = parser.ctx.get_parent_path() + string.as_str() + ".ll";
                 let path = parser.ctx.path.clone();
                 parser.ctx.path = prerequisite_path; // assign prerequisite path
                 let source_code = read_file_to_string(&parser.ctx.path);
