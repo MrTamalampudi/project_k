@@ -4,10 +4,10 @@ use crate::{ast::Location, lexer::Token};
 
 #[derive(Debug, Clone)]
 pub struct ErrorInfo {
-    message: String,
-    start_location: Location,
-    end_location: Location,
-    source_path: String,
+    pub message: String,
+    pub start_location: Location,
+    pub end_location: Location,
+    pub source_path: String,
 }
 
 #[derive(Debug, Clone)]

@@ -1,7 +1,6 @@
 use project_k::compile;
 use project_k::CompilationContext;
 use std::env;
-use std::path::Path;
 use std::path::PathBuf;
 
 fn main() {
@@ -13,6 +12,6 @@ fn main() {
     };
 
     let mut ctx = CompilationContext::new(PathBuf::from(source_path.clone()), false);
-    compile(Path::new(source_path), &mut ctx);
+    compile(&mut ctx);
     //println!("{:#?}", ctx.errors.errors);
 }

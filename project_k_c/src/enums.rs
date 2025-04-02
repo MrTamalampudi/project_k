@@ -6,7 +6,7 @@ macro_rules! define_enums {
         $enum_name:ident,
         $($keyword:ident $(= $string:literal)?),*
     ) => {
-        #[derive(Debug,Clone)]
+        #[derive(Debug,Clone,PartialEq)]
         #[allow(non_camel_case_types)]
         pub enum $enum_name {
             NONE,

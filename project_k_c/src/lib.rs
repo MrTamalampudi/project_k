@@ -67,7 +67,6 @@ impl CompilationContext {
 }
 
 fn read_file_to_string(path: &Path) -> String {
-    println!("{:#?}", path);
     match fs::read_to_string(path) {
         Ok(string) => string,
         Err(error) => panic!("{:#?}", error),
@@ -80,14 +79,18 @@ fn source_code_to_tokens(source_code: String, ctx: &mut CompilationContext) -> V
 
 fn source_code_to_lexer(source_code: String, ctx: &mut CompilationContext) -> Lexer {
     let tokens = source_code_to_tokens(source_code, ctx);
-    //println!("tokens {:#?}", tokens);
+    println!("tokens {:#?}", tokens);
     Lexer::from_tokens(tokens)
 }
 
-pub fn compile(entry_point: &Path, ctx: &mut CompilationContext) {
-    let source_code = read_file_to_string(entry_point);
+pub fn compile_for_errors(ctx: &mut CompilationContext) {
+    let source_code = read_file_to_string(&ctx.path);
     let mut lexer = source_code_to_lexer(source_code, ctx);
     Parser::new(&mut lexer, ctx).parse();
+}
+
+pub fn compile(ctx: &mut CompilationContext) {
+    compile_for_errors(ctx);
     println!("{:#?}", ctx.program);
     //execute(ctx.program.clone());
 }

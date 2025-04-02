@@ -1,9 +1,10 @@
-use super::errors::collect_capability_key_error;
+use super::errors::{collect_capability_key_error, collect_prerequisite_path_error};
 use super::Parser;
 use crate::actions::{Action, ActionOption};
 use crate::ast::{TestCase, TestStep};
 use crate::enums::{Browser, Capabilities, CapabilityValue};
 use crate::keywords::TokenType;
+use crate::lexer::Token;
 use crate::utils::get_parent;
 use crate::{read_file_to_string, source_code_to_tokens};
 use crate::{source_code_to_lexer, Lexer};
@@ -14,8 +15,18 @@ pub fn parse_testcase(parser: &mut Parser) -> Rc<RefCell<TestCase>> {
     let mut testcase: TestCase = TestCase::new();
     //consume "#TESTCASE" token
     parser.lexer.next_token();
+    consume_new_line_token(parser);
     parse_top_level_items(&mut testcase, parser);
     parser.ctx.program.push_testcase(&testcase)
+}
+
+pub fn consume_new_line_token(parser: &mut Parser) {
+    match parser.lexer.peek_token() {
+        TokenType::NEW_LINE => {
+            parser.lexer.next_token();
+        }
+        _ => (),
+    }
 }
 
 fn parse_top_level_items(testcase: &mut TestCase, parser: &mut Parser) {
@@ -25,9 +36,7 @@ fn parse_top_level_items(testcase: &mut TestCase, parser: &mut Parser) {
             TokenType::TESTSTEPS => parse_test_step(testcase, parser),
             TokenType::PREREQUISITE => parse_prerequisite(testcase, parser),
             TokenType::CAPABILITIES => parse_capbilities(testcase, parser),
-            TokenType::NEW_LINE => {
-                parser.lexer.next_token();
-            }
+            TokenType::NEW_LINE => consume_new_line_token(parser),
             TokenType::EOF => break,
             _ => break,
         }
@@ -37,7 +46,10 @@ fn parse_top_level_items(testcase: &mut TestCase, parser: &mut Parser) {
 //@todo write better logic
 //handle errors properly
 fn parse_capbilities(testcase: &mut TestCase, parser: &mut Parser) {
-    parser.lexer.next_token(); // consume capability token
+    //cosnume capability highleveltoken
+    parser.lexer.next_token();
+    consume_new_line_token(parser);
+
     loop {
         let token = parser.lexer.peek_token().clone();
         let capability = match token {
@@ -48,31 +60,30 @@ fn parse_capbilities(testcase: &mut TestCase, parser: &mut Parser) {
                     collect_capability_key_error(&token, parser);
                     continue;
                 }
-                let capbility = Capabilities::from_string(string.as_str());
-
-                // consume assign token
-                match parser.lexer.peek_token() {
-                    TokenType::ASSIGN_OP => {
-                        parser.lexer.next_token();
-                    }
-                    x @ _ => {
-                        parser.ctx.errors.insert_parsing_error(
-                            format!("Expected Assign token got {}", x),
-                            &token,
-                        );
-                    }
-                };
-
-                capbility
+                Capabilities::from_string(string.as_str())
             }
             _ => break,
         };
+
+        consume_operator_token(TokenType::ASSIGN_OP, parser);
 
         match capability {
             Capabilities::BROWSER => parse_browser_capability(testcase, parser),
             Capabilities::DRIVERURL => parse_driver_url_capability(testcase, parser),
             Capabilities::NONE => break,
         }
+
+        consume_new_line_token(parser);
+    }
+}
+
+fn consume_operator_token(token_type: TokenType, parser: &mut Parser) {
+    let token = parser.lexer.next_token();
+    if token.get_token_type() != token_type {
+        parser.ctx.errors.insert_parsing_error(
+            format!("Expected Assign token got {}", token.get_token_type()),
+            &token,
+        );
     }
 }
 
@@ -212,16 +223,23 @@ fn parse_click_action(testcase: &mut TestCase, parser: &mut Parser) {
 
 //todo solve circular prerequisite dependency
 fn parse_prerequisite(testcase: &mut TestCase, parser: &mut Parser) {
-    parser.lexer.next_token(); //consume PREREQUISITE token
+    //consume PREREQUISITE token
+    parser.lexer.next_token();
+    consume_new_line_token(parser);
     loop {
         let token = parser.lexer.peek_token();
-        println!("{:#?}", parser.ctx.path.clone());
         match token {
             TokenType::IDENTIFIER(string) => {
                 let path = parser.ctx.path.clone();
                 // assign prerequisite path
                 let prerequisite_path =
                     parser.ctx.get_parent_path().join(string.to_owned() + ".ll");
+
+                if !prerequisite_path.exists() {
+                    collect_prerequisite_path_error(parser);
+                    continue;
+                }
+
                 parser.ctx.set_path(&prerequisite_path);
                 let source_code = read_file_to_string(&parser.ctx.path);
                 let prerequiste_lexer = source_code_to_lexer(source_code, parser.ctx);
@@ -237,6 +255,7 @@ fn parse_prerequisite(testcase: &mut TestCase, parser: &mut Parser) {
                 // consume current token
                 parser.lexer.next_token();
             }
+            TokenType::NEW_LINE => consume_new_line_token(parser),
             _ => break,
         }
     }

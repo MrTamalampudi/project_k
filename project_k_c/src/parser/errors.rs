@@ -2,6 +2,13 @@ use crate::{keywords::TokenType, lexer::Token};
 
 use super::Parser;
 
+pub fn collect_prerequisite_path_error(parser: &mut Parser) {
+    parser.ctx.errors.insert_parsing_error(
+        format!("No such testcase exists in directory"),
+        &parser.lexer.next_token(),
+    );
+}
+
 pub fn collect_capability_key_error(token: &Token, parser: &mut Parser) {
     parser
         .ctx
