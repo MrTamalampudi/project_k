@@ -1,3 +1,5 @@
+use std::str::FromStr;
+
 use tower_lsp::jsonrpc::{Error, Result as LspResult};
 use tower_lsp::lsp_types::*;
 use tower_lsp::{Client, LanguageServer, LspService, Server};
@@ -32,6 +34,15 @@ impl LanguageServer for Backend {
     }
     async fn shutdown(&self) -> LspResult<()> {
         Ok(())
+    }
+
+    async fn did_open(&self, params: DidOpenTextDocumentParams) {
+        self.client
+            .show_message(
+                MessageType::INFO,
+                format!("{:#?}", Uri::from_str("./new.ll")),
+            )
+            .await;
     }
 
     async fn did_change(&self, params: DidChangeTextDocumentParams) {

@@ -121,7 +121,8 @@ fn parse_test_step(testcase: &mut TestCase, parser: &mut Parser) {
             TokenType::ACTION_FORWARD => parse_forward_action(testcase, parser),
             TokenType::IDENTIFIER(ident) => parse_variable_initalization(testcase, parser),
             TokenType::NEW_LINE => {
-                parser.lexer.next_token(); // consume NEW_LINE token
+                // consume NEW_LINE token
+                parser.lexer.next_token();
             }
             _ => break,
         }
@@ -214,23 +215,27 @@ fn parse_prerequisite(testcase: &mut TestCase, parser: &mut Parser) {
     parser.lexer.next_token(); //consume PREREQUISITE token
     loop {
         let token = parser.lexer.peek_token();
+        println!("{:#?}", parser.ctx.path.clone());
         match token {
             TokenType::IDENTIFIER(string) => {
-                let prerequisite_path = parser.ctx.get_parent_path() + string.as_str() + ".ll";
                 let path = parser.ctx.path.clone();
-                parser.ctx.path = prerequisite_path; // assign prerequisite path
+                // assign prerequisite path
+                let prerequisite_path =
+                    parser.ctx.get_parent_path().join(string.to_owned() + ".ll");
+                parser.ctx.set_path(&prerequisite_path);
                 let source_code = read_file_to_string(&parser.ctx.path);
                 let prerequiste_lexer = source_code_to_lexer(source_code, parser.ctx);
-                let current_lexer = parser.lexer.clone(); //current lexer
-                parser.set_lexer(prerequiste_lexer); // assign preruqisite lexer
-
+                //current lexer
+                let current_lexer = parser.lexer.clone();
+                // assign preruqisite lexer
+                parser.set_lexer(prerequiste_lexer);
                 //println!("{:#?}", parser.lexer.tokens);
                 let prerequisite_testcase = parse_testcase(parser);
                 parser.ctx.path = path; //reassign current path
                 testcase.insert_prerequisite(prerequisite_testcase);
                 parser.set_lexer(current_lexer);
-
-                parser.lexer.next_token(); // consume current token
+                // consume current token
+                parser.lexer.next_token();
             }
             _ => break,
         }

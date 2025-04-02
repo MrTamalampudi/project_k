@@ -1,6 +1,8 @@
 use project_k::compile;
 use project_k::CompilationContext;
 use std::env;
+use std::path::Path;
+use std::path::PathBuf;
 
 fn main() {
     env::set_var("RUST_BACKTRACE", "1");
@@ -9,7 +11,8 @@ fn main() {
         Some(path) => path,
         None => panic!("please provide a file path"),
     };
-    let mut ctx = CompilationContext::new(source_path.clone());
-    compile(source_path, &mut ctx);
+
+    let mut ctx = CompilationContext::new(PathBuf::from(source_path.clone()), false);
+    compile(Path::new(source_path), &mut ctx);
     //println!("{:#?}", ctx.errors.errors);
 }

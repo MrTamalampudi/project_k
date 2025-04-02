@@ -31,7 +31,7 @@ fn parse_testcase(testsuite: &mut TestSuite, parser: &mut Parser) {
     parser.lexer.next_token();
     // current testuite path ex: "./testsuite.ll" or "./testsuite/testsuite.ll"
     let current_path = parser.ctx.path.clone();
-    let parent_path = get_parent(&current_path).clone() + "/../testcases/";
+    let parent_path = get_parent(&current_path).clone().join("/../testcases/");
     loop {
         println!("checlllllllll");
         let token_type = parser.lexer.peek_token();
@@ -39,7 +39,7 @@ fn parse_testcase(testsuite: &mut TestSuite, parser: &mut Parser) {
             TokenType::IDENTIFIER(string) => {
                 parser
                     .ctx
-                    .set_path(&{ parent_path.to_owned() + string.as_str() + ".ll" });
+                    .set_path(&{ parent_path.join(string.to_owned() + ".ll") });
                 let source_code = read_file_to_string(&parser.ctx.path);
                 let tc_lexer = source_code_to_lexer(source_code, parser.ctx);
                 //current testsuite lexer

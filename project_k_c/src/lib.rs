@@ -12,8 +12,10 @@ use std::env;
 use std::fmt;
 use std::fs;
 use std::path::Display;
+use std::path::Path;
+use std::path::PathBuf;
 use std::process::Command;
-use utils::correct_the_file_path;
+use utils::get_parent;
 
 mod actions;
 pub mod ast;
@@ -33,9 +35,10 @@ enum ExecutionType {
 
 #[derive(Debug, Clone)]
 pub struct CompilationContext {
-    path: String,
+    pub path: PathBuf,
     pub errors: ErrorManager,
     pub program: Program,
+    pub lsp: bool,
 }
 
 impl fmt::Display for CompilationContext {
@@ -45,25 +48,26 @@ impl fmt::Display for CompilationContext {
 }
 
 impl CompilationContext {
-    pub fn new(entry_path: String) -> CompilationContext {
+    pub fn new(entry_path: PathBuf, lsp: bool) -> CompilationContext {
         CompilationContext {
             path: entry_path,
             errors: ErrorManager::new(),
             program: Program::new(),
+            lsp,
         }
     }
 
-    pub fn set_path(&mut self, path: &String) {
+    pub fn set_path(&mut self, path: &PathBuf) {
         self.path = path.clone();
     }
 
-    pub fn get_parent_path(&self) -> String {
-        correct_the_file_path(&self.path)
+    pub fn get_parent_path(&self) -> PathBuf {
+        self.path.parent().unwrap().to_path_buf()
     }
 }
 
-fn read_file_to_string(path: &String) -> String {
-    println!("{path} =========");
+fn read_file_to_string(path: &Path) -> String {
+    println!("{:#?}", path);
     match fs::read_to_string(path) {
         Ok(string) => string,
         Err(error) => panic!("{:#?}", error),
@@ -76,10 +80,11 @@ fn source_code_to_tokens(source_code: String, ctx: &mut CompilationContext) -> V
 
 fn source_code_to_lexer(source_code: String, ctx: &mut CompilationContext) -> Lexer {
     let tokens = source_code_to_tokens(source_code, ctx);
+    //println!("tokens {:#?}", tokens);
     Lexer::from_tokens(tokens)
 }
 
-pub fn compile(entry_point: &String, ctx: &mut CompilationContext) {
+pub fn compile(entry_point: &Path, ctx: &mut CompilationContext) {
     let source_code = read_file_to_string(entry_point);
     let mut lexer = source_code_to_lexer(source_code, ctx);
     Parser::new(&mut lexer, ctx).parse();

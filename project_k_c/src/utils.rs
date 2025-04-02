@@ -1,21 +1,8 @@
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
-pub fn get_parent(path: &String) -> String {
-    Path::new(path)
-        .parent()
-        .unwrap()
-        .to_str()
-        .unwrap()
-        .to_string()
+pub fn get_parent(path: &PathBuf) -> PathBuf {
+    path.parent().unwrap().to_path_buf()
 }
 
 // problem is with only "xx.ll" type of paths
 // "./xx.ll" will work fine
-pub fn correct_the_file_path(path: &String) -> String {
-    let parent = get_parent(path);
-    if parent.len() > 0 {
-        parent + "/"
-    } else {
-        "./".to_string()
-    }
-}

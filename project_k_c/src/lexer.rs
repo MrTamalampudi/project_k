@@ -1,9 +1,9 @@
 use crate::ast::Location;
 use crate::keywords::TokenType;
 use crate::CompilationContext;
-use std::fmt;
 use std::iter::Peekable;
 use std::str::Chars;
+use std::{fmt, path::PathBuf};
 use unicode_ident::{is_xid_continue, is_xid_start};
 
 const WHITESPACE: char = ' ';
@@ -93,7 +93,7 @@ impl State<'_> {
 
 pub struct Tokenizer<'a> {
     source_code: String,
-    source_path: String,
+    source_path: PathBuf,
     ctx: &'a mut CompilationContext,
 }
 
@@ -105,6 +105,11 @@ impl<'a> Tokenizer<'a> {
             ctx,
         }
     }
+
+    fn get_source_path_as_string(&self) -> String {
+        self.source_path.to_str().unwrap().to_string()
+    }
+
     pub fn tokenize(&mut self) -> Vec<Token> {
         let source_code = self.source_code.clone();
         let mut state = State {
@@ -152,7 +157,7 @@ impl<'a> Tokenizer<'a> {
                             state.next(); //consume unexpected char
                             state.location
                         },
-                        self.source_path.clone(),
+                        self.get_source_path_as_string(),
                     );
                 }
             };
@@ -162,7 +167,7 @@ impl<'a> Tokenizer<'a> {
             TokenType::EOF,
             Location::dummy(),
             Location::dummy(),
-            self.source_path.clone(),
+            self.get_source_path_as_string(),
         ));
     }
 
@@ -181,7 +186,7 @@ impl<'a> Tokenizer<'a> {
                         state.next();
                         state.location
                     },
-                    self.source_path.clone(),
+                    self.get_source_path_as_string(),
                 ),
             }
         }
@@ -224,7 +229,7 @@ impl<'a> Tokenizer<'a> {
             token_type,
             start,
             state.location,
-            self.source_path.clone(),
+            self.get_source_path_as_string(),
         ))
     }
 
@@ -244,7 +249,7 @@ impl<'a> Tokenizer<'a> {
             token_type,
             start,
             state.location,
-            self.source_path.clone(),
+            self.get_source_path_as_string(),
         ));
     }
 
@@ -253,7 +258,7 @@ impl<'a> Tokenizer<'a> {
             TokenType::EOF,
             state.location,
             state.location,
-            self.source_path.clone(),
+            self.get_source_path_as_string(),
         ));
     }
 
@@ -282,7 +287,7 @@ impl<'a> Tokenizer<'a> {
             TokenType::STRING(string),
             start_location,
             state.location,
-            self.source_path.clone(),
+            self.get_source_path_as_string(),
         ));
     }
 }
