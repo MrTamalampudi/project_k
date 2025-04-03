@@ -11,7 +11,9 @@ tokio = { version = "1", features = [
     "macros",
     "net",
 ] }
+tokio-util = { version = "0.7", features = ["codec"] }
 unicode-ident = { version = "1.0.18" }
 tower-lsp = { package = "deno_tower_lsp", version = "=0.4.3", features = [
     "proposed",
 ] }
+project_k = { path = "../project_k_c" }

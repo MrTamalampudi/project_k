@@ -11,7 +11,7 @@ fn main() {
         None => panic!("please provide a file path"),
     };
 
-    let mut ctx = CompilationContext::new(PathBuf::from(source_path.clone()), false);
+    let mut ctx = CompilationContext::new(PathBuf::from(source_path.clone()));
     compile(&mut ctx);
     //println!("{:#?}", ctx.errors.errors);
 }

@@ -24,7 +24,7 @@ pub mod enums;
 pub mod error_handling;
 pub mod keywords;
 pub mod lexer;
-mod parser;
+pub mod parser;
 pub mod utils;
 
 enum ExecutionType {
@@ -38,7 +38,6 @@ pub struct CompilationContext {
     pub path: PathBuf,
     pub errors: ErrorManager,
     pub program: Program,
-    pub lsp: bool,
 }
 
 impl fmt::Display for CompilationContext {
@@ -48,12 +47,11 @@ impl fmt::Display for CompilationContext {
 }
 
 impl CompilationContext {
-    pub fn new(entry_path: PathBuf, lsp: bool) -> CompilationContext {
+    pub fn new(entry_path: PathBuf) -> CompilationContext {
         CompilationContext {
             path: entry_path,
             errors: ErrorManager::new(),
             program: Program::new(),
-            lsp,
         }
     }
 
@@ -77,9 +75,9 @@ fn source_code_to_tokens(source_code: String, ctx: &mut CompilationContext) -> V
     Tokenizer::new(source_code, ctx).tokenize()
 }
 
-fn source_code_to_lexer(source_code: String, ctx: &mut CompilationContext) -> Lexer {
+pub fn source_code_to_lexer(source_code: String, ctx: &mut CompilationContext) -> Lexer {
     let tokens = source_code_to_tokens(source_code, ctx);
-    println!("tokens {:#?}", tokens);
+    //println!("tokens {:#?}", tokens);
     Lexer::from_tokens(tokens)
 }
 
@@ -91,6 +89,7 @@ pub fn compile_for_errors(ctx: &mut CompilationContext) {
 
 pub fn compile(ctx: &mut CompilationContext) {
     compile_for_errors(ctx);
-    println!("{:#?}", ctx.program);
+    //println!("{:#?}", ctx.program);
+    //println!("{:#?}", ctx.errors);
     //execute(ctx.program.clone());
 }
