@@ -1,5 +1,5 @@
 use super::errors::{collect_capability_key_error, collect_prerequisite_path_error};
-use super::Parser;
+use super::{consume_new_line_token, Parser};
 use crate::actions::{Action, ActionOption};
 use crate::ast::{TestCase, TestStep};
 use crate::enums::{Browser, Capabilities, CapabilityValue};
@@ -18,15 +18,6 @@ pub fn parse_testcase(parser: &mut Parser) -> Rc<RefCell<TestCase>> {
     consume_new_line_token(parser);
     parse_top_level_items(&mut testcase, parser);
     parser.ctx.program.push_testcase(&testcase)
-}
-
-pub fn consume_new_line_token(parser: &mut Parser) {
-    match parser.lexer.peek_token() {
-        TokenType::NEW_LINE => {
-            parser.lexer.next_token();
-        }
-        _ => (),
-    }
 }
 
 fn parse_top_level_items(testcase: &mut TestCase, parser: &mut Parser) {

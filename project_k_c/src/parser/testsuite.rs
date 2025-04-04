@@ -2,12 +2,14 @@ use std::{cell::RefCell, rc::Rc, thread::park};
 
 use crate::{ast::TestSuite, keywords::TokenType, lexer, utils::get_parent};
 
-use super::{testcase::parse_testcase as parse_tc, Parser};
+use super::{consume_new_line_token, testcase::parse_testcase as parse_tc, Parser};
 use crate::{read_file_to_string, source_code_to_lexer};
 
 pub fn parse_testsuite(parser: &mut Parser) -> Rc<TestSuite> {
     let mut testsuite = TestSuite::new();
-    parser.lexer.next_token(); //consume #TESTSUITE token
+    //consume #TESTSUITE token
+    parser.lexer.next_token();
+    consume_new_line_token(parser);
     parse_top_level_items(&mut testsuite, parser);
     parser.ctx.program.push_testsuite(&testsuite)
 }
@@ -29,11 +31,11 @@ fn parse_top_level_items(testcase: &mut TestSuite, parser: &mut Parser) {
 fn parse_testcase(testsuite: &mut TestSuite, parser: &mut Parser) {
     // consume #TESTCASE highlevel token
     parser.lexer.next_token();
+    consume_new_line_token(parser);
     // current testuite path ex: "./testsuite.ll" or "./testsuite/testsuite.ll"
     let current_path = parser.ctx.path.clone();
-    let parent_path = get_parent(&current_path).clone().join("/../testcases/");
+    let parent_path = get_parent(&current_path).clone().join("../testcases/");
     loop {
-        println!("checlllllllll");
         let token_type = parser.lexer.peek_token();
         match token_type {
             TokenType::IDENTIFIER(string) => {
@@ -56,6 +58,7 @@ fn parse_testcase(testsuite: &mut TestSuite, parser: &mut Parser) {
             }
             _ => break,
         }
+        consume_new_line_token(parser);
     }
 }
 

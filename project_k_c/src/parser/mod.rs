@@ -35,3 +35,12 @@ impl<'a, 'b> Parser<'a, 'b> {
         *self.lexer = lexer;
     }
 }
+
+pub fn consume_new_line_token(parser: &mut Parser) {
+    match parser.lexer.peek_token() {
+        TokenType::NEW_LINE => {
+            parser.lexer.next_token();
+        }
+        _ => (),
+    }
+}
