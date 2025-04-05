@@ -13,6 +13,7 @@ macro_rules! define_tokens {
             CAPS(Capabilities),
             //capbilities
             BROWSER(Browser),
+            XPATH(String),
             NONE,
             $($keyword),*
         }
@@ -49,7 +50,7 @@ macro_rules! define_tokens {
 
             pub fn to_string(&self) -> &str {
                 match self {
-                    TokenType::STRING(string) | TokenType::IDENTIFIER(string) => string,
+                    TokenType::STRING(string) | TokenType::IDENTIFIER(string) | TokenType::XPATH(string)  => string,
                     TokenType::NONE => "none",
                     TokenType::CAPS(caps) => caps.to_string(),
                     TokenType::BROWSER(browser) => browser.to_string(),

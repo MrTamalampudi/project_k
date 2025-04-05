@@ -1,4 +1,6 @@
-use super::errors::{collect_capability_key_error, collect_prerequisite_path_error};
+use url::Url;
+
+use super::errors::{collect_capability_key_error, collect_prerequisite_path_error, ParserError};
 use super::{consume_new_line_token, Parser};
 use crate::actions::{Action, ActionOption};
 use crate::ast::{TestCase, TestStep};
@@ -113,7 +115,8 @@ fn parse_browser_capability(testcase: &mut TestCase, parser: &mut Parser) {
 }
 
 fn parse_test_step(testcase: &mut TestCase, parser: &mut Parser) {
-    let _ = parser.lexer.next_token(); //consume "TestSteps" token
+    //consume "TestSteps" token
+    parser.lexer.next_token();
     loop {
         let token = parser.lexer.peek_token();
         match token {
@@ -122,25 +125,26 @@ fn parse_test_step(testcase: &mut TestCase, parser: &mut Parser) {
             TokenType::ACTION_BACK => parse_back_action(testcase, parser),
             TokenType::ACTION_FORWARD => parse_forward_action(testcase, parser),
             TokenType::IDENTIFIER(ident) => parse_variable_initalization(testcase, parser),
-            TokenType::NEW_LINE => {
-                // consume NEW_LINE token
-                parser.lexer.next_token();
-            }
+            TokenType::NEW_LINE => consume_new_line_token(parser),
             _ => break,
         }
     }
 }
 
 fn parse_variable_initalization(testcase: &mut TestCase, parser: &mut Parser) {
-    let identifier = match parser.lexer.next_token().get_token_type() {
-        TokenType::IDENTIFIER(ident) => ident,
-        x @ _ => panic!("Expected String token got {x}"),
-    };
-    match parser.lexer.peek_token() {
+    match parser.lexer.double_peek_token() {
         TokenType::ASSIGN_OP => {}
-        x @ _ => panic!("Expected Assign token got {x}"),
+        _ => return,
+    }
+
+    let identifier = match parser.lexer.next_token().get_token_type() {
+        TokenType::IDENTIFIER(string) => string,
+        _ => return,
     };
-    parser.lexer.next_token(); // consume Assign token
+
+    //cosnume assignment token
+    parser.lexer.next_token();
+
     let value = parser
         .lexer
         .next_token()
@@ -177,8 +181,17 @@ fn parse_navigate_action(testcase: &mut TestCase, parser: &mut Parser) {
     let navigate_token = parser.lexer.next_token();
     //check if next token is String
     let url = match parser.lexer.peek_token() {
-        TokenType::STRING(url) => url.clone(),
-        x @ _ => panic!("Expected String but got {:#?}", x),
+        TokenType::STRING(url) => match validate_url(url) {
+            Ok(url) => url,
+            Err(error) => {
+                parser.error(error);
+                return;
+            }
+        },
+        _ => {
+            parser.error(ParserError::URL);
+            return;
+        }
     };
     //consume string token
     let url_token = parser.lexer.next_token();
@@ -190,6 +203,20 @@ fn parse_navigate_action(testcase: &mut TestCase, parser: &mut Parser) {
         ActionOption::NONE,
         vec![url],
     ));
+}
+
+fn validate_url(url: &String) -> Result<String, ParserError> {
+    let parsed_url = Url::parse(url.as_str());
+    match parsed_url {
+        Ok(url) => {
+            if url.scheme() != "https" {
+                return Err(ParserError::URL_HTTPS);
+            } else {
+                Ok(url.to_string())
+            }
+        }
+        Err(error) => Err(ParserError::URL),
+    }
 }
 
 fn parse_click_action(testcase: &mut TestCase, parser: &mut Parser) {

@@ -313,6 +313,12 @@ impl Lexer {
             .map_or(&TokenType::EOF, |x| &x.token_type)
     }
 
+    pub fn double_peek_token(&self) -> &TokenType {
+        self.tokens
+            .get(self.cursor_position + 1)
+            .map_or(&TokenType::EOF, |x| &x.token_type)
+    }
+
     pub fn next_token(&mut self) -> Token {
         if self.cursor_position >= self.tokens.len() {
             Token::new(
