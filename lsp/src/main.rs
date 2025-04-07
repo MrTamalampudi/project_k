@@ -4,7 +4,7 @@ use std::path::{Path, PathBuf};
 use std::str::FromStr;
 use std::time::SystemTime;
 
-use completion::token_by_pos_for_completion;
+use completion::IntelliSense;
 use parking_lot::RwLock;
 use project_k::lexer::Token;
 use project_k::parser::Parser;
@@ -154,8 +154,7 @@ impl LanguageServer for Backend {
         // self.client
         //     .show_message(MessageType::INFO, format!("tokendds {:#?}", tokens))
         //     .await;
-        let t = token_by_pos_for_completion(self, tokens, &params.text_document_position.position)
-            .await;
+        let t = IntelliSense::new(tokens, &params.text_document_position.position).complete();
         Ok(Some(CompletionResponse::Array(t)))
         // self.client
         //     .show_message(MessageType::INFO, format!("tokens {:#?}", token))
