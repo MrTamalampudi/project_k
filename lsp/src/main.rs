@@ -108,7 +108,7 @@ impl LanguageServer for Backend {
     }
     async fn did_change(&self, params: DidChangeTextDocumentParams) {
         self.compile_and_publish_diagnostics(
-            params.text_document.uri,
+            params.text_document.uri.clone(),
             params.text_document.version,
             params.content_changes.get(0).unwrap().text.clone(),
         )
@@ -151,13 +151,16 @@ impl LanguageServer for Backend {
         let tokens = tokens
             .get(&params.text_document_position.text_document.uri)
             .unwrap();
-        let token =
-            token_by_pos_for_completion(&self, tokens, &params.text_document_position.position)
-                .await;
-        Ok(Some(CompletionResponse::Array(vec![
-            CompletionItem::new_simple("#teststeps".to_string(), "Headers".to_string()),
-            CompletionItem::new_simple("#testcase".to_string(), "Headers".to_string()),
-        ])))
+        // self.client
+        //     .show_message(MessageType::INFO, format!("tokendds {:#?}", tokens))
+        //     .await;
+        let t = token_by_pos_for_completion(self, tokens, &params.text_document_position.position)
+            .await;
+        Ok(Some(CompletionResponse::Array(t)))
+        // self.client
+        //     .show_message(MessageType::INFO, format!("tokens {:#?}", token))
+        //     .await;
+        //Ok(None)
     }
 }
 

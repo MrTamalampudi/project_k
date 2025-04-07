@@ -2,6 +2,7 @@ use ast::Program;
 use ast::TestCase;
 use engine::execute;
 use engine::execute_test_case;
+use enums::Capabilities;
 use error_handling::ErrorManager;
 use keywords::TokenType;
 use lexer::Token;
@@ -85,7 +86,7 @@ pub fn compile_for_errors(ctx: &mut CompilationContext) {
     let source_code = read_file_to_string(&ctx.path);
     let mut lexer = source_code_to_lexer(source_code, ctx);
     //println!("{:#?}", lexer.tokens);
-    //Parser::new(&mut lexer, ctx).parse();
+    Parser::new(&mut lexer, ctx).parse();
 }
 
 pub fn compile(ctx: &mut CompilationContext) {

@@ -13,5 +13,6 @@ fn main() {
 
     let mut ctx = CompilationContext::new(PathBuf::from(source_path.clone()));
     compile(&mut ctx);
-    //println!("{:#?}", ctx.errors.errors);
+    // println!("{:#?}", ctx.errors.errors);
+    // println!("{:#?}", ctx.program);
 }

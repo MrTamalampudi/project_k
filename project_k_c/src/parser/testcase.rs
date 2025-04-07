@@ -47,36 +47,51 @@ fn parse_capbilities(testcase: &mut TestCase, parser: &mut Parser) {
         let token = parser.lexer.peek_token().clone();
         let capability = match token {
             TokenType::IDENTIFIER(string) => {
-                //consume capabilitity key
-                let token = parser.lexer.next_token();
                 if !Capabilities::is_capability_key_valid(&string) {
-                    collect_capability_key_error(&token, parser);
+                    collect_capability_key_error(parser);
                     continue;
                 }
+                //consume capability key
+                parser.lexer.next_token();
                 Capabilities::from_string(string.as_str())
             }
             _ => break,
         };
 
-        consume_operator_token(TokenType::ASSIGN_OP, parser);
+        match consume_operator_token(TokenType::ASSIGN_OP, parser) {
+            Ok(_) => {}
+            Err(_) => {
+                parser.error(ParserError::ASSIGN_OP);
+                continue;
+            }
+        };
 
         match capability {
             Capabilities::BROWSER => parse_browser_capability(testcase, parser),
             Capabilities::DRIVERURL => parse_driver_url_capability(testcase, parser),
-            Capabilities::NONE => break,
+            Capabilities::NONE => continue,
         }
 
         consume_new_line_token(parser);
     }
 }
 
-fn consume_operator_token(token_type: TokenType, parser: &mut Parser) {
-    let token = parser.lexer.next_token();
-    if token.get_token_type() != token_type {
-        parser.ctx.errors.insert_parsing_error(
-            format!("Expected Assign token got {}", token.get_token_type()),
-            &token,
-        );
+pub fn consume_till_new_line_or_eof_token(parser: &mut Parser) {
+    loop {
+        let token = parser.lexer.next_token();
+        match token.get_token_type() {
+            TokenType::NEW_LINE | TokenType::EOF => break,
+            _ => continue,
+        }
+    }
+}
+
+fn consume_operator_token(token_type: TokenType, parser: &mut Parser) -> Result<(), ()> {
+    if *parser.lexer.peek_token() != token_type {
+        Err(())
+    } else {
+        parser.lexer.next_token();
+        Ok(())
     }
 }
 
@@ -89,7 +104,7 @@ fn parse_driver_url_capability(testcase: &mut TestCase, parser: &mut Parser) {
             parser
                 .ctx
                 .errors
-                .insert_parsing_error("Expected a valid browser".to_string(), &token);
+                .insert_parsing_error("Expected a valid driver url".to_string(), &token);
             return;
         }
     };

@@ -26,6 +26,12 @@ macro_rules! define_enums {
                     keyword_map.get(token_string).cloned().unwrap_or($enum_name::NONE)
             }
 
+            pub fn to_vector() -> Vec<String> {
+                vec![$(
+                    stringify!($keyword).replace("_"," ").to_lowercase()
+                ),*]
+            }
+
             pub fn to_string(&self) -> &str {
                 match self {
                     $enum_name::NONE => "none",
