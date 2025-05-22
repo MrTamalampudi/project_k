@@ -1,3 +1,10 @@
+use slr_parser::error::ParseError;
+use slr_parser::grammar;
+use slr_parser::grammar::Grammar;
+use slr_parser::parser::Parser as SLR_Parser;
+use slr_parser::production::Production;
+use slr_parser::symbol::Symbol;
+use slr_parser::terminal::Terminal;
 use url::Url;
 
 use super::errors::{collect_capability_key_error, collect_prerequisite_path_error, ParserError};
@@ -6,12 +13,56 @@ use crate::actions::{Action, ActionOption};
 use crate::ast::{TestCase, TestStep};
 use crate::enums::{Browser, Capabilities, CapabilityValue};
 use crate::keywords::TokenType;
-use crate::lexer::Token;
+use crate::source_code_to_lexer;
+use crate::token::Token;
 use crate::utils::get_parent;
 use crate::{read_file_to_string, source_code_to_tokens};
-use crate::{source_code_to_lexer, Lexer};
 use std::cell::RefCell;
 use std::rc::Rc;
+
+pub fn parser_slr(tokens: Vec<Token>) {
+    let tt: Vec<Token> = tokens
+        .iter()
+        .cloned()
+        .filter(|t| t.get_token_type().ne(&TokenType::NEW_LINE))
+        .collect();
+    let d_string = || "".to_string();
+    let gr: Grammar = grammar!(
+        TokenType,
+        TESTCASE -> [TokenType::TESTCASE] CAPABILITIES TESTSTEPS;
+
+        CAPABILITIES -> [TokenType::CAPABILITIES] CAPABILITY_BODY_;
+
+        CAPABILITY_BODY_ -> CAPABILITY_BODY | CAPABILITY_BODY CAPABILITY_BODY_;
+
+        CAPABILITY_BODY -> [TokenType::IDENTIFIER(d_string()),TokenType::ASSIGN_OP] I_S;
+
+        TESTSTEPS -> [TokenType::TESTSTEPS] TESTSTEPS_BODY_;
+
+        TESTSTEPS_BODY_ -> TESTSTEPS_BODY | TESTSTEPS_BODY TESTSTEPS_BODY_;
+
+        TESTSTEPS_BODY -> [ TokenType::ACTION_NAVIGATE,TokenType::STRING(d_string())]
+        | [TokenType::ACTION_CLICK,TokenType::STRING(d_string())]
+        | [TokenType::ACTION_BACK]
+        | [TokenType::ACTION_FORWARD];
+
+        I_S             -> [TokenType::IDENTIFIER(d_string())] | [TokenType::STRING(d_string())]
+    );
+    let mut parsed = SLR_Parser::new(gr.productions);
+    parsed.compute_lr0_items();
+    let mut errors: Vec<ParseError<Token>> = Vec::new();
+    let mut par = parsed.parse(tt, &mut errors);
+    refine_errors(&mut errors);
+    println!("-----------------");
+    println!("{:#?}", errors);
+}
+
+fn refine_errors(errors: &mut Vec<ParseError<Token>>) {
+    errors
+        .iter_mut()
+        .filter(|e| e.productionEnd)
+        .for_each(|e| e.token.start = e.token.end);
+}
 
 pub fn parse_testcase(parser: &mut Parser) -> Rc<RefCell<TestCase>> {
     let mut testcase: TestCase = TestCase::new();

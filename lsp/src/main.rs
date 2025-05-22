@@ -6,8 +6,8 @@ use std::time::SystemTime;
 
 use completion::IntelliSense;
 use parking_lot::RwLock;
-use project_k::lexer::Token;
 use project_k::parser::Parser;
+use project_k::token::Token;
 use project_k::{compile, compile_for_errors, source_code_to_lexer, CompilationContext};
 use std::env;
 use tokio_util::sync::CancellationToken;

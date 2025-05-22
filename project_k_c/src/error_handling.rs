@@ -1,6 +1,6 @@
 use std::collections::HashSet;
 
-use crate::{ast::Location, lexer::Token};
+use crate::{ast::Location, token::Token};
 
 #[derive(Debug, Clone)]
 pub struct ErrorInfo {

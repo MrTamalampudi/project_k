@@ -32,12 +32,12 @@ macro_rules! define_enums {
                 ),*]
             }
 
-            pub fn to_string(&self) -> &str {
+            pub fn to_string(&self) -> String {
                 match self {
-                    $enum_name::NONE => "none",
-                    $($enum_name::$keyword => Box::leak(
-                        stringify!($keyword).replace("_"," ").to_lowercase().into_boxed_str()
-                    ),)*
+                    $enum_name::NONE => "none".to_string(),
+                    $($enum_name::$keyword =>
+                        stringify!($keyword).replace("_"," ").to_lowercase()
+                    ,)*
                 }
             }
         }

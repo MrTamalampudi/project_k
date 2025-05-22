@@ -4,7 +4,7 @@ use testsuite::parse_testsuite;
 
 use crate::ast::EntryPoint;
 use crate::error_handling::ErrorInfo;
-use crate::lexer::{Lexer, Token};
+use crate::lexer::Lexer;
 use crate::{CompilationContext, TokenType};
 
 pub mod errors;

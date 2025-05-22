@@ -1,3 +1,5 @@
+use slr_parser::terminal::Terminal;
+
 use crate::enums::{Browser, Capabilities};
 use crate::enums::{CapabilityValue, IdentifierValue};
 use std::collections::HashMap;
@@ -48,17 +50,34 @@ macro_rules! define_tokens {
                     keyword_map.get(token_string).cloned().unwrap_or(TokenType::IDENTIFIER(token_string.to_string()))
             }
 
-            pub fn to_string(&self) -> &str {
+            pub fn to_string(&self) -> String {
                 match self {
-                    TokenType::STRING(string) | TokenType::IDENTIFIER(string) | TokenType::XPATH(string)  => string,
-                    TokenType::NONE => "none",
-                    TokenType::CAPS(caps) => caps.to_string(),
-                    TokenType::BROWSER(browser) => browser.to_string(),
-                    $(TokenType::$keyword => Box::leak(
-                        stringify!($keyword).replace("_"," ").to_lowercase().into_boxed_str()
-                    ),)*
-                    TokenType::NEW_LINE => "new line"
+                    TokenType::STRING(_) => String::from("string"),
+                    TokenType::IDENTIFIER(_) => String::from("identifier"),
+                    TokenType::XPATH(_)  => String::from("xpath"),
+                    TokenType::NONE => "none".to_string(),
+                    TokenType::CAPS(caps) => caps.to_string().clone(),
+                    TokenType::BROWSER(browser) => browser.to_string().clone(),
+                    $(TokenType::$keyword =>{
+                        if stringify!($keyword) == "EOF"{
+                            "EOF".to_string()
+                        } else if stringify!($($string)?).len() > 0 {
+                            String::from(stringify!($($string)?))
+                        } else {
+                            stringify!($keyword).replace("_"," ").to_lowercase()
+                        }}
+                    ,)*
+                    TokenType::NEW_LINE => "new line".to_string(),
                 }
+            }
+        }
+
+        impl Terminal for TokenType {
+            fn get_ending_token() -> String {
+                "EOF".to_string()
+            }
+            fn to_string_c(&self) -> String {
+                self.to_string()
             }
         }
     };

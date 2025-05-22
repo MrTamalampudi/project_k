@@ -3,7 +3,7 @@ use std::cmp::Ordering;
 use project_k::{
     enums::{Browser, Capabilities},
     keywords::TokenType,
-    lexer::Token,
+    token::Token,
 };
 use tower_lsp::lsp_types::{CompletionItem, MessageType, Position};
 
@@ -120,14 +120,14 @@ fn complete_capability_value(token: TokenType) -> Vec<CompletionItem> {
         }
     };
     let capbility = Capabilities::from_string(&string);
-    let (item, item_type) = match capbility {
-        Capabilities::BROWSER => (Browser::to_vector(), Capabilities::BROWSER.to_string()),
-        _ => (vec![], ""),
+    let item = match capbility {
+        Capabilities::BROWSER => Browser::to_vector(),
+        _ => vec![],
     };
 
     item.iter()
         .map(|item_| {
-            CompletionItem::new_simple(item_.clone(), String::from(item_type).to_uppercase())
+            CompletionItem::new_simple(item_.clone(), String::from("Browser").to_uppercase())
         })
         .collect()
 }
