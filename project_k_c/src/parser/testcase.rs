@@ -12,6 +12,7 @@ use super::{consume_new_line_token, Parser};
 use crate::actions::{Action, ActionOption};
 use crate::ast::{TestCase, TestStep};
 use crate::enums::{Browser, Capabilities, CapabilityValue};
+use crate::error_handling::{parse_error_to_error_info, ErrorInfo};
 use crate::keywords::TokenType;
 use crate::source_code_to_lexer;
 use crate::token::Token;
@@ -20,8 +21,10 @@ use crate::{read_file_to_string, source_code_to_tokens};
 use std::cell::RefCell;
 use std::rc::Rc;
 
-pub fn parser_slr(tokens: Vec<Token>) {
-    let tt: Vec<Token> = tokens
+pub fn parser_slr(parser: &mut Parser) {
+    let tt: Vec<Token> = parser
+        .lexer
+        .tokens
         .iter()
         .cloned()
         .filter(|t| t.get_token_type().ne(&TokenType::NEW_LINE))
@@ -42,19 +45,23 @@ pub fn parser_slr(tokens: Vec<Token>) {
         TESTSTEPS_BODY_ -> TESTSTEPS_BODY | TESTSTEPS_BODY TESTSTEPS_BODY_;
 
         TESTSTEPS_BODY -> [ TokenType::ACTION_NAVIGATE,TokenType::STRING(d_string())]
+        | [TokenType::IDENTIFIER(d_string()),TokenType::ASSIGN_OP] I_S
         | [TokenType::ACTION_CLICK,TokenType::STRING(d_string())]
         | [TokenType::ACTION_BACK]
         | [TokenType::ACTION_FORWARD];
 
-        I_S             -> [TokenType::IDENTIFIER(d_string())] | [TokenType::STRING(d_string())]
+        I_S -> [TokenType::IDENTIFIER(d_string())] | [TokenType::STRING(d_string())]
     );
     let mut parsed = SLR_Parser::new(gr.productions);
     parsed.compute_lr0_items();
     let mut errors: Vec<ParseError<Token>> = Vec::new();
-    let mut par = parsed.parse(tt, &mut errors);
+    parsed.parse(tt, &mut errors);
     refine_errors(&mut errors);
-    println!("-----------------");
-    println!("{:#?}", errors);
+    let transformed_errors: Vec<ErrorInfo> = errors
+        .iter()
+        .map(|e| parse_error_to_error_info(e.clone()))
+        .collect();
+    parser.ctx.errors.errors.extend(transformed_errors);
 }
 
 fn refine_errors(errors: &mut Vec<ParseError<Token>>) {

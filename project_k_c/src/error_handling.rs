@@ -1,5 +1,7 @@
 use std::collections::HashSet;
 
+use slr_parser::error::ParseError;
+
 use crate::{ast::Location, token::Token};
 
 #[derive(Debug, Clone)]
@@ -13,6 +15,15 @@ pub struct ErrorInfo {
 #[derive(Debug, Clone)]
 pub struct ErrorManager {
     pub errors: Vec<ErrorInfo>,
+}
+
+pub fn parse_error_to_error_info(error: ParseError<Token>) -> ErrorInfo {
+    ErrorInfo {
+        message: error.message,
+        start_location: error.token.start,
+        end_location: error.token.end,
+        source_path: error.token.source_path,
+    }
 }
 
 impl ErrorManager {

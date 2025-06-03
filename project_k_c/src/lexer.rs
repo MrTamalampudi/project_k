@@ -177,6 +177,9 @@ impl<'a> Tokenizer<'a> {
                     if is_xid_continue(*ch) {
                         string.push(*ch);
                         state.next();
+                        if state.peek().is_none() {
+                            token_type = TokenType::from_string(string.as_str())
+                        }
                     } else {
                         token_type = TokenType::from_string(string.as_str())
                     }
