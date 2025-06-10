@@ -8,22 +8,16 @@ use slr_parser::terminal::Terminal;
 use std::sync::Arc;
 use url::Url;
 
-use super::errors::{collect_capability_key_error, collect_prerequisite_path_error, ParserError};
+use super::errors::{collect_capability_key_error, ParserError};
 use super::{consume_new_line_token, Parser};
 use crate::actions::{Action, ActionOption};
 use crate::ast::testcase::TestCase;
 use crate::ast::teststep::TestStep;
+use crate::ast::AST;
 use crate::enums::{Browser, Capabilities, CapabilityValue};
 use crate::error_handling::{parse_error_to_error_info, ErrorInfo};
 use crate::keywords::TokenType;
-use crate::source_code_to_lexer;
 use crate::token::Token;
-use crate::utils::get_parent;
-use crate::{read_file_to_string, source_code_to_tokens};
-use std::cell::RefCell;
-use std::rc::Rc;
-
-const NAVIGATE_ERROR: &str = "Expected syntax navigate \"url\"";
 
 pub fn parser_slr(parser: &mut Parser) {
     let tt: Vec<Token> = parser
@@ -34,8 +28,9 @@ pub fn parser_slr(parser: &mut Parser) {
         .filter(|t| t.get_token_type().ne(&TokenType::NEW_LINE))
         .collect();
     let d_string = || "".to_string();
-    let gr: Grammar = grammar!(
+    let gr: Grammar<AST> = grammar!(
         TokenType,
+        AST,
         TESTCASE -> TESTCASE_ CAPABILITIES TESTSTEPS {error:"Testing"};
 
         TESTCASE_ -> [TokenType::TESTCASE]
@@ -53,7 +48,7 @@ pub fn parser_slr(parser: &mut Parser) {
 
         TESTSTEPS_BODY_ -> TESTSTEPS_BODY
         {error:"Teststeps body_"}
-        {action:|check| {println!("holy cow{:#?}",check);}}
+        {action:|check| { println!("checkk {:#?}",check); }}
         | TESTSTEPS_BODY TESTSTEPS_BODY_
         {error:"Teststeps body_ 2"};
 
