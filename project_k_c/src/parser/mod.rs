@@ -1,8 +1,6 @@
 use errors::ParserError;
 use testcase::{parse_testcase, parser_slr};
-use testsuite::parse_testsuite;
 
-use crate::ast::EntryPoint;
 use crate::error_handling::ErrorInfo;
 use crate::lexer::Lexer;
 use crate::{CompilationContext, TokenType};
@@ -10,7 +8,6 @@ use crate::{CompilationContext, TokenType};
 pub mod errors;
 pub mod testcase;
 pub mod testplan;
-pub mod testsuite;
 
 #[derive(Debug)]
 pub struct Parser<'a, 'b> {

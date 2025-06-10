@@ -2,17 +2,18 @@ use std::cell::RefCell;
 use std::rc::Rc;
 
 use crate::actions::Action;
-use crate::ast::{Program, TestCase, TestStep};
+use crate::ast::testcase::TestCase;
+use crate::ast::teststep::TestStep;
 use crate::enums::{Browser, CapabilityValue};
 use crate::keywords::TokenType;
 use thirtyfour::prelude::*;
 
-pub fn execute(program: Program) {
-    match program.entrypoint {
-        crate::ast::EntryPoint::TESTCASE(testcase) => execute_test_case(testcase),
-        _ => todo!(),
-    }
-}
+// pub fn execute(program: Program) {
+//     match program.entrypoint {
+//         crate::ast::EntryPoint::TESTCASE(testcase) => execute_test_case(testcase),
+//         _ => todo!(),
+//     }
+// }
 
 #[tokio::main]
 pub async fn execute_test_case(test_case: Rc<RefCell<TestCase>>) {

@@ -1,6 +1,3 @@
-use ast::Program;
-use ast::TestCase;
-use engine::execute;
 use engine::execute_test_case;
 use enums::Capabilities;
 use error_handling::ErrorManager;
@@ -19,9 +16,10 @@ use std::process::Command;
 use token::Token;
 use utils::get_parent;
 
+use crate::program::Program;
+
 mod actions;
 pub mod ast;
-pub mod astt;
 mod engine;
 pub mod enums;
 pub mod error_handling;
@@ -29,6 +27,7 @@ pub mod keywords;
 pub mod lexer;
 pub mod location;
 pub mod parser;
+pub mod program;
 pub mod token;
 pub mod utils;
 
