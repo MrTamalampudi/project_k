@@ -2,7 +2,7 @@ use std::collections::HashSet;
 
 use slr_parser::error::ParseError;
 
-use crate::{ast::Location, token::Token};
+use crate::{location::Location, token::Token};
 
 #[derive(Debug, Clone)]
 pub struct ErrorInfo {

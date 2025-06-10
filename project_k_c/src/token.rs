@@ -2,7 +2,7 @@ use std::fmt;
 
 use slr_parser::terminal::Terminal;
 
-use crate::{ast::Location, keywords::TokenType};
+use crate::{keywords::TokenType, location::Location};
 
 #[derive(Clone, Debug)]
 #[allow(unused)]

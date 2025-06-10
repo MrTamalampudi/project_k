@@ -21,11 +21,13 @@ use utils::get_parent;
 
 mod actions;
 pub mod ast;
+pub mod astt;
 mod engine;
 pub mod enums;
 pub mod error_handling;
 pub mod keywords;
 pub mod lexer;
+pub mod location;
 pub mod parser;
 pub mod token;
 pub mod utils;

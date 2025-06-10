@@ -1,0 +1,32 @@
+use std::fmt;
+
+#[derive(Copy, Clone, Debug)]
+pub struct Location {
+    pub line: usize,
+    pub column: usize,
+}
+
+impl fmt::Display for Location {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "Line:{} column:{}", self.line, self.column,)
+    }
+}
+
+impl Location {
+    pub fn new(line: usize, column: usize) -> Self {
+        Location { line, column }
+    }
+
+    pub fn next_column(&mut self) -> Self {
+        self.column += 1;
+        *self
+    }
+
+    pub fn get_location(&self) -> Location {
+        self.clone()
+    }
+
+    pub fn dummy() -> Location {
+        Location { line: 0, column: 0 }
+    }
+}

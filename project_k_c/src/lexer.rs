@@ -1,5 +1,5 @@
-use crate::ast::Location;
 use crate::keywords::TokenType;
+use crate::location::Location;
 use crate::token::Token;
 use crate::CompilationContext;
 use std::iter::Peekable;
