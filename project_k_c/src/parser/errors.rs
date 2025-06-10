@@ -1,4 +1,4 @@
-use crate::{keywords::TokenType, lexer::Token};
+use crate::keywords::TokenType;
 use core::fmt::{self, Formatter, Write};
 
 use super::{testcase::consume_till_new_line_or_eof_token, Parser};

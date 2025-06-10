@@ -1,13 +1,10 @@
-use ast::Program;
-use ast::TestCase;
-use engine::execute;
 use engine::execute_test_case;
 use enums::Capabilities;
 use error_handling::ErrorManager;
 use keywords::TokenType;
-use lexer::Token;
 use lexer::{Lexer, Tokenizer};
 use parser::testcase;
+use parser::testcase::parser_slr;
 use parser::Parser;
 use std::env;
 use std::fmt;
@@ -16,7 +13,10 @@ use std::path::Display;
 use std::path::Path;
 use std::path::PathBuf;
 use std::process::Command;
+use token::Token;
 use utils::get_parent;
+
+use crate::program::Program;
 
 mod actions;
 pub mod ast;
@@ -25,7 +25,10 @@ pub mod enums;
 pub mod error_handling;
 pub mod keywords;
 pub mod lexer;
+pub mod location;
 pub mod parser;
+pub mod program;
+pub mod token;
 pub mod utils;
 
 enum ExecutionType {
@@ -85,6 +88,7 @@ pub fn source_code_to_lexer(source_code: String, ctx: &mut CompilationContext) -
 pub fn compile_for_errors(ctx: &mut CompilationContext) {
     let source_code = read_file_to_string(&ctx.path);
     let mut lexer = source_code_to_lexer(source_code, ctx);
+    //parser_slr(lexer.tokens.clone());
     //println!("{:#?}", lexer.tokens);
     Parser::new(&mut lexer, ctx).parse();
 }

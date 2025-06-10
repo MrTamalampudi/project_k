@@ -1,16 +1,13 @@
 use errors::ParserError;
-use testcase::parse_testcase;
-use testsuite::parse_testsuite;
+use testcase::{parse_testcase, parser_slr};
 
-use crate::ast::EntryPoint;
 use crate::error_handling::ErrorInfo;
-use crate::lexer::{Lexer, Token};
+use crate::lexer::Lexer;
 use crate::{CompilationContext, TokenType};
 
 pub mod errors;
 pub mod testcase;
 pub mod testplan;
-pub mod testsuite;
 
 #[derive(Debug)]
 pub struct Parser<'a, 'b> {
@@ -23,14 +20,16 @@ impl<'a, 'b> Parser<'a, 'b> {
         Parser { lexer, ctx }
     }
     pub fn parse(&mut self) {
-        let token_type = self.lexer.peek_token();
-        let entrypoint = match token_type {
-            TokenType::TESTCASE => EntryPoint::TESTCASE(parse_testcase(self)),
-            TokenType::TESTSUITE => EntryPoint::TESTSUITE(parse_testsuite(self)),
-            TokenType::TESTPLAN => todo!(),
-            _ => return,
-        };
-        self.ctx.program.set_entrypoint(entrypoint);
+        parser_slr(self);
+        //println!("errors {:#?}", self.ctx.errors.errors);
+        // let token_type = self.lexer.peek_token();
+        // let entrypoint = match token_type {
+        //     TokenType::TESTCASE => EntryPoint::TESTCASE(parse_testcase(self)),
+        //     TokenType::TESTSUITE => EntryPoint::TESTSUITE(parse_testsuite(self)),
+        //     TokenType::TESTPLAN => todo!(),
+        //     _ => return,
+        // };
+        // self.ctx.program.set_entrypoint(entrypoint);
     }
 
     pub fn set_lexer(&mut self, lexer: Lexer) {

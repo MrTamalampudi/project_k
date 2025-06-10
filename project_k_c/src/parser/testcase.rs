@@ -1,25 +1,97 @@
+use slr_parser::error::ParseError;
+use slr_parser::grammar;
+use slr_parser::grammar::Grammar;
+use slr_parser::parser::Parser as SLR_Parser;
+use slr_parser::production::Production;
+use slr_parser::symbol::Symbol;
+use slr_parser::terminal::Terminal;
+use std::sync::Arc;
 use url::Url;
 
-use super::errors::{collect_capability_key_error, collect_prerequisite_path_error, ParserError};
+use super::errors::{collect_capability_key_error, ParserError};
 use super::{consume_new_line_token, Parser};
 use crate::actions::{Action, ActionOption};
-use crate::ast::{TestCase, TestStep};
+use crate::ast::testcase::TestCase;
+use crate::ast::teststep::TestStep;
+use crate::ast::AST;
 use crate::enums::{Browser, Capabilities, CapabilityValue};
+use crate::error_handling::{parse_error_to_error_info, ErrorInfo};
 use crate::keywords::TokenType;
-use crate::lexer::Token;
-use crate::utils::get_parent;
-use crate::{read_file_to_string, source_code_to_tokens};
-use crate::{source_code_to_lexer, Lexer};
-use std::cell::RefCell;
-use std::rc::Rc;
+use crate::token::Token;
 
-pub fn parse_testcase(parser: &mut Parser) -> Rc<RefCell<TestCase>> {
+pub fn parser_slr(parser: &mut Parser) {
+    let tt: Vec<Token> = parser
+        .lexer
+        .tokens
+        .iter()
+        .cloned()
+        .filter(|t| t.get_token_type().ne(&TokenType::NEW_LINE))
+        .collect();
+    let d_string = || "".to_string();
+    let gr: Grammar<AST> = grammar!(
+        TokenType,
+        AST,
+        TESTCASE -> TESTCASE_ CAPABILITIES TESTSTEPS {error:"Testing"};
+
+        TESTCASE_ -> [TokenType::TESTCASE]
+        { action: |check| {
+            println!("Testcase checked");
+        }};
+
+        CAPABILITIES -> [TokenType::CAPABILITIES] CAPABILITY_BODY_ {error:"capabilities"};
+
+        CAPABILITY_BODY_ -> CAPABILITY_BODY | CAPABILITY_BODY CAPABILITY_BODY_ {error:"capabilities body"};
+
+        CAPABILITY_BODY -> [TokenType::IDENTIFIER(d_string()),TokenType::ASSIGN_OP] I_S;
+
+        TESTSTEPS -> [TokenType::TESTSTEPS] TESTSTEPS_BODY_ {error:"Teststeps body_ 33"};
+
+        TESTSTEPS_BODY_ -> TESTSTEPS_BODY
+        {error:"Teststeps body_"}
+        {action:|check| { println!("checkk {:#?}",check); }}
+        | TESTSTEPS_BODY TESTSTEPS_BODY_
+        {error:"Teststeps body_ 2"};
+
+        TESTSTEPS_BODY -> [ TokenType::ACTION_NAVIGATE,TokenType::STRING(d_string())]
+        {error:"Expected syntax ' navigate \"url\" '"}
+        {action:|check| {
+            println!("hey msd{:#?}",check);
+            println!("helllo msdian");
+        } }
+        | [TokenType::IDENTIFIER(d_string()),TokenType::ASSIGN_OP] I_S
+        | [TokenType::ACTION_CLICK,TokenType::STRING(d_string())]
+        | [TokenType::ACTION_BACK] {error:"Please check teststeps syntax"}
+        | [TokenType::ACTION_FORWARD];
+
+        I_S -> [TokenType::IDENTIFIER(d_string())] | [TokenType::STRING(d_string())]
+    );
+    let mut parsed = SLR_Parser::new(gr.productions);
+    parsed.compute_lr0_items();
+    let mut errors: Vec<ParseError<Token>> = Vec::new();
+    parsed.parse(tt, &mut errors);
+    refine_errors(&mut errors);
+    let transformed_errors: Vec<ErrorInfo> = errors
+        .iter()
+        .map(|e| parse_error_to_error_info(e.clone()))
+        .collect();
+    parser.ctx.errors.errors.extend(transformed_errors);
+}
+
+fn refine_errors(errors: &mut Vec<ParseError<Token>>) {
+    errors
+        .iter_mut()
+        .filter(|e| e.productionEnd)
+        .for_each(|e| e.token.start = e.token.end);
+}
+
+pub fn parse_testcase(parser: &mut Parser) -> TestCase {
     let mut testcase: TestCase = TestCase::new();
     //consume "#TESTCASE" token
     parser.lexer.next_token();
     consume_new_line_token(parser);
     parse_top_level_items(&mut testcase, parser);
-    parser.ctx.program.push_testcase(&testcase)
+    parser.ctx.program.testcase = testcase.clone();
+    testcase
 }
 
 fn parse_top_level_items(testcase: &mut TestCase, parser: &mut Parser) {
@@ -27,7 +99,6 @@ fn parse_top_level_items(testcase: &mut TestCase, parser: &mut Parser) {
         let token = parser.lexer.peek_token();
         match token {
             TokenType::TESTSTEPS => parse_test_step(testcase, parser),
-            TokenType::PREREQUISITE => parse_prerequisite(testcase, parser),
             TokenType::CAPABILITIES => parse_capbilities(testcase, parser),
             TokenType::NEW_LINE => consume_new_line_token(parser),
             TokenType::EOF => break,
@@ -255,41 +326,41 @@ fn parse_click_action(testcase: &mut TestCase, parser: &mut Parser) {
 }
 
 //todo solve circular prerequisite dependency
-fn parse_prerequisite(testcase: &mut TestCase, parser: &mut Parser) {
-    //consume PREREQUISITE token
-    parser.lexer.next_token();
-    consume_new_line_token(parser);
-    loop {
-        let token = parser.lexer.peek_token();
-        match token {
-            TokenType::IDENTIFIER(string) => {
-                let path = parser.ctx.path.clone();
-                // assign prerequisite path
-                let prerequisite_path =
-                    parser.ctx.get_parent_path().join(string.to_owned() + ".ll");
+// fn parse_prerequisite(testcase: &mut TestCase, parser: &mut Parser) {
+//     //consume PREREQUISITE token
+//     parser.lexer.next_token();
+//     consume_new_line_token(parser);
+//     loop {
+//         let token = parser.lexer.peek_token();
+//         match token {
+//             TokenType::IDENTIFIER(string) => {
+//                 let path = parser.ctx.path.clone();
+//                 // assign prerequisite path
+//                 let prerequisite_path =
+//                     parser.ctx.get_parent_path().join(string.to_owned() + ".ll");
 
-                if !prerequisite_path.exists() {
-                    collect_prerequisite_path_error(parser);
-                    continue;
-                }
+//                 if !prerequisite_path.exists() {
+//                     collect_prerequisite_path_error(parser);
+//                     continue;
+//                 }
 
-                parser.ctx.set_path(&prerequisite_path);
-                let source_code = read_file_to_string(&parser.ctx.path);
-                let prerequiste_lexer = source_code_to_lexer(source_code, parser.ctx);
-                //current lexer
-                let current_lexer = parser.lexer.clone();
-                // assign preruqisite lexer
-                parser.set_lexer(prerequiste_lexer);
-                //println!("{:#?}", parser.lexer.tokens);
-                let prerequisite_testcase = parse_testcase(parser);
-                parser.ctx.path = path; //reassign current path
-                testcase.insert_prerequisite(prerequisite_testcase);
-                parser.set_lexer(current_lexer);
-                // consume current token
-                parser.lexer.next_token();
-            }
-            TokenType::NEW_LINE => consume_new_line_token(parser),
-            _ => break,
-        }
-    }
-}
+//                 parser.ctx.set_path(&prerequisite_path);
+//                 let source_code = read_file_to_string(&parser.ctx.path);
+//                 let prerequiste_lexer = source_code_to_lexer(source_code, parser.ctx);
+//                 //current lexer
+//                 let current_lexer = parser.lexer.clone();
+//                 // assign preruqisite lexer
+//                 parser.set_lexer(prerequiste_lexer);
+//                 //println!("{:#?}", parser.lexer.tokens);
+//                 let prerequisite_testcase = parse_testcase(parser);
+//                 parser.ctx.path = path; //reassign current path
+//                 testcase.insert_prerequisite(prerequisite_testcase);
+//                 parser.set_lexer(current_lexer);
+//                 // consume current token
+//                 parser.lexer.next_token();
+//             }
+//             TokenType::NEW_LINE => consume_new_line_token(parser),
+//             _ => break,
+//         }
+//     }
+// }

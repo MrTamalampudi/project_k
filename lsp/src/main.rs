@@ -6,8 +6,8 @@ use std::time::SystemTime;
 
 use completion::IntelliSense;
 use parking_lot::RwLock;
-use project_k::lexer::Token;
 use project_k::parser::Parser;
+use project_k::token::Token;
 use project_k::{compile, compile_for_errors, source_code_to_lexer, CompilationContext};
 use std::env;
 use tokio_util::sync::CancellationToken;
@@ -30,13 +30,16 @@ impl Backend {
             .publish_diagnostics(uri.clone(), Vec::new(), Some(version))
             .await;
         let mut ctx = CompilationContext::new(PathBuf::from(uri.path().as_str()));
-        let mut lexer = source_code_to_lexer(text, &mut ctx);
+        let mut lexer = source_code_to_lexer(text.clone(), &mut ctx);
         let mut lock = self.token_map.write();
         lock.insert(uri, lexer.tokens.clone());
         Parser::new(&mut lexer, &mut ctx).parse();
         let mut diagnostic_map: HashMap<Uri, Vec<Diagnostic>> = HashMap::new();
         //converting compiler errors to lsp errors and
         //adding diagnostic_map grouped by file URI
+        self.client
+            .show_message(MessageType::INFO, format!("{:#?}", ctx.errors.errors))
+            .await;
         for error in ctx.errors.errors.into_iter() {
             diagnostic_map
                 .entry(Uri::from_str(&error.source_path).expect(""))
@@ -142,25 +145,25 @@ impl LanguageServer for Backend {
         Ok(Some(vec![code_lens.clone(), code_lens.clone()]))
     }
 
-    async fn completion(
-        &self,
-        params: CompletionParams,
-        token: CancellationToken,
-    ) -> Result<Option<CompletionResponse>> {
-        let tokens = self.token_map.read();
-        let tokens = tokens
-            .get(&params.text_document_position.text_document.uri)
-            .unwrap();
-        // self.client
-        //     .show_message(MessageType::INFO, format!("tokendds {:#?}", tokens))
-        //     .await;
-        let t = IntelliSense::new(tokens, &params.text_document_position.position).complete();
-        Ok(Some(CompletionResponse::Array(t)))
-        // self.client
-        //     .show_message(MessageType::INFO, format!("tokens {:#?}", token))
-        //     .await;
-        //Ok(None)
-    }
+    // async fn completion(
+    //     &self,
+    //     params: CompletionParams,
+    //     token: CancellationToken,
+    // ) -> Result<Option<CompletionResponse>> {
+    //     let tokens = self.token_map.read();
+    //     let tokens = tokens
+    //         .get(&params.text_document_position.text_document.uri)
+    //         .unwrap();
+    //     // self.client
+    //     //     .show_message(MessageType::INFO, format!("tokendds {:#?}", tokens))
+    //     //     .await;
+    //     let t = IntelliSense::new(tokens, &params.text_document_position.position).complete();
+    //     Ok(Some(CompletionResponse::Array(t)))
+    //     // self.client
+    //     //     .show_message(MessageType::INFO, format!("tokens {:#?}", token))
+    //     //     .await;
+    //     //Ok(None)
+    // }
 }
 
 #[tokio::main]

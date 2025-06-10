@@ -9,3 +9,4 @@ thirtyfour = "0.35.0"
 tokio = { version = "1", features = ["full"] }
 unicode-ident = { version = "1.0.18" }
 url = "2.5.4"
+slr-parser = { path = "../../manodae" }

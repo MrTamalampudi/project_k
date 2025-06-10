@@ -1,5 +1,6 @@
-use crate::ast::Location;
 use crate::keywords::TokenType;
+use crate::location::Location;
+use crate::token::Token;
 use crate::CompilationContext;
 use std::iter::Peekable;
 use std::str::Chars;
@@ -16,51 +17,9 @@ const DOLLAR: char = '$';
 const ASSIGN: char = '=';
 const UNDERLINE: char = '_';
 
-#[derive(Clone, Debug)]
-#[allow(unused)]
-pub struct Token {
-    token_type: TokenType,
-    start: Location,
-    end: Location,
-    source_path: String,
-}
-
 impl fmt::Display for TokenType {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{:#?}", self)
-    }
-}
-
-impl fmt::Display for Token {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{:#?}", self)
-    }
-}
-
-impl Token {
-    fn new(token_type: TokenType, start: Location, end: Location, source_path: String) -> Self {
-        Self {
-            token_type,
-            start,
-            end,
-            source_path,
-        }
-    }
-
-    pub fn get_start_location(&self) -> Location {
-        self.start
-    }
-
-    pub fn get_end_location(&self) -> Location {
-        self.end
-    }
-
-    pub fn get_token_type(&self) -> TokenType {
-        self.token_type.clone()
-    }
-
-    pub fn get_source_path(&self) -> String {
-        self.source_path.clone()
     }
 }
 
@@ -218,6 +177,9 @@ impl<'a> Tokenizer<'a> {
                     if is_xid_continue(*ch) {
                         string.push(*ch);
                         state.next();
+                        if state.peek().is_none() {
+                            token_type = TokenType::from_string(string.as_str())
+                        }
                     } else {
                         token_type = TokenType::from_string(string.as_str())
                     }
