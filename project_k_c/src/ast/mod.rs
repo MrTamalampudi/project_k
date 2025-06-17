@@ -4,8 +4,10 @@ use crate::ast::{if_stmt::IfStmt, testcase::TestCase, teststep::TestStep};
 
 pub mod expression;
 pub mod if_stmt;
+pub mod primitives;
 pub mod testcase;
 pub mod teststep;
+pub mod var_decl;
 
 //
 #[derive(Debug, Clone)]
