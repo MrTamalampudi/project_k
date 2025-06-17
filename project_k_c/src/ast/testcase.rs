@@ -1,7 +1,7 @@
-use std::{cell::RefCell, collections::HashMap, rc::Rc};
+use std::collections::HashMap;
 
 use crate::{
-    ast::teststep::TestStep,
+    ast::{if_stmt::IfStmt, teststep::TestStep},
     enums::{CapabilityValue, IdentifierValue},
 };
 
@@ -10,7 +10,6 @@ use crate::{
 pub struct TestCase {
     capabilities: HashMap<String, CapabilityValue>,
     variables: HashMap<String, IdentifierValue>,
-    prerequisites: Vec<Rc<RefCell<TestCase>>>,
     test_steps: Vec<TestStep>,
 }
 
@@ -19,7 +18,6 @@ impl TestCase {
         TestCase {
             capabilities: HashMap::new(),
             variables: HashMap::new(),
-            prerequisites: vec![],
             test_steps: vec![],
         }
     }
@@ -47,12 +45,9 @@ impl TestCase {
     pub fn get_teststeps(&self) -> &Vec<TestStep> {
         &self.test_steps
     }
+}
 
-    pub fn get_prerequisite(&self) -> &Vec<Rc<RefCell<TestCase>>> {
-        &self.prerequisites
-    }
-
-    pub fn insert_prerequisite(&mut self, testcase: Rc<RefCell<TestCase>>) {
-        self.prerequisites.push(testcase);
-    }
+pub enum TestcaseBody {
+    TESTSTEP(TestStep),
+    IF(IfStmt),
 }

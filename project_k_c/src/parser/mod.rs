@@ -1,5 +1,5 @@
 use errors::ParserError;
-use testcase::{parse_testcase, parser_slr};
+use testcase::parser_slr;
 
 use crate::error_handling::ErrorInfo;
 use crate::lexer::Lexer;

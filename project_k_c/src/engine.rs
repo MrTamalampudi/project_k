@@ -1,19 +1,11 @@
 use std::cell::RefCell;
 use std::rc::Rc;
 
-use crate::actions::Action;
 use crate::ast::testcase::TestCase;
 use crate::ast::teststep::TestStep;
 use crate::enums::{Browser, CapabilityValue};
 use crate::keywords::TokenType;
 use thirtyfour::prelude::*;
-
-// pub fn execute(program: Program) {
-//     match program.entrypoint {
-//         crate::ast::EntryPoint::TESTCASE(testcase) => execute_test_case(testcase),
-//         _ => todo!(),
-//     }
-// }
 
 #[tokio::main]
 pub async fn execute_test_case(test_case: Rc<RefCell<TestCase>>) {
@@ -27,16 +19,9 @@ pub async fn execute_test_case(test_case: Rc<RefCell<TestCase>>) {
         Err(result) => panic!("there was an error{}", result),
     };
 
-    let prerequiste: &Vec<Rc<RefCell<TestCase>>> = testcase.get_prerequisite();
-
-    for testcase in prerequiste.iter() {
-        let teststeps = testcase.borrow_mut().get_teststeps().clone();
-        execute_teststeps(&driver, &teststeps).await;
-    }
-
     let teststeps: &Vec<TestStep> = testcase.get_teststeps();
 
-    execute_teststeps(&driver, teststeps).await;
+    // execute_teststeps(&driver, teststeps).await;
 }
 
 fn get_driver_url(test_case: &TestCase) -> String {
@@ -63,19 +48,19 @@ fn get_browser_capabilites(test_case: TestCase) -> Browser {
     }
 }
 
-async fn execute_teststeps(driver: &WebDriver, teststeps: &Vec<TestStep>) {
-    for teststep in teststeps.iter() {
-        let action = teststep.action.clone();
-        match action {
-            Action::NAVIGATE => execute_navigate_action(&driver, teststep).await,
-            Action::CLICK => execute_click_action(&driver, teststep).await,
-            Action::BACK => execute_back_action(&driver, teststep).await,
-            Action::FORWARD => execute_forward_action(&driver, teststep).await,
-            Action::NONE => todo!(),
-            _ => break,
-        }
-    }
-}
+// async fn execute_teststeps(driver: &WebDriver, teststeps: &Vec<TestStep>) {
+//     for teststep in teststeps.iter() {
+//         let action = teststep.class.clone();
+//         match action {
+//             Action::NAVIGATE => execute_navigate_action(&driver, teststep).await,
+//             Action::CLICK => execute_click_action(&driver, teststep).await,
+//             Action::BACK => execute_back_action(&driver, teststep).await,
+//             Action::FORWARD => execute_forward_action(&driver, teststep).await,
+//             Action::NONE => todo!(),
+//             _ => break,
+//         }
+//     }
+// }
 
 async fn execute_back_action(driver: &WebDriver, teststep: &TestStep) {
     match driver.back().await {

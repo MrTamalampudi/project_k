@@ -54,4 +54,8 @@ impl Terminal for Token {
     fn to_string_c(&self) -> String {
         self.token_type.to_string()
     }
+
+    fn get_value(&self) -> Option<String> {
+        self.token_type.get_value()
+    }
 }

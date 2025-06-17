@@ -18,8 +18,8 @@ use utils::get_parent;
 
 use crate::program::Program;
 
-mod actions;
 pub mod ast;
+pub mod class;
 mod engine;
 pub mod enums;
 pub mod error_handling;

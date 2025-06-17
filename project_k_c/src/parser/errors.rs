@@ -1,20 +1,6 @@
 use crate::keywords::TokenType;
 use core::fmt::{self, Formatter, Write};
 
-use super::{testcase::consume_till_new_line_or_eof_token, Parser};
-
-pub fn collect_prerequisite_path_error(parser: &mut Parser) {
-    parser.ctx.errors.insert_parsing_error(
-        format!("No such testcase exists in directory"),
-        &parser.lexer.next_token(),
-    );
-}
-
-pub fn collect_capability_key_error(parser: &mut Parser) {
-    parser.error(ParserError::CAPABILITY_KEY);
-    consume_till_new_line_or_eof_token(parser);
-}
-
 macro_rules! parser_error {
     ($($name: ident = $description: expr,)+) => {
         /// Errors that can occur during parsing.

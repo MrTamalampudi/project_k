@@ -1,5 +1,5 @@
 use crate::{
-    actions::{Action, ActionOption},
+    class::{Class, Method},
     location::Location,
 };
 
@@ -8,8 +8,8 @@ use crate::{
 pub struct TestStep {
     start: Location,
     end: Location,
-    pub action: Action,
-    option: ActionOption,
+    pub class: Class,
+    pub method: Method,
     pub arguments: Vec<String>,
 }
 
@@ -17,15 +17,15 @@ impl TestStep {
     pub fn new(
         start: Location,
         end: Location,
-        action: Action,
-        option: ActionOption,
+        class: Class,
+        method: Method,
         arguments: Vec<String>,
     ) -> TestStep {
         TestStep {
             start,
             end,
-            action,
-            option,
+            class,
+            method,
             arguments,
         }
     }
