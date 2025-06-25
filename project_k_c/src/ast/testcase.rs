@@ -1,8 +1,12 @@
 use std::collections::HashMap;
 
 use crate::{
-    ast::{if_stmt::IfStmt, teststep::TestStep},
-    enums::{CapabilityValue, IdentifierValue},
+    ast::{
+        if_stmt::IfStmt,
+        teststep::TestStep,
+        var_decl::{IdentifierValue, VarDecl},
+    },
+    enums::CapabilityValue,
 };
 
 #[derive(Debug, Clone)]
@@ -10,7 +14,7 @@ use crate::{
 pub struct TestCase {
     capabilities: HashMap<String, CapabilityValue>,
     variables: HashMap<String, IdentifierValue>,
-    test_steps: Vec<TestStep>,
+    test_steps: Vec<TestcaseBody>,
 }
 
 impl TestCase {
@@ -34,20 +38,22 @@ impl TestCase {
         self.capabilities.insert(capability.clone(), value.clone());
     }
 
-    pub fn insert_variable(&mut self, identifier: &String, value: &IdentifierValue) {
-        self.variables.insert(identifier.clone(), value.clone());
+    pub fn insert_variable(&mut self, var: &VarDecl) {
+        self.variables.insert(var.name.clone(), var.value.clone());
     }
 
     pub fn insert_teststep(&mut self, test_step: TestStep) {
-        self.test_steps.push(test_step);
+        self.test_steps.push(TestcaseBody::TESTSTEP(test_step));
     }
 
     pub fn get_teststeps(&self) -> &Vec<TestStep> {
-        &self.test_steps
+        todo!()
     }
 }
 
+#[derive(Debug, Clone)]
 pub enum TestcaseBody {
     TESTSTEP(TestStep),
     IF(IfStmt),
+    VarDecl(),
 }

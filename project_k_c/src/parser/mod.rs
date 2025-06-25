@@ -6,6 +6,7 @@ use crate::lexer::Lexer;
 use crate::{CompilationContext, TokenType};
 
 pub mod errors;
+pub mod locator;
 pub mod testcase;
 pub mod testplan;
 

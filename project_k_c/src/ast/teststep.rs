@@ -1,4 +1,5 @@
 use crate::{
+    ast::arguments::Args,
     class::{Class, Method},
     location::Location,
 };
@@ -10,7 +11,7 @@ pub struct TestStep {
     end: Location,
     pub class: Class,
     pub method: Method,
-    pub arguments: Vec<String>,
+    pub arguments: Vec<Args>,
 }
 
 impl TestStep {
@@ -19,7 +20,7 @@ impl TestStep {
         end: Location,
         class: Class,
         method: Method,
-        arguments: Vec<String>,
+        arguments: Vec<Args>,
     ) -> TestStep {
         TestStep {
             start,

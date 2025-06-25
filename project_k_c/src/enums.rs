@@ -66,11 +66,6 @@ impl LexingMode {
     }
 }
 
-#[derive(Debug, Clone)]
-pub enum IdentifierValue {
-    STRING(String),
-}
-
 define_enums!(
     //EnumName
     Capabilities,

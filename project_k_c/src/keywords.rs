@@ -1,7 +1,7 @@
 use slr_parser::terminal::Terminal;
 
+use crate::enums::CapabilityValue;
 use crate::enums::{Browser, Capabilities};
-use crate::enums::{CapabilityValue, IdentifierValue};
 use std::collections::HashMap;
 
 macro_rules! define_tokens {
@@ -91,13 +91,6 @@ impl Terminal for TokenType {
 }
 
 impl TokenType {
-    pub fn match_identifier_value(self) -> IdentifierValue {
-        match self {
-            Self::STRING(string) => IdentifierValue::STRING(string),
-            _ => panic!("Not a valid IdentifierValue"),
-        }
-    }
-
     pub fn match_capability_value(self) -> CapabilityValue {
         match self {
             Self::BROWSER(browser) => CapabilityValue::BROWSER(browser),
