@@ -8,20 +8,36 @@ use slr_parser::terminal::Terminal;
 use std::sync::Arc;
 use url::Url;
 
-use super::{consume_new_line_token, Parser};
+use super::Parser;
+use crate::ast::arguments::Args;
 use crate::ast::if_stmt::IfStmt;
-use crate::ast::testcase::{self, TestCase};
+use crate::ast::testcase::TestCase;
 use crate::ast::teststep::TestStep;
 use crate::class::{Class, Element, Method, Navigation, WebDriver};
-use crate::enums::{Browser, Capabilities, CapabilityValue};
+use crate::engine::{self, engine};
 use crate::error_handling::{parse_error_to_error_info, ErrorInfo};
 use crate::keywords::TokenType;
+use crate::parser::errors::{VALID_URL, VALID_URL_SHCEME};
+use crate::parser::locator::LocatorStrategy;
 use crate::token::Token;
 
 macro_rules! unwrap_or_return {
     ($expr:expr) => {
         match $expr {
-            Some(val) => val,
+            Some(value_) => value_,
+            None => return,
+        }
+    };
+}
+
+macro_rules! get_input_from_token_stack {
+    ($input:expr) => {
+        match $input {
+            Some(value_) => match &value_.token_type {
+                TokenType::IDENTIFIER(ident) => ident,
+                TokenType::STRING(string) => string,
+                _ => return,
+            },
             None => return,
         }
     };
@@ -59,14 +75,14 @@ pub fn parser_slr(parser: &mut Parser) {
         TESTCASE -> TESTCASE_ TESTSTEPS {error:"Testing"};
 
         TESTCASE_ -> [TokenType::TESTCASE]
-        { action: |tl_stack,input_stack,token_stack| {
+        { action: |tl_stack,token_stack,errors| {
             tl_stack.push(AST::TESTCASE(TestCase::new()));
         }};
 
         TESTSTEPS -> TESTSTEPS_ TESTSTEPS_BODY_ {error:"Teststeps body_ 33"};
 
         TESTSTEPS_ -> [TokenType::TESTSTEPS]
-        {action:|tl_stack,input_stack,token_stack| {
+        {action:|tl_stack,token_stack,errors| {
             token_stack.clear();
         }}
         ;
@@ -78,85 +94,34 @@ pub fn parser_slr(parser: &mut Parser) {
 
         TESTSTEPS_BODY -> [ TokenType::ACTION_NAVIGATE,TokenType::STRING(d_string())]
         {error:"Expected syntax ' navigate \"url\" '"}
-        {action:|tl_stack,input_stack,token_stack| {
-            let testcase = unwrap_or_return!(get_testcase_from_translator_stack(tl_stack));
+        {action:|tl_stack,token_stack,errors| {
+            webdriver_navigate(tl_stack, token_stack,errors);
+        }}
+        |
+        [TokenType::IDENTIFIER(d_string()),TokenType::ASSIGN_OP] I_S
+        {action:|tl_stack,token_stack,errors| {
+            let name = get_input_from_token_stack!(token_stack.first()) ;
+            let value = get_input_from_token_stack!(token_stack.last());
 
-            let url = match input_stack.last(){
-                Some(url_) => url_,
-                None => return
-            };
-            let test_step =
-                TestStep::new(
-                    token_stack.first().unwrap().get_start_location(),
-                    token_stack.last().unwrap().get_end_location(),
-                    Class::WEB_DRIVER,
-                    Method::WEB_DRIVER(WebDriver::NAVIGATE),
-                    vec![url.clone()]
-                );
-            testcase.insert_teststep(test_step);
-
-            //clear token_stack after every use
+            let testcase = unwrap_or_return!(get_testcase_from_translator_stack(tl_stack));;
             token_stack.clear();
         }}
-        | [TokenType::IDENTIFIER(d_string()),TokenType::ASSIGN_OP] I_S
-        {action:|tl_stack,input_stack,token_stack| {
-            token_stack.clear();
-        }}
-        | [TokenType::ACTION_CLICK,TokenType::STRING(d_string())]
+        |
+        [TokenType::ACTION_CLICK,TokenType::STRING(d_string())]
         {error:"Please check teststeps syntax"}
-        {action:|tl_stack,input_stack,token_stack| {
-            let testcase = unwrap_or_return!(get_testcase_from_translator_stack(tl_stack));
-            let locator = match input_stack.last(){
-                Some(locator_) => locator_,
-                None => return
-            };
-            let test_step =
-                TestStep::new(
-                    token_stack.first().unwrap().get_start_location(),
-                    token_stack.last().unwrap().get_end_location(),
-                    Class::ELEMENT,
-                    Method::ELEMENT(Element::CLICK),
-                    vec![locator.clone()]
-                );
-            testcase.insert_teststep(test_step);
-
-            //clear token_stack after every use
-            token_stack.clear();
+        {action:|tl_stack,token_stack,errors| {
+            element_click(tl_stack, token_stack,errors);
         }}
-        | [TokenType::ACTION_BACK]
+        |
+        [TokenType::ACTION_BACK]
         {error:"Please check teststeps syntax"}
-        {action:|tl_stack,input_stack,token_stack| {
-            let testcase = unwrap_or_return!(get_testcase_from_translator_stack(tl_stack));
-
-            let test_step =
-                TestStep::new(
-                    token_stack.first().unwrap().get_start_location(),
-                    token_stack.last().unwrap().get_end_location(),
-                    Class::NAVIGATION,
-                    Method::NAVIGATION(Navigation::BACK),
-                    vec![]
-                );
-            testcase.insert_teststep(test_step);
-
-            //clear token_stack after every use
-            token_stack.clear();
+        {action:|tl_stack,token_stack,errors| {
+            navigation_back(tl_stack, token_stack,errors);
         }}
-        | [TokenType::ACTION_FORWARD]
-        {action:|tl_stack,input_stack,token_stack| {
-            let testcase = unwrap_or_return!(get_testcase_from_translator_stack(tl_stack));
-
-            let test_step =
-                TestStep::new(
-                    token_stack.first().unwrap().get_start_location(),
-                    token_stack.last().unwrap().get_end_location(),
-                    Class::NAVIGATION,
-                    Method::NAVIGATION(Navigation::FORWARD),
-                    vec![]
-                );
-            testcase.insert_teststep(test_step);
-
-            //clear token_stack after every use
-            token_stack.clear();
+        |
+        [TokenType::ACTION_FORWARD]
+        {action:|tl_stack,token_stack,errors| {
+            navigation_forward(tl_stack, token_stack,errors);
         }}
         ;
 
@@ -172,6 +137,7 @@ pub fn parser_slr(parser: &mut Parser) {
         .map(|e| parse_error_to_error_info(e.clone()))
         .collect();
     parser.ctx.errors.errors.extend(transformed_errors);
+    engine();
 }
 
 fn get_testcase_from_translator_stack(tl_stack: &mut Vec<AST>) -> Option<&mut TestCase> {
@@ -189,4 +155,103 @@ fn refine_errors(errors: &mut Vec<ParseError<Token>>) {
         .iter_mut()
         .filter(|e| e.productionEnd)
         .for_each(|e| e.token.start = e.token.end);
+}
+
+fn webdriver_navigate(
+    tl_stack: &mut Vec<AST>,
+    token_stack: &mut Vec<Token>,
+    errors: &mut Vec<ParseError<Token>>,
+) {
+    let testcase = unwrap_or_return!(get_testcase_from_translator_stack(tl_stack));
+    let url_ = get_input_from_token_stack!(&token_stack.last());
+
+    //sample and it should be imporved
+    let parsed_url = match Url::parse(url_) {
+        Ok(parsed_url) => {
+            if parsed_url.scheme() != "https" {
+                errors.push(ParseError {
+                    token: token_stack.last().unwrap().clone(),
+                    message: String::from(VALID_URL_SHCEME),
+                    productionEnd: false,
+                })
+            }
+        }
+        Err(_) => errors.push(ParseError {
+            token: token_stack.last().unwrap().clone().clone(),
+            message: String::from(VALID_URL),
+            productionEnd: false,
+        }),
+    };
+
+    let test_step = TestStep::new(
+        token_stack.first().unwrap().get_start_location(),
+        token_stack.last().unwrap().get_end_location(),
+        Class::WEB_DRIVER,
+        Method::WEB_DRIVER(WebDriver::NAVIGATE),
+        vec![Args::String(url_.clone())],
+    );
+    testcase.insert_teststep(test_step);
+
+    //clear token_stack after every use
+    token_stack.clear();
+}
+
+fn element_click(
+    tl_stack: &mut Vec<AST>,
+    token_stack: &mut Vec<Token>,
+    errors: &mut Vec<ParseError<Token>>,
+) {
+    let testcase = unwrap_or_return!(get_testcase_from_translator_stack(tl_stack));
+    let locator = LocatorStrategy::parse(get_input_from_token_stack!(token_stack.last()));
+    let test_step = TestStep::new(
+        token_stack.first().unwrap().get_start_location(),
+        token_stack.last().unwrap().get_end_location(),
+        Class::ELEMENT,
+        Method::ELEMENT(Element::CLICK),
+        vec![Args::Locator(locator)],
+    );
+    testcase.insert_teststep(test_step);
+
+    //clear token_stack after every use
+    token_stack.clear();
+}
+
+fn navigation_back(
+    tl_stack: &mut Vec<AST>,
+    token_stack: &mut Vec<Token>,
+    errors: &mut Vec<ParseError<Token>>,
+) {
+    let testcase = unwrap_or_return!(get_testcase_from_translator_stack(tl_stack));
+
+    let test_step = TestStep::new(
+        token_stack.first().unwrap().get_start_location(),
+        token_stack.last().unwrap().get_end_location(),
+        Class::NAVIGATION,
+        Method::NAVIGATION(Navigation::BACK),
+        vec![],
+    );
+    testcase.insert_teststep(test_step);
+
+    //clear token_stack after every use
+    token_stack.clear();
+}
+
+fn navigation_forward(
+    tl_stack: &mut Vec<AST>,
+    token_stack: &mut Vec<Token>,
+    errors: &mut Vec<ParseError<Token>>,
+) {
+    let testcase = unwrap_or_return!(get_testcase_from_translator_stack(tl_stack));
+
+    let test_step = TestStep::new(
+        token_stack.first().unwrap().get_start_location(),
+        token_stack.last().unwrap().get_end_location(),
+        Class::NAVIGATION,
+        Method::NAVIGATION(Navigation::FORWARD),
+        vec![],
+    );
+    testcase.insert_teststep(test_step);
+
+    //clear token_stack after every use
+    token_stack.clear();
 }
