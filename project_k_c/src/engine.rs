@@ -1,104 +1,75 @@
-use std::cell::RefCell;
-use std::rc::Rc;
+use std::{
+    net::{Ipv4Addr, SocketAddrV4, TcpListener},
+    path::{Path, PathBuf},
+    process::Command,
+    time::Duration,
+};
 
-use crate::ast::testcase::TestCase;
-use crate::ast::teststep::TestStep;
-use crate::enums::{Browser, CapabilityValue};
-use crate::keywords::TokenType;
-use thirtyfour::prelude::*;
+use thirtyfour::{DesiredCapabilities, WebDriver};
+use webdriver_manager::{chrome::ChromeManager, logger::Logger, WebdriverManager};
+
+type Port = u16;
 
 #[tokio::main]
-pub async fn execute_test_case(test_case: Rc<RefCell<TestCase>>) {
-    let caps = DesiredCapabilities::chrome();
-    let testcase = test_case.borrow_mut();
-    let driver_url = get_driver_url(&testcase);
-    let driver_result = WebDriver::new(driver_url, caps).await;
-
-    let driver = match driver_result {
-        Ok(result) => result,
-        Err(result) => panic!("there was an error{}", result),
-    };
-
-    let teststeps: &Vec<TestStep> = testcase.get_teststeps();
-
-    // execute_teststeps(&driver, teststeps).await;
-}
-
-fn get_driver_url(test_case: &TestCase) -> String {
-    let result = test_case.get_capability(
-        &TokenType::CAPS(crate::enums::Capabilities::DRIVERURL)
-            .to_string()
-            .to_string(),
-    );
-    match result {
-        CapabilityValue::STRING(string) => string,
-        _ => panic!("Expecting Driver url"),
-    }
-}
-
-fn get_browser_capabilites(test_case: TestCase) -> Browser {
-    let browser = test_case.get_capability(
-        &TokenType::CAPS(crate::enums::Capabilities::BROWSER)
-            .to_string()
-            .to_string(),
-    );
-    match browser {
-        CapabilityValue::BROWSER(browser) => browser,
-        _ => panic!("Expecting Browser capability value"),
-    }
-}
-
-// async fn execute_teststeps(driver: &WebDriver, teststeps: &Vec<TestStep>) {
-//     for teststep in teststeps.iter() {
-//         let action = teststep.class.clone();
-//         match action {
-//             Action::NAVIGATE => execute_navigate_action(&driver, teststep).await,
-//             Action::CLICK => execute_click_action(&driver, teststep).await,
-//             Action::BACK => execute_back_action(&driver, teststep).await,
-//             Action::FORWARD => execute_forward_action(&driver, teststep).await,
-//             Action::NONE => todo!(),
-//             _ => break,
-//         }
-//     }
-// }
-
-async fn execute_back_action(driver: &WebDriver, teststep: &TestStep) {
-    match driver.back().await {
-        Ok(_) => println!("Navigate back"),
-        Err(error) => eprintln!("{}", error),
-    }
-}
-
-async fn execute_forward_action(driver: &WebDriver, teststep: &TestStep) {
-    match driver.forward().await {
-        Ok(_) => println!("Navigate forward"),
-        Err(error) => eprintln!("{}", error),
-    }
-}
-
-async fn execute_navigate_action(driver: &WebDriver, teststep: &TestStep) {
-    let url = teststep.arguments.get(0).map(|x| x.as_str());
-    match url {
-        Some(url) => match driver.goto(url).await {
-            Ok(_) => println!("Navigated to {}", url),
-            Err(error) => eprintln!("{}", error),
-        },
-        None => {}
-    }
-}
-
-async fn execute_click_action(driver: &WebDriver, teststep: &TestStep) {
-    let locator = teststep.arguments.get(0).map(|x| x.as_str());
-    match locator {
-        Some(locator) => {
-            match driver.find(By::XPath(locator)).await {
-                Ok(element) => match element.click().await {
-                    Ok(_) => println!("click action perfomed on {}", element),
-                    Err(error) => eprintln!("{}", error),
-                },
-                Err(element) => eprintln!("{}", element),
+pub async fn engine() {
+    let log = Logger::create("/home/manikanta-reddy/new.json", true, true, "");
+    let manager = ChromeManager::new();
+    let mut driver_path: Option<PathBuf> = None;
+    if let Ok(mut manager) = manager {
+        let driver_path_ = tokio::task::spawn_blocking(move || {
+            manager.set_logger(log);
+            let browser_version = manager.discover_browser_version().unwrap_or_default();
+            if let Some(version) = browser_version {
+                manager.set_browser_version(version);
             };
+            let driver_version = manager.request_driver_version();
+            if let Ok(version) = driver_version {
+                manager.set_driver_version(version);
+            }
+            if let Err(error) = manager.download_driver() {
+                println!("Error {error}");
+            }
+
+            let path = if let Ok(path) = manager.get_driver_path_in_cache() {
+                Some(path)
+            } else {
+                None
+            };
+            path
+        })
+        .await;
+
+        if let Ok(path) = driver_path_ {
+            driver_path = path;
         }
-        None => {}
-    }
+    };
+    let mut command = Command::new("sh");
+    command.arg("-c");
+    let port = pick_a_free_port().unwrap();
+    println!("porttttttttt={port}");
+    command.arg(format!(".{:?} --port={port}", driver_path.unwrap()));
+    command.current_dir("/");
+    command.spawn().expect("msg");
+
+    //to start chromedriver it will take a sec or two sec time till then sleep
+    tokio::time::sleep(Duration::from_secs(3)).await;
+
+    let caps = DesiredCapabilities::chrome();
+    let server = format!("http://localhost:{port}");
+    println!("serverrrrrrrrrr : {server}");
+    let driver = WebDriver::new(server, caps).await;
+
+    match driver {
+        Ok(driver_) => {
+            driver_.goto("https://www.google.com").await;
+        }
+        Err(_) => {
+            println!("error")
+        }
+    };
+}
+
+fn pick_a_free_port() -> Option<Port> {
+    let ip4 = SocketAddrV4::new(Ipv4Addr::UNSPECIFIED, 0);
+    Some(TcpListener::bind(ip4).ok()?.local_addr().ok()?.port())
 }
