@@ -14,7 +14,7 @@ use crate::ast::if_stmt::IfStmt;
 use crate::ast::testcase::TestCase;
 use crate::ast::teststep::TestStep;
 use crate::class::{Class, Element, Method, Navigation, WebDriver};
-use crate::engine::{self, engine};
+use crate::engine::execute;
 use crate::error_handling::{parse_error_to_error_info, ErrorInfo};
 use crate::keywords::TokenType;
 use crate::parser::errors::{VALID_URL, VALID_URL_SHCEME};
@@ -137,7 +137,7 @@ pub fn parser_slr(parser: &mut Parser) {
         .map(|e| parse_error_to_error_info(e.clone()))
         .collect();
     parser.ctx.errors.errors.extend(transformed_errors);
-    engine();
+    execute();
 }
 
 fn get_testcase_from_translator_stack(tl_stack: &mut Vec<AST>) -> Option<&mut TestCase> {
