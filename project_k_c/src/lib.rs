@@ -19,7 +19,7 @@ use crate::program::Program;
 
 pub mod ast;
 pub mod class;
-mod engine;
+pub mod engine;
 pub mod enums;
 pub mod error_handling;
 pub mod keywords;

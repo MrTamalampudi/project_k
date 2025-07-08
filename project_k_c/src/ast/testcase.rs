@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::{cell::RefCell, collections::HashMap, rc::Rc};
 
 use crate::{
     ast::{
@@ -14,7 +14,8 @@ use crate::{
 pub struct TestCase {
     capabilities: HashMap<String, CapabilityValue>,
     variables: HashMap<String, IdentifierValue>,
-    test_steps: Vec<TestcaseBody>,
+    test_steps: Vec<Rc<RefCell<TestcaseBody>>>,
+    pub test_step: Option<Rc<RefCell<TestcaseBody>>>,
 }
 
 impl TestCase {
@@ -23,6 +24,7 @@ impl TestCase {
             capabilities: HashMap::new(),
             variables: HashMap::new(),
             test_steps: vec![],
+            test_step: None,
         }
     }
 
@@ -42,8 +44,12 @@ impl TestCase {
         self.variables.insert(var.name.clone(), var.value.clone());
     }
 
-    pub fn insert_teststep(&mut self, test_step: TestStep) {
-        self.test_steps.push(TestcaseBody::TESTSTEP(test_step));
+    pub fn insert_teststep(&mut self, body: Rc<RefCell<TestcaseBody>>) {
+        self.test_steps.push(body);
+    }
+
+    pub fn get_last_teststep_entry(&mut self) -> Option<Rc<RefCell<TestcaseBody>>> {
+        self.test_steps.last().cloned()
     }
 
     pub fn get_teststeps(&self) -> &Vec<TestStep> {

@@ -1,5 +1,7 @@
+use std::rc::Rc;
+
 use crate::{
-    ast::arguments::Args,
+    ast::{arguments::Args, testcase::TestcaseBody},
     class::{Class, Method},
     location::Location,
 };
@@ -12,6 +14,7 @@ pub struct TestStep {
     pub class: Class,
     pub method: Method,
     pub arguments: Vec<Args>,
+    pub next: Option<Rc<TestcaseBody>>,
 }
 
 impl TestStep {
@@ -28,6 +31,7 @@ impl TestStep {
             class,
             method,
             arguments,
+            next: None,
         }
     }
 }
