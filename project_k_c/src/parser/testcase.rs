@@ -6,6 +6,7 @@ use slr_parser::production::Production;
 use slr_parser::symbol::Symbol;
 use slr_parser::terminal::Terminal;
 use std::cell::RefCell;
+use std::ops::{Deref, DerefMut};
 use std::rc::Rc;
 use std::sync::Arc;
 use url::Url;
@@ -184,15 +185,7 @@ fn webdriver_navigate(
         vec![Args::String(url_.clone())],
     );
 
-    let teststep_refcell = RefCell::new(TestcaseBody::TESTSTEP(test_step));
-    let teststep_rc = Rc::new(teststep_refcell);
-
-    testcase.insert_teststep(teststep_rc.clone());
-
-    if testcase.test_stepp.is_none() {
-        testcase.test_stepp = Some(teststep_rc);
-    } else {
-    }
+    testcase.insert_teststep(TestcaseBody::TESTSTEP(test_step));
 
     //clear token_stack after every use
     token_stack.clear();
@@ -211,7 +204,8 @@ fn element_click(
         Method::ELEMENT(Element::CLICK),
         vec![Args::Locator(locator)],
     );
-    testcase.insert_teststep(test_step);
+
+    testcase.insert_teststep(TestcaseBody::TESTSTEP(test_step));
 
     // clear token_stack after every use
     // token stack is particular to production so it should be cleared
@@ -231,7 +225,8 @@ fn navigation_back(
         Method::NAVIGATION(Navigation::BACK),
         vec![],
     );
-    testcase.insert_teststep(test_step);
+
+    testcase.insert_teststep(TestcaseBody::TESTSTEP(test_step));
 
     //clear token_stack after every use
     token_stack.clear();
@@ -249,7 +244,8 @@ fn navigation_forward(
         Method::NAVIGATION(Navigation::FORWARD),
         vec![],
     );
-    testcase.insert_teststep(test_step);
+
+    testcase.insert_teststep(TestcaseBody::TESTSTEP(test_step));
 
     //clear token_stack after every use
     token_stack.clear();

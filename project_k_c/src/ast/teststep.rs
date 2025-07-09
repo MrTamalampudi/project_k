@@ -1,4 +1,4 @@
-use std::rc::Rc;
+use std::{cell::RefCell, rc::Rc};
 
 use crate::{
     ast::{arguments::Args, testcase::TestcaseBody},
@@ -14,7 +14,7 @@ pub struct TestStep {
     pub class: Class,
     pub method: Method,
     pub arguments: Vec<Args>,
-    pub next: Option<Rc<TestcaseBody>>,
+    pub next: Option<Rc<RefCell<TestcaseBody>>>,
 }
 
 impl TestStep {

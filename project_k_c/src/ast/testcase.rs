@@ -44,8 +44,19 @@ impl TestCase {
         self.variables.insert(var.name.clone(), var.value.clone());
     }
 
-    pub fn insert_teststep(&mut self, body: Rc<RefCell<TestcaseBody>>) {
-        self.test_steps.push(body);
+    pub fn insert_teststep(&mut self, body: TestcaseBody) {
+        let teststep_refcell = RefCell::new(body);
+        let teststep_rc = Rc::new(teststep_refcell);
+        if self.test_step.is_none() {
+            self.test_step = Some(teststep_rc.clone());
+        } else {
+            let teststep = self.get_last_teststep_entry().unwrap();
+            let teststep_deref = &mut *teststep.borrow_mut();
+            if let TestcaseBody::TESTSTEP(step) = teststep_deref {
+                step.next = Some(teststep_rc.clone());
+            }
+        }
+        self.test_steps.push(teststep_rc);
     }
 
     pub fn get_last_teststep_entry(&mut self) -> Option<Rc<RefCell<TestcaseBody>>> {

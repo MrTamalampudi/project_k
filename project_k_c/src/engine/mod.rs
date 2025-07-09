@@ -1,21 +1,30 @@
 use std::{
     net::{Ipv4Addr, SocketAddrV4, TcpListener},
+    ops::Deref,
     panic,
     path::PathBuf,
     process::Command,
     time::Duration,
 };
 
-use thirtyfour::{DesiredCapabilities, WebDriver};
+use thirtyfour::{By, DesiredCapabilities, WebDriver};
 use webdriver_manager::{chrome::ChromeManager, logger::Logger, WebdriverManager};
 
-use crate::ast::testcase::TestCase;
+use crate::{
+    ast::{
+        arguments::Args,
+        testcase::{TestCase, TestcaseBody},
+        teststep::TestStep,
+    },
+    class::{Element, Method, Navigation, WebDriver as Driver},
+    parser::locator::LocatorStrategy,
+};
 
 type Port = u16;
 
 #[tokio::main]
 pub async fn execute(testcase: TestCase) {
-    let engine = Engine::new(testcase).await;
+    let mut engine = Engine::new(testcase).await;
     engine.start().await;
     engine.kill();
 }
@@ -28,12 +37,8 @@ pub struct Engine {
 
 impl Engine {
     async fn new(testcase: TestCase) -> Engine {
-        let port: Port = match start_driver().await {
-            Ok(port) => port,
-            Err(error) => panic!("{error}"),
-        };
-        let driver = match create_web_driver(port).await {
-            Ok(driver) => driver,
+        let (driver, port) = match create_web_driver().await {
+            Ok((driver, port)) => (driver, port),
             Err(error) => panic!("{error}"),
         };
         Engine {
@@ -46,28 +51,76 @@ impl Engine {
     fn kill(&self) {
         let mut process = Command::new("sh");
         process.arg("-c");
-        process.arg(format!("kill -9 `lsof -t -i:{}", self.port));
+        process.arg(format!("kill -9 `lsof -t -i:{}`", self.port));
         match process.spawn() {
             Ok(_) => println!("Successfully killed driver process"),
             Err(_) => println!("Failed to killed driver process"),
         };
     }
 
-    async fn start(&self) {
-        if let Err(_) = self.driver.goto("https://google.com").await {
-            panic!("there is an error");
+    async fn start(&mut self) {
+        while let Some(step_ref_cell) = self.testcase.test_step.take() {
+            let step = step_ref_cell.borrow();
+
+            match step.deref() {
+                TestcaseBody::TESTSTEP(stepo) => {
+                    match stepo.method {
+                        Method::WEB_DRIVER(Driver::NAVIGATE) => self.navigate(stepo).await,
+                        Method::ELEMENT(Element::CLICK) => self.click(stepo).await,
+                        Method::NAVIGATION(Navigation::BACK) => self.back(stepo).await,
+                        Method::NAVIGATION(Navigation::FORWARD) => self.forward(stepo).await,
+                        _ => {}
+                    }
+                    if let Some(next_step) = &stepo.next {
+                        self.testcase.test_step = Some(next_step.clone());
+                    } else {
+                        self.testcase.test_step = None;
+                    }
+                }
+                _ => {
+                    self.testcase.test_step = None;
+                }
+            };
         }
+    }
+
+    async fn navigate(&self, teststep: &TestStep) {
+        let url = teststep.arguments.get(0).unwrap();
+        if let Args::String(url) = url {
+            if let Err(_) = self.driver.goto(url).await {
+                panic!("there is an error");
+            }
+        };
+    }
+
+    async fn click(&self, teststep: &TestStep) {
+        let path = teststep.arguments.get(0).unwrap();
+        if let Args::Locator(locator) = path {
+            if let LocatorStrategy::XPATH(xpath) = locator {
+                if let Ok(element) = self.driver.find(By::XPath(xpath)).await {
+                    element.click().await;
+                }
+            }
+        }
+    }
+
+    async fn back(&self, teststep: &TestStep) {
+        self.driver.back().await;
+    }
+
+    async fn forward(&self, teststep: &TestStep) {
+        self.driver.forward().await;
     }
 }
 
-async fn create_web_driver(port: Port) -> Result<WebDriver, String> {
+async fn create_web_driver() -> Result<(WebDriver, Port), String> {
     let port = start_driver().await?;
     let caps = DesiredCapabilities::chrome();
     let server = format!("http://localhost:{port}");
     let driver = WebDriver::new(server, caps).await;
 
     match driver {
-        Ok(driver) => Ok(driver),
+        Ok(driver) => Ok((driver, port)),
         Err(error) => Err(error.to_string()),
     }
 }
