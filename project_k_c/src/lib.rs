@@ -30,12 +30,6 @@ pub mod program;
 pub mod token;
 pub mod utils;
 
-enum ExecutionType {
-    TESTCASE,
-    TESTSUITE,
-    TESTPLAN,
-}
-
 #[derive(Debug, Clone)]
 pub struct CompilationContext {
     pub path: PathBuf,
