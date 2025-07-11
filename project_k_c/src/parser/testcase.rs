@@ -16,10 +16,12 @@ use crate::ast::arguments::Args;
 use crate::ast::if_stmt::IfStmt;
 use crate::ast::testcase::{TestCase, TestcaseBody};
 use crate::ast::teststep::TestStep;
-use crate::class::{Class, Element, Method, Navigation, WebDriver};
+use crate::class::WEB_DRIVER_ACTION;
+use crate::class::{Class, Method, ELEMENT, NAVIGATION, WEB_DRIVER};
 use crate::engine::execute;
 use crate::error_handling::{parse_error_to_error_info, ErrorInfo};
 use crate::keywords::TokenType;
+use crate::parser::actions::driver::Driver;
 use crate::parser::errors::{VALID_URL, VALID_URL_SHCEME};
 use crate::parser::locator::LocatorStrategy;
 use crate::program::Program;
@@ -35,6 +37,7 @@ macro_rules! unwrap_or_return {
     };
 }
 
+#[macro_export]
 macro_rules! get_input_from_token_stack {
     ($input:expr) => {
         match $input {
@@ -97,7 +100,7 @@ pub fn parser_slr(parser: &mut Parser) {
         TESTSTEPS_BODY -> [ TokenType::ACTION_NAVIGATE,TokenType::STRING(d_string())]
         {error:"Expected syntax ' navigate \"url\" '"}
         {action:|ast,token_stack,errors| {
-            webdriver_navigate(ast, token_stack,errors);
+            Driver::NAVIGATE(ast, token_stack, errors);
         }}
         |
         [TokenType::IDENTIFIER(d_string()),TokenType::ASSIGN_OP] I_S
@@ -181,7 +184,7 @@ fn webdriver_navigate(
         token_stack.first().unwrap().get_start_location(),
         token_stack.last().unwrap().get_end_location(),
         Class::WEB_DRIVER,
-        Method::WEB_DRIVER(WebDriver::NAVIGATE),
+        Method::WEB_DRIVER(WEB_DRIVER::NAVIGATE),
         vec![Args::String(url_.clone())],
     );
 
@@ -201,7 +204,7 @@ fn element_click(
         token_stack.first().unwrap().get_start_location(),
         token_stack.last().unwrap().get_end_location(),
         Class::ELEMENT,
-        Method::ELEMENT(Element::CLICK),
+        Method::ELEMENT(ELEMENT::CLICK),
         vec![Args::Locator(locator)],
     );
 
@@ -222,7 +225,7 @@ fn navigation_back(
         token_stack.first().unwrap().get_start_location(),
         token_stack.last().unwrap().get_end_location(),
         Class::NAVIGATION,
-        Method::NAVIGATION(Navigation::BACK),
+        Method::NAVIGATION(NAVIGATION::BACK),
         vec![],
     );
 
@@ -241,7 +244,7 @@ fn navigation_forward(
         token_stack.first().unwrap().get_start_location(),
         token_stack.last().unwrap().get_end_location(),
         Class::NAVIGATION,
-        Method::NAVIGATION(Navigation::FORWARD),
+        Method::NAVIGATION(NAVIGATION::FORWARD),
         vec![],
     );
 

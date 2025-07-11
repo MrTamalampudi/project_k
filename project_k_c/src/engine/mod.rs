@@ -16,7 +16,7 @@ use crate::{
         testcase::{TestCase, TestcaseBody},
         teststep::TestStep,
     },
-    class::{Element, Method, Navigation, WebDriver as Driver},
+    class::{Method, ELEMENT, NAVIGATION, WEB_DRIVER as Driver},
     parser::locator::LocatorStrategy,
 };
 
@@ -66,9 +66,9 @@ impl Engine {
                 TestcaseBody::TESTSTEP(stepo) => {
                     match stepo.method {
                         Method::WEB_DRIVER(Driver::NAVIGATE) => self.navigate(stepo).await,
-                        Method::ELEMENT(Element::CLICK) => self.click(stepo).await,
-                        Method::NAVIGATION(Navigation::BACK) => self.back(stepo).await,
-                        Method::NAVIGATION(Navigation::FORWARD) => self.forward(stepo).await,
+                        Method::ELEMENT(ELEMENT::CLICK) => self.click(stepo).await,
+                        Method::NAVIGATION(NAVIGATION::BACK) => self.back(stepo).await,
+                        Method::NAVIGATION(NAVIGATION::FORWARD) => self.forward(stepo).await,
                         _ => {}
                     }
                     if let Some(next_step) = &stepo.next {
