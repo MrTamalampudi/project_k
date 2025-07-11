@@ -5,6 +5,15 @@ use crate::token::Token;
 use slr_parser::error::ParseError;
 use std::future::Future;
 
+macro_rules! ifdef {
+    ([$($_:tt)+] { $($then:tt)* } $(else { $($_else:tt)* })?) => {
+        $($then)*
+    };
+    ([] { $($_then:tt)* } $(else { $($else:tt)* })?) => {
+        $($($else)*)?
+    };
+}
+
 macro_rules! class_macro {
     (
         $(
@@ -14,9 +23,10 @@ macro_rules! class_macro {
                 $class:ident {
                     $(
                         $method:ident$(
-                            {$(
-                                $type:ident
-                            ),*}
+                            {
+                                $(Action_return_type: $action_return_type:ident,)?
+                                $(Engine_return_type: $engine_return_type:ident)?
+                            }
                         )?
                     ),+
                 }
@@ -43,7 +53,11 @@ macro_rules! class_macro {
         $(
             pub trait $engine{
                 $(
-                    fn $method(&self) -> impl Future<Output = ()>;
+                    ifdef! {[$($($engine_return_type)?)?]
+                        {fn $method(&self) -> impl Future<Output = $($($engine_return_type)?)?>;}
+                        else
+                        {fn $method(&self) -> impl Future<Output = ()>;}
+                    }
                 )+
             }
         )+
@@ -51,11 +65,19 @@ macro_rules! class_macro {
         $(
             pub trait $action{
                 $(
-                    fn $method(
-                        testcase: &mut TestCase,
-                        token_stack: &mut Vec<Token>,
-                        errors: &mut Vec<ParseError<Token>>
-                    );
+                    ifdef! {[$($($action_return_type)?)?]
+                        {fn $method(
+                            testcase: &mut TestCase,
+                            token_stack: &mut Vec<Token>,
+                            errors: &mut Vec<ParseError<Token>>
+                        ) -> $($($action_return_type)?)?;}
+                        else
+                        {fn $method(
+                            testcase: &mut TestCase,
+                            token_stack: &mut Vec<Token>,
+                            errors: &mut Vec<ParseError<Token>>
+                        );}
+                    }
                 )+
             }
         )+
@@ -100,7 +122,9 @@ class_macro!(
         action: WEB_DRIVER_ACTION,
         engine: WEB_DRIVER_ENGINE,
         WEB_DRIVER {
-            GET_TITLE,
+            GET_TITLE {
+                Engine_return_type: String
+            },
             GET_CURRENT_URL,
             GET_PAGE_SOURCE,
             GET_WINDOW_HANDLE,
