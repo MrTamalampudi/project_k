@@ -1,5 +1,5 @@
 use enums::Capabilities;
-use error_handling::ErrorManager;
+use error_handler::ErrorManager;
 use keywords::TokenType;
 use lexer::{Lexer, Tokenizer};
 use parser::testcase;
@@ -21,7 +21,7 @@ pub mod ast;
 pub mod class;
 pub mod engine;
 pub mod enums;
-pub mod error_handling;
+pub mod error_handler;
 pub mod keywords;
 pub mod lexer;
 pub mod location;

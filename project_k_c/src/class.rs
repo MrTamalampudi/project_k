@@ -1,6 +1,6 @@
 #![allow(non_camel_case_types, non_snake_case)]
 
-use crate::ast::testcase::TestCase;
+use crate::ast::AST;
 use crate::token::Token;
 use slr_parser::error::ParseError;
 use std::future::Future;
@@ -73,7 +73,7 @@ macro_rules! class_macro {
                         ) -> $($($action_return_type)?)?;}
                         else
                         {fn $method(
-                            testcase: &mut TestCase,
+                            ast: &mut Vec<AST>,
                             token_stack: &mut Vec<Token>,
                             errors: &mut Vec<ParseError<Token>>
                         );}

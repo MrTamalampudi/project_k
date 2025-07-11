@@ -1,8 +1,10 @@
 use crate::ast::arguments::Args;
 use crate::ast::testcase::TestcaseBody;
 use crate::ast::teststep::TestStep;
+use crate::ast::AST;
 use crate::class::{Class, Method, WEB_DRIVER};
 use crate::parser::errors::{VALID_URL, VALID_URL_SHCEME};
+use crate::unwrap_or_return;
 use slr_parser::error::ParseError;
 use url::Url;
 
@@ -13,10 +15,11 @@ pub struct Driver {}
 
 impl WEB_DRIVER_ACTION for Driver {
     fn NAVIGATE(
-        testcase: &mut crate::ast::testcase::TestCase,
+        ast: &mut Vec<AST>,
         token_stack: &mut Vec<crate::token::Token>,
         errors: &mut Vec<slr_parser::error::ParseError<crate::token::Token>>,
     ) -> () {
+        let testcase = unwrap_or_return!(AST::get_testcase_from_ast(ast.first_mut()));
         let url_ = get_input_from_token_stack!(&token_stack.last());
 
         //sample and it should be imporved
@@ -52,41 +55,41 @@ impl WEB_DRIVER_ACTION for Driver {
     }
 
     fn CLOSE(
-        testcase: &mut crate::ast::testcase::TestCase,
+        ast: &mut Vec<AST>,
         token_stack: &mut Vec<crate::token::Token>,
         errors: &mut Vec<slr_parser::error::ParseError<crate::token::Token>>,
     ) -> () {
     }
 
     fn FIND_ELEMENT(
-        testcase: &mut crate::ast::testcase::TestCase,
+        ast: &mut Vec<AST>,
         token_stack: &mut Vec<crate::token::Token>,
         errors: &mut Vec<slr_parser::error::ParseError<crate::token::Token>>,
     ) -> () {
     }
 
     fn GET_CURRENT_URL(
-        testcase: &mut crate::ast::testcase::TestCase,
+        ast: &mut Vec<AST>,
         token_stack: &mut Vec<crate::token::Token>,
         errors: &mut Vec<slr_parser::error::ParseError<crate::token::Token>>,
     ) -> () {
     }
 
     fn GET_PAGE_SOURCE(
-        testcase: &mut crate::ast::testcase::TestCase,
+        ast: &mut Vec<AST>,
         token_stack: &mut Vec<crate::token::Token>,
         errors: &mut Vec<slr_parser::error::ParseError<crate::token::Token>>,
     ) -> () {
     }
 
     fn GET_TITLE(
-        testcase: &mut crate::ast::testcase::TestCase,
+        ast: &mut Vec<AST>,
         token_stack: &mut Vec<crate::token::Token>,
         errors: &mut Vec<slr_parser::error::ParseError<crate::token::Token>>,
     ) -> () {
     }
     fn GET_WINDOW_HANDLE(
-        testcase: &mut crate::ast::testcase::TestCase,
+        ast: &mut Vec<AST>,
         token_stack: &mut Vec<crate::token::Token>,
         errors: &mut Vec<slr_parser::error::ParseError<crate::token::Token>>,
     ) -> () {

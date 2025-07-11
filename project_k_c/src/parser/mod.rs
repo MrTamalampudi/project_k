@@ -1,7 +1,7 @@
 use errors::ParserError;
 use testcase::parser_slr;
 
-use crate::error_handling::ErrorInfo;
+use crate::error_handler::ErrorInfo;
 use crate::lexer::Lexer;
 use crate::{CompilationContext, TokenType};
 

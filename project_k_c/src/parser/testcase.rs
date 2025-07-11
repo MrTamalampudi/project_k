@@ -16,18 +16,21 @@ use crate::ast::arguments::Args;
 use crate::ast::if_stmt::IfStmt;
 use crate::ast::testcase::{TestCase, TestcaseBody};
 use crate::ast::teststep::TestStep;
-use crate::class::WEB_DRIVER_ACTION;
-use crate::class::{Class, Method, ELEMENT, NAVIGATION, WEB_DRIVER};
+use crate::ast::AST;
+use crate::class::{Class, Method, ELEMENT, NAVIGATION, NAVIGATION_ACTION, WEB_DRIVER};
+use crate::class::{ELEMENT_ACTION, WEB_DRIVER_ACTION};
 use crate::engine::execute;
-use crate::error_handling::{parse_error_to_error_info, ErrorInfo};
+use crate::error_handler::{parse_error_to_error_info, ErrorInfo};
 use crate::keywords::TokenType;
 use crate::parser::actions::driver::Driver;
+use crate::parser::actions::element::Element;
+use crate::parser::actions::navigation::Navigation;
 use crate::parser::errors::{VALID_URL, VALID_URL_SHCEME};
 use crate::parser::locator::LocatorStrategy;
 use crate::program::Program;
 use crate::token::Token;
 
-#[allow(unused)]
+#[macro_export]
 macro_rules! unwrap_or_return {
     ($expr:expr) => {
         match $expr {
@@ -51,21 +54,6 @@ macro_rules! get_input_from_token_stack {
     };
 }
 
-//This ast is only used as for TranslatorStack
-#[allow(non_camel_case_types, unused)]
-#[derive(Debug, Clone)]
-enum AST {
-    TESTCASE(TestCase),
-    TESTSTEP(TestStep),
-    IF(IfStmt),
-}
-
-impl std::fmt::Display for AST {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "AST")
-    }
-}
-
 #[allow(non_camel_case_types, unused)]
 pub fn parser_slr(parser: &mut Parser) {
     let tt: Vec<Token> = parser
@@ -76,13 +64,17 @@ pub fn parser_slr(parser: &mut Parser) {
         .filter(|t| t.get_token_type().ne(&TokenType::NEW_LINE))
         .collect();
     let d_string = || "".to_string();
-    let gr: Grammar<TestCase, Token> = grammar!(
+    let gr: Grammar<AST, Token> = grammar!(
         TokenType,
-        TestCase,
+        AST,
         Token,
         TESTCASE -> TESTCASE_ TESTSTEPS {error:"Testing"};
 
-        TESTCASE_ -> [TokenType::TESTCASE];
+        TESTCASE_ -> [TokenType::TESTCASE]
+        {action:|ast,token_stack,errors| {
+            ast.push(AST::TESTCASE(TestCase::new()));
+        }}
+        ;
 
         TESTSTEPS -> TESTSTEPS_ TESTSTEPS_BODY_ {error:"Teststeps body_ 33"};
 
@@ -105,6 +97,13 @@ pub fn parser_slr(parser: &mut Parser) {
         |
         [TokenType::IDENTIFIER(d_string()),TokenType::ASSIGN_OP] I_S
         {action:|ast,token_stack,errors| {
+            let identifier_token = token_stack.first();
+            let value_token = token_stack.last();
+
+            if let Some(value) = value_token {
+
+            }
+
             let name = get_input_from_token_stack!(token_stack.first()) ;
             let value = get_input_from_token_stack!(token_stack.last());
 
@@ -114,18 +113,23 @@ pub fn parser_slr(parser: &mut Parser) {
         [TokenType::ACTION_CLICK,TokenType::STRING(d_string())]
         {error:"Please check teststeps syntax"}
         {action:|ast,token_stack,errors| {
-            element_click(ast, token_stack,errors);
+            Element::CLICK(ast, token_stack, errors);
         }}
         |
         [TokenType::ACTION_BACK]
         {error:"Please check teststeps syntax"}
         {action:|ast,token_stack,errors| {
-            navigation_back(ast, token_stack,errors);
+            Navigation::BACK(ast, token_stack, errors);
         }}
         |
         [TokenType::ACTION_FORWARD]
         {action:|ast,token_stack,errors| {
-            navigation_forward(ast, token_stack,errors);
+            Navigation::FORWARD(ast, token_stack, errors);
+        }}
+        |
+        [TokenType::ACTION_REFRESH]
+        {action:|ast,token_stack,errors| {
+            Navigation::REFRESH(ast, token_stack, errors);
         }}
         ;
 
@@ -134,7 +138,7 @@ pub fn parser_slr(parser: &mut Parser) {
     let mut parsed = SLR_Parser::new(gr.productions);
     parsed.compute_lr0_items();
     let mut errors: Vec<ParseError<Token>> = Vec::new();
-    let mut ast = TestCase::new();
+    let mut ast: Vec<AST> = Vec::new();
     parsed.parse(tt, &mut errors, &mut ast);
     refine_errors(&mut errors);
     let transformed_errors: Vec<ErrorInfo> = errors
@@ -143,9 +147,12 @@ pub fn parser_slr(parser: &mut Parser) {
         .collect();
     parser.ctx.errors.errors.extend(transformed_errors);
     parser.ctx.program = Program {
-        testcase: ast.clone(),
+        testcase: match AST::get_testcase_from_ast(ast.first_mut()) {
+            Some(testcase) => testcase.clone(),
+            None => return,
+        },
     };
-    execute(ast);
+    execute(parser.ctx.program.testcase.clone());
 }
 
 fn refine_errors(errors: &mut Vec<ParseError<Token>>) {
@@ -155,51 +162,13 @@ fn refine_errors(errors: &mut Vec<ParseError<Token>>) {
         .for_each(|e| e.token.start = e.token.end);
 }
 
-fn webdriver_navigate(
-    testcase: &mut TestCase,
-    token_stack: &mut Vec<Token>,
-    errors: &mut Vec<ParseError<Token>>,
-) {
-    let url_ = get_input_from_token_stack!(&token_stack.last());
-
-    //sample and it should be imporved
-    let parsed_url = match Url::parse(url_) {
-        Ok(parsed_url) => {
-            if parsed_url.scheme() != "https" {
-                errors.push(ParseError {
-                    token: token_stack.last().unwrap().clone(),
-                    message: String::from(VALID_URL_SHCEME),
-                    productionEnd: false,
-                })
-            }
-        }
-        Err(_) => errors.push(ParseError {
-            token: token_stack.last().unwrap().clone().clone(),
-            message: String::from(VALID_URL),
-            productionEnd: false,
-        }),
-    };
-
-    let test_step = TestStep::new(
-        token_stack.first().unwrap().get_start_location(),
-        token_stack.last().unwrap().get_end_location(),
-        Class::WEB_DRIVER,
-        Method::WEB_DRIVER(WEB_DRIVER::NAVIGATE),
-        vec![Args::String(url_.clone())],
-    );
-
-    testcase.insert_teststep(TestcaseBody::TESTSTEP(test_step));
-
-    //clear token_stack after every use
-    token_stack.clear();
-}
-
 fn element_click(
     testcase: &mut TestCase,
     token_stack: &mut Vec<Token>,
     errors: &mut Vec<ParseError<Token>>,
 ) {
-    let locator = LocatorStrategy::parse(get_input_from_token_stack!(token_stack.last()));
+    let locator_token = token_stack.last();
+    let locator = LocatorStrategy::parse(get_input_from_token_stack!(locator_token));
     let test_step = TestStep::new(
         token_stack.first().unwrap().get_start_location(),
         token_stack.last().unwrap().get_end_location(),
