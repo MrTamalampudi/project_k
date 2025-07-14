@@ -1,6 +1,7 @@
-#![allow(non_camel_case_types, non_snake_case)]
+#![allow(non_camel_case_types, non_snake_case, unused_parens)]
 
 use crate::ast::AST;
+use crate::parser::locator::LocatorStrategy;
 use crate::token::Token;
 use slr_parser::error::ParseError;
 use std::future::Future;
@@ -24,8 +25,17 @@ macro_rules! class_macro {
                     $(
                         $method:ident$(
                             {
-                                $(Action_return_type: $action_return_type:ident,)?
-                                $(Engine_return_type: $engine_return_type:ident)?
+                                $(
+                                    action: {
+                                        returns : $action_returns:ident
+                                    }
+                                )?
+                                $(
+                                    engine : {
+                                        $(args:($($engine_identifier:ident : $enigne_type:ident),*))?
+                                        $(returns : $engine_returns:ident)?
+                                    }
+                                )?
                             }
                         )?
                     ),+
@@ -53,10 +63,25 @@ macro_rules! class_macro {
         $(
             pub trait $engine{
                 $(
-                    ifdef! {[$($($engine_return_type)?)?]
-                        {fn $method(&self) -> impl Future<Output = $($($engine_return_type)?)?>;}
+                    ifdef! {
+                        [$($($($($engine_identifier, $enigne_type),*)?)?)?,$($($($engine_returns)?)?)?]
+                        {fn $method(&self,$($($($($engine_identifier : $enigne_type),*)?)?)?) -> impl Future<Output = ($($($($engine_returns)?)?)?)>;}
                         else
-                        {fn $method(&self) -> impl Future<Output = ()>;}
+                        {
+                            ifdef! {
+                                [$($($($($engine_identifier, $enigne_type),*)?)?)?]
+                                {fn $method(&self,$($($($($engine_identifier : $enigne_type),*)?)?)?) -> impl Future<Output = ()>;}
+                                else
+                                {
+                                    ifdef! {
+                                        [$($($($engine_returns)?)?)?]
+                                        {fn $method(&self) -> impl Future<Output = ($($($($engine_returns)?)?)?)>;}
+                                        else
+                                        {fn $method(&self) -> impl Future<Output = ()>;}
+                                    }
+                                }
+                            }
+                        }
                     }
                 )+
             }
@@ -65,12 +90,12 @@ macro_rules! class_macro {
         $(
             pub trait $action{
                 $(
-                    ifdef! {[$($($action_return_type)?)?]
+                    ifdef! {[$($($action_returns)?)?]
                         {fn $method(
-                            testcase: &mut TestCase,
+                            ast: &mut Vec<AST>,
                             token_stack: &mut Vec<Token>,
                             errors: &mut Vec<ParseError<Token>>
-                        ) -> $($($action_return_type)?)?;}
+                        ) -> $($($action_returns)?)?;}
                         else
                         {fn $method(
                             ast: &mut Vec<AST>,
@@ -86,30 +111,34 @@ macro_rules! class_macro {
 
 class_macro!(
     {
-        action: ELEMENT_ACTION,
-        engine: ELENENT_ENGINE,
+        action: ElementAction,
+        engine: ElementEngine,
         ELEMENT {
             CLEAR,
-            CLICK,
-            GET_ACCESSBILE_NAME,
-            GET_ARIA_ROLE,
-            GET_ATTRIBUTE,
-            GET_CSS_VALUE,
-            GET_DOM_PROPERTY,
-            GET_LOCATION,
-            GET_SIZE,
-            GET_TAG_NAME,
-            GET_TEXT,
-            IS_DISPLAYED,
-            IS_ENABLED,
-            IS_SELECTED,
+            CLICK {
+                engine: {
+                    args: (locator:LocatorStrategy)
+                }
+            },
             SENDKEYS,
             SUBMIT
+            // GET_ACCESSBILE_NAME,
+            // GET_ARIA_ROLE,
+            // GET_ATTRIBUTE,
+            // GET_CSS_VALUE,
+            // GET_DOM_PROPERTY,
+            // GET_LOCATION,
+            // GET_SIZE,
+            // GET_TAG_NAME,
+            // GET_TEXT,
+            // IS_DISPLAYED,
+            // IS_ENABLED,
+            // IS_SELECTED
         }
     },
     {
-        action: WINDOW_ACTION,
-        engine: WINDOW_ENGINE,
+        action: WindowAction,
+        engine: WindowEngine,
         WINDOW {
             FULL_SCREEN,
             GET_POSITION,
@@ -119,11 +148,13 @@ class_macro!(
         }
     },
     {
-        action: WEB_DRIVER_ACTION,
-        engine: WEB_DRIVER_ENGINE,
+        action: WebDriverAction,
+        engine: WebDriverEngine,
         WEB_DRIVER {
             GET_TITLE {
-                Engine_return_type: String
+                engine: {
+                    returns: String
+                }
             },
             GET_CURRENT_URL,
             GET_PAGE_SOURCE,
@@ -134,8 +165,8 @@ class_macro!(
         }
     },
     {
-        action: ALERT_ACTION,
-        engine: ALERT_ENGINE,
+        action: AlertAction,
+        engine: AlertEngine,
         ALERT {
             ACCEPT,
             DISMISS,
@@ -144,8 +175,8 @@ class_macro!(
         }
     },
     {
-        action: NAVIGATION_ACTION,
-        engine: NAVIGATION_ENGINE,
+        action: NavigationAction,
+        engine: NavigationEngine,
         NAVIGATION {
             BACK,
             FORWARD,
@@ -153,8 +184,8 @@ class_macro!(
         }
     },
     {
-        action: OPTIONS_ACTION,
-        engine: OPTIONS_ENGINE,
+        action: OptionsAction,
+        engine: OptionsEngine,
         OPTIONS {
             ADD_COOKIE,
             DELETE_ALL_COOKIES,
@@ -163,8 +194,8 @@ class_macro!(
         }
     },
     {
-        action: TARGET_LOCATOR_ACTION,
-        engine: TARGET_LOCATOR_ENGINE,
+        action: TargetLocatorAction,
+        engine: TargetLocatorEngine,
         TARGET_LOCATOR {
             ACTIVE_ELEMENT,
             ALERT,
@@ -175,8 +206,8 @@ class_macro!(
         }
     },
     {
-        action: TIMEOUTS_ACTION,
-        engine: TIMEOUTS_ENGINE,
+        action: TimeoutsAction,
+        engine: TimeoutsEngine,
         TIMEOUTS {
             GET_IMPLICIT_TIMEOUT,
             GET_PAGE_LOAD_TIMEOUT,
@@ -185,8 +216,8 @@ class_macro!(
         }
     },
     {
-        action: HAS_DOWNLOADS_ACTION,
-        engine: HAS_DOWNLOADS_ENGINE,
+        action: HasDownloadsAction,
+        engine: HasDownloadsEngine,
         HAS_DOWNLOADS {
             DELETE_DOWNLOADABLE_FILES,
             DOWNLOAD_FILE,
