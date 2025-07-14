@@ -16,9 +16,13 @@ use crate::{
         testcase::{TestCase, TestcaseBody},
         teststep::TestStep,
     },
-    class::{Method, ELEMENT, NAVIGATION, WEB_DRIVER as Driver},
+    class::{ElementEngine, Method, ELEMENT, NAVIGATION, WEB_DRIVER as Driver},
+    engine::element::Element,
     parser::locator::LocatorStrategy,
 };
+
+mod element;
+mod navigation;
 
 type Port = u16;
 
@@ -66,7 +70,10 @@ impl Engine {
                 TestcaseBody::TESTSTEP(stepo) => {
                     match stepo.method {
                         Method::WEB_DRIVER(Driver::NAVIGATE) => self.navigate(stepo).await,
-                        Method::ELEMENT(ELEMENT::CLICK) => self.click(stepo).await,
+                        Method::ELEMENT(ELEMENT::CLICK) => {
+                            let element = Element(&mut self.driver);
+                            element.CLICK(stepo).await;
+                        }
                         Method::NAVIGATION(NAVIGATION::BACK) => self.back(stepo).await,
                         Method::NAVIGATION(NAVIGATION::FORWARD) => self.forward(stepo).await,
                         _ => {}

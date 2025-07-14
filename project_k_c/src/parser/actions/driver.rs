@@ -9,11 +9,11 @@ use slr_parser::error::ParseError;
 use url::Url;
 
 use crate::keywords::TokenType;
-use crate::{class::WEB_DRIVER_ACTION, get_input_from_token_stack};
+use crate::{class::WebDriverAction, get_input_from_token_stack};
 
 pub struct Driver {}
 
-impl WEB_DRIVER_ACTION for Driver {
+impl WebDriverAction for Driver {
     fn NAVIGATE(
         ast: &mut Vec<AST>,
         token_stack: &mut Vec<crate::token::Token>,

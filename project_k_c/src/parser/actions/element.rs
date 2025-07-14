@@ -3,7 +3,7 @@ use crate::ast::testcase::TestcaseBody;
 use crate::ast::teststep::TestStep;
 use crate::ast::AST;
 use crate::class::ELEMENT;
-use crate::class::{Class, Method, ELEMENT_ACTION};
+use crate::class::{Class, ElementAction, Method};
 use crate::parser::locator::LocatorStrategy;
 use crate::token::Token;
 use crate::TokenType;
@@ -12,7 +12,7 @@ use slr_parser::error::ParseError;
 
 pub struct Element {}
 
-impl ELEMENT_ACTION for Element {
+impl ElementAction for Element {
     fn CLICK(
         ast: &mut Vec<AST>,
         token_stack: &mut Vec<Token>,
@@ -37,78 +37,6 @@ impl ELEMENT_ACTION for Element {
         token_stack.clear();
     }
     fn CLEAR(
-        ast: &mut Vec<AST>,
-        token_stack: &mut Vec<Token>,
-        errors: &mut Vec<slr_parser::error::ParseError<Token>>,
-    ) {
-    }
-    fn GET_ACCESSBILE_NAME(
-        ast: &mut Vec<AST>,
-        token_stack: &mut Vec<Token>,
-        errors: &mut Vec<slr_parser::error::ParseError<Token>>,
-    ) {
-    }
-    fn GET_ARIA_ROLE(
-        ast: &mut Vec<AST>,
-        token_stack: &mut Vec<Token>,
-        errors: &mut Vec<slr_parser::error::ParseError<Token>>,
-    ) {
-    }
-    fn GET_ATTRIBUTE(
-        ast: &mut Vec<AST>,
-        token_stack: &mut Vec<Token>,
-        errors: &mut Vec<slr_parser::error::ParseError<Token>>,
-    ) {
-    }
-    fn GET_CSS_VALUE(
-        ast: &mut Vec<AST>,
-        token_stack: &mut Vec<Token>,
-        errors: &mut Vec<slr_parser::error::ParseError<Token>>,
-    ) {
-    }
-    fn GET_DOM_PROPERTY(
-        ast: &mut Vec<AST>,
-        token_stack: &mut Vec<Token>,
-        errors: &mut Vec<slr_parser::error::ParseError<Token>>,
-    ) {
-    }
-    fn GET_LOCATION(
-        ast: &mut Vec<AST>,
-        token_stack: &mut Vec<Token>,
-        errors: &mut Vec<slr_parser::error::ParseError<Token>>,
-    ) {
-    }
-    fn GET_SIZE(
-        ast: &mut Vec<AST>,
-        token_stack: &mut Vec<Token>,
-        errors: &mut Vec<slr_parser::error::ParseError<Token>>,
-    ) {
-    }
-    fn GET_TAG_NAME(
-        ast: &mut Vec<AST>,
-        token_stack: &mut Vec<Token>,
-        errors: &mut Vec<slr_parser::error::ParseError<Token>>,
-    ) {
-    }
-    fn GET_TEXT(
-        ast: &mut Vec<AST>,
-        token_stack: &mut Vec<Token>,
-        errors: &mut Vec<slr_parser::error::ParseError<Token>>,
-    ) {
-    }
-    fn IS_DISPLAYED(
-        ast: &mut Vec<AST>,
-        token_stack: &mut Vec<Token>,
-        errors: &mut Vec<slr_parser::error::ParseError<Token>>,
-    ) {
-    }
-    fn IS_ENABLED(
-        ast: &mut Vec<AST>,
-        token_stack: &mut Vec<Token>,
-        errors: &mut Vec<slr_parser::error::ParseError<Token>>,
-    ) {
-    }
-    fn IS_SELECTED(
         ast: &mut Vec<AST>,
         token_stack: &mut Vec<Token>,
         errors: &mut Vec<slr_parser::error::ParseError<Token>>,

@@ -1,20 +1,16 @@
-use crate::ast::arguments::Args;
 use crate::ast::testcase::TestcaseBody;
 use crate::ast::teststep::TestStep;
 use crate::ast::AST;
-use crate::class::ELEMENT;
+use crate::class::NavigationAction;
 use crate::class::NAVIGATION;
-use crate::class::NAVIGATION_ACTION;
-use crate::class::{Class, Method, ELEMENT_ACTION};
-use crate::parser::locator::LocatorStrategy;
+use crate::class::{Class, Method};
 use crate::token::Token;
-use crate::TokenType;
-use crate::{get_input_from_token_stack, unwrap_or_return};
+use crate::unwrap_or_return;
 use slr_parser::error::ParseError;
 
 pub struct Navigation {}
 
-impl NAVIGATION_ACTION for Navigation {
+impl NavigationAction for Navigation {
     fn BACK(ast: &mut Vec<AST>, token_stack: &mut Vec<Token>, errors: &mut Vec<ParseError<Token>>) {
         let testcase = unwrap_or_return!(AST::get_testcase_from_ast(ast.first_mut()));
         let test_step = TestStep::new(
