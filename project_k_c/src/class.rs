@@ -1,7 +1,7 @@
 #![allow(non_camel_case_types, non_snake_case, unused_parens)]
 
+use crate::ast::teststep::TestStep;
 use crate::ast::AST;
-use crate::parser::locator::LocatorStrategy;
 use crate::token::Token;
 use slr_parser::error::ParseError;
 use std::future::Future;
@@ -32,7 +32,6 @@ macro_rules! class_macro {
                                 )?
                                 $(
                                     engine : {
-                                        $(args:($($engine_identifier:ident : $enigne_type:ident),*))?
                                         $(returns : $engine_returns:ident)?
                                     }
                                 )?
@@ -64,24 +63,10 @@ macro_rules! class_macro {
             pub trait $engine{
                 $(
                     ifdef! {
-                        [$($($($($engine_identifier, $enigne_type),*)?)?)?,$($($($engine_returns)?)?)?]
-                        {fn $method(&self,$($($($($engine_identifier : $enigne_type),*)?)?)?) -> impl Future<Output = ($($($($engine_returns)?)?)?)>;}
+                        [$($($($engine_returns)?)?)?]
+                        {fn $method(&self,step:&TestStep) -> impl Future<Output = ($($($($engine_returns)?)?)?)>;}
                         else
-                        {
-                            ifdef! {
-                                [$($($($($engine_identifier, $enigne_type),*)?)?)?]
-                                {fn $method(&self,$($($($($engine_identifier : $enigne_type),*)?)?)?) -> impl Future<Output = ()>;}
-                                else
-                                {
-                                    ifdef! {
-                                        [$($($($engine_returns)?)?)?]
-                                        {fn $method(&self) -> impl Future<Output = ($($($($engine_returns)?)?)?)>;}
-                                        else
-                                        {fn $method(&self) -> impl Future<Output = ()>;}
-                                    }
-                                }
-                            }
-                        }
+                        {fn $method(&self,step:&TestStep) -> impl Future<Output = ()>;}
                     }
                 )+
             }
@@ -115,11 +100,7 @@ class_macro!(
         engine: ElementEngine,
         ELEMENT {
             CLEAR,
-            CLICK {
-                engine: {
-                    args: (locator:LocatorStrategy)
-                }
-            },
+            CLICK,
             SENDKEYS,
             SUBMIT
             // GET_ACCESSBILE_NAME,
