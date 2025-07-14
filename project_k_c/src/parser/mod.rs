@@ -5,7 +5,7 @@ use crate::error_handler::ErrorInfo;
 use crate::lexer::Lexer;
 use crate::{CompilationContext, TokenType};
 
-pub mod actions;
+mod actions;
 pub mod errors;
 pub mod locator;
 pub mod testcase;
