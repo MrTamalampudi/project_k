@@ -25,7 +25,7 @@ impl WebDriverAction for Driver {
         let url_ = get_input_from_token_stack!(&token_stack.last());
 
         //sample and it should be imporved
-        let parsed_url = match Url::parse(url_) {
+        match Url::parse(url_) {
             Ok(parsed_url) => {
                 if parsed_url.scheme() != "https" {
                     errors.push(ParseError {
