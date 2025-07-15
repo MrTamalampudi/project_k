@@ -1,4 +1,6 @@
-use crate::ast::arguments::Args;
+use std::collections::HashMap;
+
+use crate::ast::arguments::{Args, LOCATOR_ARGKEY};
 use crate::ast::testcase::TestcaseBody;
 use crate::ast::teststep::TestStep;
 use crate::ast::AST;
@@ -26,7 +28,7 @@ impl ElementAction for Element {
             token_stack.last().unwrap().get_end_location(),
             Class::ELEMENT,
             Method::ELEMENT(ELEMENT::CLICK),
-            vec![Args::Locator(locator)],
+            HashMap::from([(LOCATOR_ARGKEY, Args::Locator(locator))]),
         );
 
         testcase.insert_teststep(TestcaseBody::TESTSTEP(test_step));

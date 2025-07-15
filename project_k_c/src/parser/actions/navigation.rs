@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use crate::ast::testcase::TestcaseBody;
 use crate::ast::teststep::TestStep;
 use crate::ast::AST;
@@ -18,7 +20,7 @@ impl NavigationAction for Navigation {
             token_stack.last().unwrap().get_end_location(),
             Class::NAVIGATION,
             Method::NAVIGATION(NAVIGATION::BACK),
-            vec![],
+            HashMap::new(),
         );
 
         testcase.insert_teststep(TestcaseBody::TESTSTEP(test_step));
@@ -37,7 +39,7 @@ impl NavigationAction for Navigation {
             token_stack.last().unwrap().get_end_location(),
             Class::NAVIGATION,
             Method::NAVIGATION(NAVIGATION::FORWARD),
-            vec![],
+            HashMap::new(),
         );
 
         testcase.insert_teststep(TestcaseBody::TESTSTEP(test_step));
@@ -56,7 +58,7 @@ impl NavigationAction for Navigation {
             token_stack.last().unwrap().get_end_location(),
             Class::NAVIGATION,
             Method::NAVIGATION(NAVIGATION::REFRESH),
-            vec![],
+            HashMap::new(),
         );
 
         testcase.insert_teststep(TestcaseBody::TESTSTEP(test_step));

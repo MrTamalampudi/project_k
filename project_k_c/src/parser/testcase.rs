@@ -8,11 +8,9 @@ use slr_parser::terminal::Terminal;
 use std::sync::Arc;
 
 use super::Parser;
-use crate::ast::arguments::Args;
-use crate::ast::testcase::{TestCase, TestcaseBody};
-use crate::ast::teststep::TestStep;
+use crate::ast::testcase::TestCase;
 use crate::ast::AST;
-use crate::class::{Class, Method, NavigationAction, ELEMENT, NAVIGATION};
+use crate::class::NavigationAction;
 use crate::class::{ElementAction, WebDriverAction};
 use crate::engine::execute;
 use crate::error_handler::{parse_error_to_error_info, ErrorInfo};
@@ -20,7 +18,6 @@ use crate::keywords::TokenType;
 use crate::parser::actions::driver::Driver;
 use crate::parser::actions::element::Element;
 use crate::parser::actions::navigation::Navigation;
-use crate::parser::locator::LocatorStrategy;
 use crate::program::Program;
 use crate::token::Token;
 
@@ -154,65 +151,4 @@ fn refine_errors(errors: &mut Vec<ParseError<Token>>) {
         .iter_mut()
         .filter(|e| e.productionEnd)
         .for_each(|e| e.token.start = e.token.end);
-}
-
-fn element_click(
-    testcase: &mut TestCase,
-    token_stack: &mut Vec<Token>,
-    errors: &mut Vec<ParseError<Token>>,
-) {
-    let locator_token = token_stack.last();
-    let locator = LocatorStrategy::parse(get_input_from_token_stack!(locator_token));
-    let test_step = TestStep::new(
-        token_stack.first().unwrap().get_start_location(),
-        token_stack.last().unwrap().get_end_location(),
-        Class::ELEMENT,
-        Method::ELEMENT(ELEMENT::CLICK),
-        vec![Args::Locator(locator)],
-    );
-
-    testcase.insert_teststep(TestcaseBody::TESTSTEP(test_step));
-
-    // clear token_stack after every use
-    // token stack is particular to production so it should be cleared
-    // before any production using
-    token_stack.clear();
-}
-
-fn navigation_back(
-    testcase: &mut TestCase,
-    token_stack: &mut Vec<Token>,
-    errors: &mut Vec<ParseError<Token>>,
-) {
-    let test_step = TestStep::new(
-        token_stack.first().unwrap().get_start_location(),
-        token_stack.last().unwrap().get_end_location(),
-        Class::NAVIGATION,
-        Method::NAVIGATION(NAVIGATION::BACK),
-        vec![],
-    );
-
-    testcase.insert_teststep(TestcaseBody::TESTSTEP(test_step));
-
-    //clear token_stack after every use
-    token_stack.clear();
-}
-
-fn navigation_forward(
-    testcase: &mut TestCase,
-    token_stack: &mut Vec<Token>,
-    errors: &mut Vec<ParseError<Token>>,
-) {
-    let test_step = TestStep::new(
-        token_stack.first().unwrap().get_start_location(),
-        token_stack.last().unwrap().get_end_location(),
-        Class::NAVIGATION,
-        Method::NAVIGATION(NAVIGATION::FORWARD),
-        vec![],
-    );
-
-    testcase.insert_teststep(TestcaseBody::TESTSTEP(test_step));
-
-    //clear token_stack after every use
-    token_stack.clear();
 }

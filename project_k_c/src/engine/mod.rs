@@ -12,7 +12,7 @@ use webdriver_manager::{chrome::ChromeManager, logger::Logger, WebdriverManager}
 
 use crate::{
     ast::{
-        arguments::Args,
+        arguments::{Args, URL_ARGKEY},
         testcase::{TestCase, TestcaseBody},
         teststep::TestStep,
     },
@@ -71,7 +71,9 @@ impl Engine {
                     match stepo.method {
                         Method::WEB_DRIVER(Driver::NAVIGATE) => self.navigate(stepo).await,
                         Method::ELEMENT(ELEMENT::CLICK) => {
-                            let element = Element(&mut self.driver);
+                            let element = Element {
+                                driver: &mut self.driver,
+                            };
                             element.CLICK(stepo).await;
                         }
                         Method::NAVIGATION(NAVIGATION::BACK) => self.back(stepo).await,
@@ -92,7 +94,7 @@ impl Engine {
     }
 
     async fn navigate(&self, teststep: &TestStep) {
-        let url = teststep.arguments.get(0).unwrap();
+        let url = teststep.arguments.get(URL_ARGKEY).unwrap();
         if let Args::String(url) = url {
             if let Err(_) = self.driver.goto(url).await {
                 panic!("there is an error");
@@ -100,19 +102,10 @@ impl Engine {
         };
     }
 
-    async fn click(&self, teststep: &TestStep) {
-        let path = teststep.arguments.get(0).unwrap();
-        if let Args::Locator(locator) = path {
-            if let LocatorStrategy::XPATH(xpath) = locator {
-                if let Ok(element) = self.driver.find(By::XPath(xpath)).await {
-                    element.click().await;
-                }
-            }
-        }
-    }
-
     async fn back(&self, teststep: &TestStep) {
-        self.driver.back().await;
+        if let Ok(_) = self.driver.back().await {
+            println!("back done");
+        };
     }
 
     async fn forward(&self, teststep: &TestStep) {

@@ -1,4 +1,6 @@
-use crate::ast::arguments::Args;
+use std::collections::HashMap;
+
+use crate::ast::arguments::{Args, URL_ARGKEY};
 use crate::ast::testcase::TestcaseBody;
 use crate::ast::teststep::TestStep;
 use crate::ast::AST;
@@ -40,12 +42,14 @@ impl WebDriverAction for Driver {
             }),
         };
 
+        let arguments = HashMap::from([(URL_ARGKEY, Args::String(url_.clone()))]);
+
         let test_step = TestStep::new(
             token_stack.first().unwrap().get_start_location(),
             token_stack.last().unwrap().get_end_location(),
             Class::WEB_DRIVER,
             Method::WEB_DRIVER(WEB_DRIVER::NAVIGATE),
-            vec![Args::String(url_.clone())],
+            arguments,
         );
 
         testcase.insert_teststep(TestcaseBody::TESTSTEP(test_step));

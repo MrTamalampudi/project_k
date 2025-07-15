@@ -2,18 +2,20 @@ use thirtyfour::WebDriver;
 
 use crate::{ast::teststep::TestStep, class::NavigationEngine};
 
-pub struct Navigation(WebDriver);
+pub struct Navigation<'a> {
+    pub driver: &'a mut WebDriver,
+}
 
-impl NavigationEngine for Navigation {
+impl<'a> NavigationEngine for Navigation<'a> {
     async fn REFRESH(&self, step: &TestStep) -> () {
-        self.0.refresh().await;
+        self.driver.refresh().await;
     }
 
     async fn BACK(&self, step: &TestStep) -> () {
-        self.0.back().await;
+        self.driver.back().await;
     }
 
     async fn FORWARD(&self, step: &TestStep) -> () {
-        self.0.forward().await;
+        self.driver.forward().await;
     }
 }
