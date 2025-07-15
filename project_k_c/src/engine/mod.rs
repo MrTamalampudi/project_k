@@ -7,22 +7,18 @@ use std::{
     time::Duration,
 };
 
-use thirtyfour::{By, DesiredCapabilities, WebDriver};
+use thirtyfour::{DesiredCapabilities, WebDriver};
 use webdriver_manager::{chrome::ChromeManager, logger::Logger, WebdriverManager};
 
 use crate::{
-    ast::{
-        arguments::{Args, URL_ARGKEY},
-        testcase::{TestCase, TestcaseBody},
-        teststep::TestStep,
-    },
-    class::{ElementEngine, Method, ELEMENT, NAVIGATION, WEB_DRIVER as Driver},
-    engine::element::Element,
-    parser::locator::LocatorStrategy,
+    ast::testcase::{TestCase, TestcaseBody},
+    class::Method,
+    engine::{element::Element, navigation::Navigation, webdriver::WebDriver_},
 };
 
 mod element;
 mod navigation;
+mod webdriver;
 
 type Port = u16;
 
@@ -69,15 +65,9 @@ impl Engine {
             match step.deref() {
                 TestcaseBody::TESTSTEP(stepo) => {
                     match stepo.method {
-                        Method::WEB_DRIVER(Driver::NAVIGATE) => self.navigate(stepo).await,
-                        Method::ELEMENT(ELEMENT::CLICK) => {
-                            let element = Element {
-                                driver: &mut self.driver,
-                            };
-                            element.CLICK(stepo).await;
-                        }
-                        Method::NAVIGATION(NAVIGATION::BACK) => self.back(stepo).await,
-                        Method::NAVIGATION(NAVIGATION::FORWARD) => self.forward(stepo).await,
+                        Method::WEB_DRIVER(_) => WebDriver_::new(&mut self.driver, stepo).await,
+                        Method::ELEMENT(_) => Element::new(&mut self.driver, stepo).await,
+                        Method::NAVIGATION(_) => Navigation::new(&mut self.driver, stepo).await,
                         _ => {}
                     }
                     if let Some(next_step) = &stepo.next {
@@ -91,25 +81,6 @@ impl Engine {
                 }
             };
         }
-    }
-
-    async fn navigate(&self, teststep: &TestStep) {
-        let url = teststep.arguments.get(URL_ARGKEY).unwrap();
-        if let Args::String(url) = url {
-            if let Err(_) = self.driver.goto(url).await {
-                panic!("there is an error");
-            }
-        };
-    }
-
-    async fn back(&self, teststep: &TestStep) {
-        if let Ok(_) = self.driver.back().await {
-            println!("back done");
-        };
-    }
-
-    async fn forward(&self, teststep: &TestStep) {
-        self.driver.forward().await;
     }
 }
 
