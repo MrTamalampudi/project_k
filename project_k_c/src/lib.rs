@@ -1,5 +1,5 @@
 use enums::Capabilities;
-use error_handler::ErrorManager;
+use error_handling::ErrorManager;
 use keywords::TokenType;
 use lexer::{Lexer, Tokenizer};
 use parser::testcase;
@@ -19,9 +19,9 @@ use crate::program::Program;
 
 pub mod ast;
 pub mod class;
-pub mod engine;
+mod engine;
 pub mod enums;
-pub mod error_handler;
+pub mod error_handling;
 pub mod keywords;
 pub mod lexer;
 pub mod location;
@@ -29,6 +29,12 @@ pub mod parser;
 pub mod program;
 pub mod token;
 pub mod utils;
+
+enum ExecutionType {
+    TESTCASE,
+    TESTSUITE,
+    TESTPLAN,
+}
 
 #[derive(Debug, Clone)]
 pub struct CompilationContext {
