@@ -80,49 +80,41 @@ pub fn parser_slr(parser: &mut Parser) {
         | TESTSTEPS_BODY TESTSTEPS_BODY_
         {error:"Teststeps body_ 2"};
 
-        TESTSTEPS_BODY -> [ TokenType::ACTION_NAVIGATE,TokenType::STRING(d_string())]
+        TESTSTEPS_BODY -> [ TokenType::NAVIGATE,TokenType::STRING(d_string())]
         {error:"Expected syntax ' navigate \"url\" '"}
         {action:|ast,token_stack,errors| {
             Driver::NAVIGATE(ast, token_stack, errors);
         }}
         |
-        [TokenType::IDENTIFIER(d_string()),TokenType::ASSIGN_OP] I_S
-        {action:|ast,token_stack,errors| {
-            let identifier_token = token_stack.first();
-            let value_token = token_stack.last();
-
-            if let Some(value) = value_token {
-
-            }
-
-            let name = get_input_from_token_stack!(token_stack.first()) ;
-            let value = get_input_from_token_stack!(token_stack.last());
-
-            token_stack.clear();
-        }}
-        |
-        [TokenType::ACTION_CLICK,TokenType::STRING(d_string())]
+        [TokenType::CLICK,TokenType::STRING(d_string())]
         {error:"Please check teststeps syntax"}
         {action:|ast,token_stack,errors| {
             Element::CLICK(ast, token_stack, errors);
         }}
         |
-        [TokenType::ACTION_BACK]
+        [TokenType::BACK]
         {error:"Please check teststeps syntax"}
         {action:|ast,token_stack,errors| {
             Navigation::BACK(ast, token_stack, errors);
         }}
         |
-        [TokenType::ACTION_FORWARD]
+        [TokenType::FORWARD]
         {action:|ast,token_stack,errors| {
             Navigation::FORWARD(ast, token_stack, errors);
         }}
         |
-        [TokenType::ACTION_REFRESH]
+        [TokenType::REFRESH]
         {action:|ast,token_stack,errors| {
             Navigation::REFRESH(ast, token_stack, errors);
         }}
+        |
+        VAR_DECLARATION
         ;
+
+        VAR_DECLARATION -> [TokenType::IDENTIFIER(d_string()), TokenType::ASSIGN_OP] VAR_RHS;
+        VAR_RHS -> I_S | GETTER;
+        GETTER -> [TokenType::GET,TokenType::ATTRIBUTE];
+
 
         I_S -> [TokenType::IDENTIFIER(d_string())] | [TokenType::STRING(d_string())]
     );
@@ -143,12 +135,13 @@ pub fn parser_slr(parser: &mut Parser) {
             None => return,
         },
     };
+    println!("errors {:#?}", parser.ctx.errors);
     execute(parser.ctx.program.testcase.clone());
 }
 
 fn refine_errors(errors: &mut Vec<ParseError<Token>>) {
     errors
         .iter_mut()
-        .filter(|e| e.productionEnd)
+        .filter(|e| e.production_end)
         .for_each(|e| e.token.start = e.token.end);
 }

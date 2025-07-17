@@ -31,14 +31,14 @@ impl WebDriverAction for Driver {
                     errors.push(ParseError {
                         token: token_stack.last().unwrap().clone(),
                         message: String::from(VALID_URL_SHCEME),
-                        productionEnd: false,
+                        production_end: false,
                     })
                 }
             }
             Err(_) => errors.push(ParseError {
                 token: token_stack.last().unwrap().clone().clone(),
                 message: String::from(VALID_URL),
-                productionEnd: false,
+                production_end: false,
             }),
         };
 

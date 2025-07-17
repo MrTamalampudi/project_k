@@ -106,22 +106,26 @@ define_tokens!(
     TESTSUITE,
     TESTPLAN,
     //Actions
-    ACTION_NAVIGATE,
-    ACTION_CLICK,
-    ACTION_UPLOAD,
-    ACTION_BACK,
-    ACTION_FORWARD,
-    ACTION_REFRESH,
-    ACTION_RUN,
+    NAVIGATE,
+    CLICK,
+    UPLOAD,
+    BACK,
+    FORWARD,
+    REFRESH,
+    RUN,
     //options
-    OPTION_TO,
+    TO,
     //Operators
     ASSIGN_OP = '=',
     //High level tokens
     TESTSTEPS,
     CAPABILITIES,
     PREREQUISITE,
-    //
+    //GETTERS
+    GET,
+    ATTRIBUTE,
+    FROM,
+    ELEMENT,
     GENERATE,
     UNIQUE_EMAIL,
     EOF
