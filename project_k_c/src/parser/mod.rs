@@ -1,14 +1,12 @@
-use errors::ParserError;
 use testcase::parser_slr;
 
-use crate::error_handling::ErrorInfo;
 use crate::lexer::Lexer;
 use crate::{CompilationContext, TokenType};
 
+mod actions;
 pub mod errors;
 pub mod locator;
 pub mod testcase;
-pub mod testplan;
 
 #[derive(Debug)]
 pub struct Parser<'a, 'b> {
@@ -35,16 +33,6 @@ impl<'a, 'b> Parser<'a, 'b> {
 
     pub fn set_lexer(&mut self, lexer: Lexer) {
         *self.lexer = lexer;
-    }
-
-    pub fn error(&mut self, message: ParserError) {
-        let token = self.lexer.next_token();
-        self.ctx.errors.errors.push(ErrorInfo {
-            message: format!("{message}"),
-            start_location: token.get_start_location(),
-            end_location: token.get_end_location(),
-            source_path: token.get_source_path(),
-        });
     }
 }
 

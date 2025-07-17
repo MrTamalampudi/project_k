@@ -1,5 +1,7 @@
 #![allow(non_camel_case_types)]
 
+use thirtyfour::By;
+
 const CLASS: &'static str = "class:";
 const CSS: &'static str = "css:";
 const ID: &'static str = "id:";
@@ -33,6 +35,17 @@ impl LocatorStrategy {
             return LocatorStrategy::XPATH(locator_.clone());
         } else {
             return LocatorStrategy::XPATH(format!("//*[text()=\"{}\"", locator_));
+        }
+    }
+
+    pub fn to_by(&self) -> By {
+        match self {
+            LocatorStrategy::CLASSNAME(classname) => By::ClassName(classname),
+            LocatorStrategy::CSS_SELECTOR(css) => By::Css(css),
+            LocatorStrategy::ID(id) => By::Id(id),
+            LocatorStrategy::TAG_NAME(tag) => By::Tag(tag),
+            LocatorStrategy::XPATH(xpath) => By::XPath(xpath),
+            LocatorStrategy::NAME(name) => By::Name(name),
         }
     }
 }
