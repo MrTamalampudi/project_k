@@ -1,3 +1,0 @@
-fn testsuite() {
-    println!("testsuite");
-}

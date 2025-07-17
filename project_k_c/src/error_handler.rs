@@ -1,5 +1,3 @@
-use std::collections::HashSet;
-
 use slr_parser::error::ParseError;
 
 use crate::{location::Location, token::Token};
