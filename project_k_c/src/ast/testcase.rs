@@ -1,4 +1,4 @@
-use std::{cell::RefCell, collections::HashMap, rc::Rc};
+use std::collections::HashMap;
 
 use crate::{
     ast::{
@@ -14,8 +14,7 @@ use crate::{
 pub struct TestCase {
     capabilities: HashMap<String, CapabilityValue>,
     variables: HashMap<String, IdentifierValue>,
-    test_steps: Vec<Rc<RefCell<TestcaseBody>>>,
-    pub test_step: Option<Rc<RefCell<TestcaseBody>>>,
+    test_steps: Vec<TestcaseBody>,
 }
 
 impl TestCase {
@@ -24,7 +23,6 @@ impl TestCase {
             capabilities: HashMap::new(),
             variables: HashMap::new(),
             test_steps: vec![],
-            test_step: None,
         }
     }
 
@@ -44,23 +42,8 @@ impl TestCase {
         self.variables.insert(var.name.clone(), var.value.clone());
     }
 
-    pub fn insert_teststep(&mut self, body: TestcaseBody) {
-        let teststep_refcell = RefCell::new(body);
-        let teststep_rc = Rc::new(teststep_refcell);
-        if self.test_step.is_none() {
-            self.test_step = Some(teststep_rc.clone());
-        } else {
-            let teststep = self.get_last_teststep_entry().unwrap();
-            let teststep_deref = &mut *teststep.borrow_mut();
-            if let TestcaseBody::TESTSTEP(step) = teststep_deref {
-                step.next = Some(teststep_rc.clone());
-            }
-        }
-        self.test_steps.push(teststep_rc);
-    }
-
-    pub fn get_last_teststep_entry(&mut self) -> Option<Rc<RefCell<TestcaseBody>>> {
-        self.test_steps.last().cloned()
+    pub fn insert_teststep(&mut self, test_step: TestStep) {
+        self.test_steps.push(TestcaseBody::TESTSTEP(test_step));
     }
 
     pub fn get_teststeps(&self) -> &Vec<TestStep> {

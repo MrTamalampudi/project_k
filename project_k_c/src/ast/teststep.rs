@@ -1,7 +1,5 @@
-use std::{cell::RefCell, collections::HashMap, rc::Rc};
-
 use crate::{
-    ast::{arguments::Args, testcase::TestcaseBody},
+    ast::arguments::Args,
     class::{Class, Method},
     location::Location,
 };
@@ -13,8 +11,7 @@ pub struct TestStep {
     end: Location,
     pub class: Class,
     pub method: Method,
-    pub arguments: HashMap<&'static str, Args>,
-    pub next: Option<Rc<RefCell<TestcaseBody>>>,
+    pub arguments: Vec<Args>,
 }
 
 impl TestStep {
@@ -23,7 +20,7 @@ impl TestStep {
         end: Location,
         class: Class,
         method: Method,
-        arguments: HashMap<&'static str, Args>,
+        arguments: Vec<Args>,
     ) -> TestStep {
         TestStep {
             start,
@@ -31,7 +28,6 @@ impl TestStep {
             class,
             method,
             arguments,
-            next: None,
         }
     }
 }
