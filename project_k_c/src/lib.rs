@@ -1,19 +1,12 @@
-use enums::Capabilities;
 use error_handler::ErrorManager;
 use keywords::TokenType;
 use lexer::{Lexer, Tokenizer};
-use parser::testcase;
-use parser::testcase::parser_slr;
 use parser::Parser;
-use std::env;
 use std::fmt;
 use std::fs;
-use std::path::Display;
 use std::path::Path;
 use std::path::PathBuf;
-use std::process::Command;
 use token::Token;
-use utils::get_parent;
 
 use crate::program::Program;
 
@@ -28,7 +21,6 @@ pub mod location;
 pub mod parser;
 pub mod program;
 pub mod token;
-pub mod utils;
 
 #[derive(Debug, Clone)]
 pub struct CompilationContext {

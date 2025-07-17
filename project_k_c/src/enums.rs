@@ -115,10 +115,6 @@ impl Browser {
             Browser::NONE => CapabilityValue::NONE,
         }
     }
-
-    pub fn is_equal(&self, browser: Browser) -> bool {
-        matches!(self, Browser)
-    }
 }
 
 #[derive(Debug, Clone)]

@@ -13,7 +13,6 @@ const DOUBLE_QUOTE: char = '\"';
 const HASH_TAG: char = '#';
 const BACKSLASH: char = '\\';
 const FORWARDSLASH: char = '/';
-const DOLLAR: char = '$';
 const ASSIGN: char = '=';
 const UNDERLINE: char = '_';
 
@@ -205,21 +204,12 @@ impl<'a> Tokenizer<'a> {
     ) {
         let start = state.location;
         //consume until token length
-        for i in 1..=token_length {
+        for _ in 1..=token_length {
             state.next();
         }
         tokens.push(Token::new(
             token_type,
             start,
-            state.location,
-            self.get_source_path_as_string(),
-        ));
-    }
-
-    fn consume_eof(&self, state: &mut State, tokens: &mut Vec<Token>) {
-        tokens.push(Token::new(
-            TokenType::EOF,
-            state.location,
             state.location,
             self.get_source_path_as_string(),
         ));
