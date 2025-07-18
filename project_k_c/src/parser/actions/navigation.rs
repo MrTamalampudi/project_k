@@ -1,20 +1,23 @@
 use std::collections::HashMap;
 
+use crate::ast::testcase::TestCase;
 use crate::ast::testcase::TestcaseBody;
 use crate::ast::teststep::TestStep;
-use crate::ast::AST;
 use crate::class::NavigationAction;
 use crate::class::NAVIGATION;
 use crate::class::{Class, Method};
 use crate::token::Token;
-use crate::unwrap_or_return;
 use slr_parser::error::ParseError;
 
 pub struct Navigation {}
 
 impl NavigationAction for Navigation {
-    fn BACK(ast: &mut Vec<AST>, token_stack: &mut Vec<Token>, errors: &mut Vec<ParseError<Token>>) {
-        let testcase = unwrap_or_return!(AST::get_testcase_from_ast(ast.first_mut()));
+    fn BACK(
+        testcase: &mut TestCase,
+        token_stack: &mut Vec<Token>,
+        tl_stack: &mut Vec<TestcaseBody>,
+        errors: &mut Vec<ParseError<Token>>,
+    ) {
         let test_step = TestStep::new(
             token_stack.first().unwrap().get_start_location(),
             token_stack.last().unwrap().get_end_location(),
@@ -29,11 +32,11 @@ impl NavigationAction for Navigation {
         token_stack.clear();
     }
     fn FORWARD(
-        ast: &mut Vec<crate::ast::AST>,
+        testcase: &mut TestCase,
         token_stack: &mut Vec<Token>,
+        tl_stack: &mut Vec<TestcaseBody>,
         errors: &mut Vec<ParseError<Token>>,
     ) {
-        let testcase = unwrap_or_return!(AST::get_testcase_from_ast(ast.first_mut()));
         let test_step = TestStep::new(
             token_stack.first().unwrap().get_start_location(),
             token_stack.last().unwrap().get_end_location(),
@@ -48,11 +51,11 @@ impl NavigationAction for Navigation {
         token_stack.clear();
     }
     fn REFRESH(
-        ast: &mut Vec<crate::ast::AST>,
+        testcase: &mut TestCase,
         token_stack: &mut Vec<Token>,
+        tl_stack: &mut Vec<TestcaseBody>,
         errors: &mut Vec<ParseError<Token>>,
     ) {
-        let testcase = unwrap_or_return!(AST::get_testcase_from_ast(ast.first_mut()));
         let test_step = TestStep::new(
             token_stack.first().unwrap().get_start_location(),
             token_stack.last().unwrap().get_end_location(),

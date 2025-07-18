@@ -8,7 +8,7 @@ use slr_parser::terminal::Terminal;
 use std::sync::Arc;
 
 use super::Parser;
-use crate::ast::testcase::TestCase;
+use crate::ast::testcase::{TestCase, TestcaseBody};
 use crate::ast::AST;
 use crate::class::NavigationAction;
 use crate::class::{ElementAction, WebDriverAction};
@@ -55,73 +55,85 @@ pub fn parser_slr(parser: &mut Parser) {
         .filter(|t| t.get_token_type().ne(&TokenType::NEW_LINE))
         .collect();
     let d_string = || "".to_string();
-    let gr: Grammar<AST, Token> = grammar!(
+    let gr: Grammar<TestCase, Token, TestcaseBody> = grammar!(
         TokenType,
-        AST,
+        TestCase,
         Token,
-        TESTCASE -> TESTCASE_ TESTSTEPS {error:"Testing"};
+        TestcaseBody,
 
-        TESTCASE_ -> [TokenType::TESTCASE]
-        {action:|ast,token_stack,errors| {
-            ast.push(AST::TESTCASE(TestCase::new()));
-        }}
-        ;
+        TESTCASE -> Testcase TESTSTEPS {error:"Testing"};
 
-        TESTSTEPS -> TESTSTEPS_ TESTSTEPS_BODY_ {error:"Teststeps body_ 33"};
+        Testcase -> [TokenType::TESTCASE];
 
-        TESTSTEPS_ -> [TokenType::TESTSTEPS]
-        {action:|ast,token_stack,errors| {
-            token_stack.clear();
-        }}
-        ;
-
-        TESTSTEPS_BODY_ -> TESTSTEPS_BODY
+        TESTSTEPS -> TESTSTEPS_BODY
         {error:"Teststeps body_"}
-        | TESTSTEPS_BODY TESTSTEPS_BODY_
+        | TESTSTEPS_BODY TESTSTEPS
         {error:"Teststeps body_ 2"};
 
-        TESTSTEPS_BODY -> [ TokenType::NAVIGATE,TokenType::STRING(d_string())]
+        TESTSTEPS_BODY -> Navigate String
         {error:"Expected syntax ' navigate \"url\" '"}
-        {action:|ast,token_stack,errors| {
-            Driver::NAVIGATE(ast, token_stack, errors);
+        {action:|ast,token_stack,tl_stack,errors| {
+            Driver::NAVIGATE(ast,token_stack,tl_stack,errors);
         }}
         |
-        [TokenType::CLICK,TokenType::STRING(d_string())]
+        Click String
         {error:"Please check teststeps syntax"}
-        {action:|ast,token_stack,errors| {
-            Element::CLICK(ast, token_stack, errors);
+        {action:|ast,token_stack,tl_stack,errors| {
+            Element::CLICK(ast,token_stack,tl_stack,errors);
         }}
         |
-        [TokenType::BACK]
+        Back
         {error:"Please check teststeps syntax"}
-        {action:|ast,token_stack,errors| {
-            Navigation::BACK(ast, token_stack, errors);
+        {action:|ast,token_stack,tl_stack,errors| {
+            Navigation::BACK(ast,token_stack,tl_stack,errors);
         }}
         |
-        [TokenType::FORWARD]
-        {action:|ast,token_stack,errors| {
-            Navigation::FORWARD(ast, token_stack, errors);
+        Forward
+        {action:|ast,token_stack,tl_stack,errors| {
+            Navigation::FORWARD(ast,token_stack,tl_stack,errors);
         }}
         |
-        [TokenType::REFRESH]
-        {action:|ast,token_stack,errors| {
-            Navigation::REFRESH(ast, token_stack, errors);
+        Refresh
+        {action:|ast,token_stack,tl_stack,errors| {
+            Navigation::REFRESH(ast,token_stack,tl_stack,errors);
         }}
         |
         VAR_DECLARATION
         ;
 
-        VAR_DECLARATION -> [TokenType::IDENTIFIER(d_string()), TokenType::ASSIGN_OP] VAR_RHS;
-        VAR_RHS -> I_S | GETTER;
-        GETTER -> [TokenType::GET,TokenType::ATTRIBUTE];
+        VAR_DECLARATION -> Ident Assign VAR_RHS;
+        VAR_RHS -> IDENT_OR_STRING | GETTER;
+        GETTER -> Get Attribute IDENT_OR_STRING From Element IDENT_OR_STRING;
 
 
-        I_S -> [TokenType::IDENTIFIER(d_string())] | [TokenType::STRING(d_string())]
+        IDENT_OR_STRING -> Ident | String;
+
+        //Actions
+        Navigate    -> [TokenType::NAVIGATE];
+        Click       -> [TokenType::CLICK];
+        Back        -> [TokenType::BACK];
+        Forward     -> [TokenType::FORWARD];
+        Refresh     -> [TokenType::REFRESH];
+        Get         -> [TokenType::GET];
+
+        //Nouns
+        Attribute   -> [TokenType::ATTRIBUTE];
+        Element     -> [TokenType::ELEMENT];
+
+        //Prepositions
+        From        -> [TokenType::FROM];
+
+        //Operators
+        Assign      -> [TokenType::ASSIGN_OP];
+
+        //Inputs
+        String      -> [TokenType::STRING(d_string())];
+        Ident       -> [TokenType::IDENTIFIER(d_string())];
     );
     let mut parsed = SLR_Parser::new(gr.productions);
     parsed.compute_lr0_items();
     let mut errors: Vec<ParseError<Token>> = Vec::new();
-    let mut ast: Vec<AST> = Vec::new();
+    let mut ast: TestCase = TestCase::new();
     parsed.parse(tt, &mut errors, &mut ast);
     refine_errors(&mut errors);
     let transformed_errors: Vec<ErrorInfo> = errors
@@ -130,10 +142,7 @@ pub fn parser_slr(parser: &mut Parser) {
         .collect();
     parser.ctx.errors.errors.extend(transformed_errors);
     parser.ctx.program = Program {
-        testcase: match AST::get_testcase_from_ast(ast.first_mut()) {
-            Some(testcase) => testcase.clone(),
-            None => return,
-        },
+        testcase: ast.clone(),
     };
     println!("errors {:#?}", parser.ctx.errors);
     execute(parser.ctx.program.testcase.clone());

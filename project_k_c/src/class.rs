@@ -1,5 +1,6 @@
 #![allow(non_camel_case_types, non_snake_case, unused_parens)]
 
+use crate::ast::testcase::{TestCase, TestcaseBody};
 use crate::ast::teststep::TestStep;
 use crate::ast::AST;
 use crate::token::Token;
@@ -77,14 +78,16 @@ macro_rules! class_macro {
                 $(
                     ifdef! {[$($($action_returns)?)?]
                         {fn $method(
-                            ast: &mut Vec<AST>,
+                            ast: &mut TestCase,
                             token_stack: &mut Vec<Token>,
+                            tl_stack:&mut Vec<TestcaseBody>,
                             errors: &mut Vec<ParseError<Token>>
                         ) -> $($($action_returns)?)?;}
                         else
                         {fn $method(
-                            ast: &mut Vec<AST>,
+                            ast: &mut TestCase,
                             token_stack: &mut Vec<Token>,
+                            tl_stack:&mut Vec<TestcaseBody>,
                             errors: &mut Vec<ParseError<Token>>
                         );}
                     }

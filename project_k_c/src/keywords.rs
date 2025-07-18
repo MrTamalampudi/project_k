@@ -105,28 +105,24 @@ define_tokens!(
     TESTCASE,
     TESTSUITE,
     TESTPLAN,
-    //Actions
+    // ***** actions
     NAVIGATE,
     CLICK,
-    UPLOAD,
     BACK,
     FORWARD,
     REFRESH,
-    RUN,
-    //options
+    GET,
+    // ***** prepositions
+    FROM,
+    //nouns
+    ATTRIBUTE,
+    ELEMENT,
     TO,
-    //Operators
+    // ***** operators
     ASSIGN_OP = '=',
     //High level tokens
     TESTSTEPS,
     CAPABILITIES,
     PREREQUISITE,
-    //GETTERS
-    GET,
-    ATTRIBUTE,
-    FROM,
-    ELEMENT,
-    GENERATE,
-    UNIQUE_EMAIL,
     EOF
 );

@@ -1,26 +1,25 @@
 use std::collections::HashMap;
 
 use crate::ast::arguments::{Args, LOCATOR_ARGKEY};
-use crate::ast::testcase::TestcaseBody;
+use crate::ast::testcase::{TestCase, TestcaseBody};
 use crate::ast::teststep::TestStep;
-use crate::ast::AST;
 use crate::class::ELEMENT;
 use crate::class::{Class, ElementAction, Method};
+use crate::get_input_from_token_stack;
 use crate::parser::locator::LocatorStrategy;
 use crate::token::Token;
 use crate::TokenType;
-use crate::{get_input_from_token_stack, unwrap_or_return};
 use slr_parser::error::ParseError;
 
 pub struct Element {}
 
 impl ElementAction for Element {
     fn CLICK(
-        ast: &mut Vec<AST>,
+        testcase: &mut TestCase,
         token_stack: &mut Vec<Token>,
+        tl_stack: &mut Vec<TestcaseBody>,
         errors: &mut Vec<ParseError<Token>>,
     ) {
-        let testcase = unwrap_or_return!(AST::get_testcase_from_ast(ast.first_mut()));
         let locator_token = token_stack.last();
         let locator = LocatorStrategy::parse(get_input_from_token_stack!(locator_token));
         let test_step = TestStep::new(
@@ -39,21 +38,24 @@ impl ElementAction for Element {
         token_stack.clear();
     }
     fn CLEAR(
-        ast: &mut Vec<AST>,
+        testcase: &mut TestCase,
         token_stack: &mut Vec<Token>,
-        errors: &mut Vec<slr_parser::error::ParseError<Token>>,
+        tl_stack: &mut Vec<TestcaseBody>,
+        errors: &mut Vec<ParseError<Token>>,
     ) {
     }
     fn SENDKEYS(
-        ast: &mut Vec<AST>,
+        testcase: &mut TestCase,
         token_stack: &mut Vec<Token>,
-        errors: &mut Vec<slr_parser::error::ParseError<Token>>,
+        tl_stack: &mut Vec<TestcaseBody>,
+        errors: &mut Vec<ParseError<Token>>,
     ) {
     }
     fn SUBMIT(
-        ast: &mut Vec<AST>,
+        testcase: &mut TestCase,
         token_stack: &mut Vec<Token>,
-        errors: &mut Vec<slr_parser::error::ParseError<Token>>,
+        tl_stack: &mut Vec<TestcaseBody>,
+        errors: &mut Vec<ParseError<Token>>,
     ) {
     }
 }
