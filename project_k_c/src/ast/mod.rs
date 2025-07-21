@@ -4,6 +4,8 @@ use crate::ast::{if_stmt::IfStmt, testcase::TestCase, teststep::TestStep};
 
 pub mod arguments;
 pub mod expression;
+pub mod getter;
+pub mod identifier_value;
 pub mod if_stmt;
 pub mod primitives;
 pub mod testcase;
