@@ -2,9 +2,7 @@ use std::{cell::RefCell, collections::HashMap, rc::Rc};
 
 use crate::{
     ast::{
-        if_stmt::IfStmt,
-        teststep::TestStep,
-        var_decl::{IdentifierValue, VarDecl},
+        identifier_value::IdentifierValue, if_stmt::IfStmt, teststep::TestStep, var_decl::VarDecl,
     },
     enums::CapabilityValue,
 };
@@ -13,7 +11,7 @@ use crate::{
 #[allow(unused)]
 pub struct TestCase {
     capabilities: HashMap<String, CapabilityValue>,
-    variables: HashMap<String, IdentifierValue>,
+    pub variables: HashMap<String, IdentifierValue>,
     test_steps: Vec<Rc<RefCell<TestcaseBody>>>,
     pub test_step: Option<Rc<RefCell<TestcaseBody>>>,
 }
@@ -40,8 +38,9 @@ impl TestCase {
         self.capabilities.insert(capability.clone(), value.clone());
     }
 
-    pub fn insert_variable(&mut self, var: &VarDecl) {
-        self.variables.insert(var.name.clone(), var.value.clone());
+    pub fn insert_variable(&mut self, var: VarDecl) {
+        self.variables
+            .insert(var.name.clone(), var.type_.to_identifier_value());
     }
 
     pub fn insert_teststep(&mut self, body: TestcaseBody) {
@@ -72,5 +71,5 @@ impl TestCase {
 pub enum TestcaseBody {
     TESTSTEP(TestStep),
     IF(IfStmt),
-    VarDecl(),
+    VarDecl(VarDecl),
 }
