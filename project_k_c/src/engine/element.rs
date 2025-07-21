@@ -17,6 +17,7 @@ impl<'a> Element<'a> {
                 ELEMENT::SENDKEYS => element.SENDKEYS(step).await,
                 ELEMENT::SUBMIT => element.SUBMIT(step).await,
                 ELEMENT::CLICK => element.CLICK(step).await,
+                ELEMENT::GET_ATTRIBUTE => element.GET_ATTRIBUTE(step).await,
             };
         };
     }
@@ -26,6 +27,7 @@ impl<'a> ElementEngine for Element<'a> {
     async fn CLEAR(&self, step: &TestStep) -> () {}
     async fn SUBMIT(&self, step: &TestStep) -> () {}
     async fn SENDKEYS(&self, step: &TestStep) -> () {}
+    async fn GET_ATTRIBUTE(&self, step: &TestStep) -> () {}
     async fn CLICK(&self, step: &TestStep) -> () {
         if let Args::Locator(locator) = step.arguments.get(LOCATOR_ARGKEY).unwrap() {
             let by = locator.to_by();

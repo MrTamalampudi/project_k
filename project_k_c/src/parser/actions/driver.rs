@@ -5,6 +5,7 @@ use crate::ast::testcase::{TestCase, TestcaseBody};
 use crate::ast::teststep::TestStep;
 use crate::class::{Class, Method, WEB_DRIVER};
 use crate::parser::errors::{VALID_URL, VALID_URL_SHCEME};
+use crate::parser::translator_stack::TranslatorStack;
 use crate::token::Token;
 use slr_parser::error::ParseError;
 use url::Url;
@@ -18,7 +19,7 @@ impl WebDriverAction for Driver {
     fn NAVIGATE(
         testcase: &mut TestCase,
         token_stack: &mut Vec<Token>,
-        tl_stack: &mut Vec<TestcaseBody>,
+        tl_stack: &mut Vec<TranslatorStack>,
         errors: &mut Vec<ParseError<Token>>,
     ) -> () {
         let url_ = get_input_from_token_stack!(&token_stack.last());
@@ -60,7 +61,7 @@ impl WebDriverAction for Driver {
     fn CLOSE(
         testcase: &mut TestCase,
         token_stack: &mut Vec<Token>,
-        tl_stack: &mut Vec<TestcaseBody>,
+        tl_stack: &mut Vec<TranslatorStack>,
         errors: &mut Vec<ParseError<Token>>,
     ) -> () {
     }
@@ -68,7 +69,7 @@ impl WebDriverAction for Driver {
     fn FIND_ELEMENT(
         testcase: &mut TestCase,
         token_stack: &mut Vec<Token>,
-        tl_stack: &mut Vec<TestcaseBody>,
+        tl_stack: &mut Vec<TranslatorStack>,
         errors: &mut Vec<ParseError<Token>>,
     ) -> () {
     }
@@ -76,7 +77,7 @@ impl WebDriverAction for Driver {
     fn GET_CURRENT_URL(
         testcase: &mut TestCase,
         token_stack: &mut Vec<Token>,
-        tl_stack: &mut Vec<TestcaseBody>,
+        tl_stack: &mut Vec<TranslatorStack>,
         errors: &mut Vec<ParseError<Token>>,
     ) -> () {
     }
@@ -84,7 +85,7 @@ impl WebDriverAction for Driver {
     fn GET_PAGE_SOURCE(
         testcase: &mut TestCase,
         token_stack: &mut Vec<Token>,
-        tl_stack: &mut Vec<TestcaseBody>,
+        tl_stack: &mut Vec<TranslatorStack>,
         errors: &mut Vec<ParseError<Token>>,
     ) -> () {
     }
@@ -92,14 +93,14 @@ impl WebDriverAction for Driver {
     fn GET_TITLE(
         testcase: &mut TestCase,
         token_stack: &mut Vec<Token>,
-        tl_stack: &mut Vec<TestcaseBody>,
+        tl_stack: &mut Vec<TranslatorStack>,
         errors: &mut Vec<ParseError<Token>>,
     ) -> () {
     }
     fn GET_WINDOW_HANDLE(
         testcase: &mut TestCase,
         token_stack: &mut Vec<Token>,
-        tl_stack: &mut Vec<TestcaseBody>,
+        tl_stack: &mut Vec<TranslatorStack>,
         errors: &mut Vec<ParseError<Token>>,
     ) -> () {
     }

@@ -6,6 +6,7 @@ use crate::ast::teststep::TestStep;
 use crate::class::NavigationAction;
 use crate::class::NAVIGATION;
 use crate::class::{Class, Method};
+use crate::parser::translator_stack::TranslatorStack;
 use crate::token::Token;
 use slr_parser::error::ParseError;
 
@@ -15,7 +16,7 @@ impl NavigationAction for Navigation {
     fn BACK(
         testcase: &mut TestCase,
         token_stack: &mut Vec<Token>,
-        tl_stack: &mut Vec<TestcaseBody>,
+        tl_stack: &mut Vec<TranslatorStack>,
         errors: &mut Vec<ParseError<Token>>,
     ) {
         let test_step = TestStep::new(
@@ -34,7 +35,7 @@ impl NavigationAction for Navigation {
     fn FORWARD(
         testcase: &mut TestCase,
         token_stack: &mut Vec<Token>,
-        tl_stack: &mut Vec<TestcaseBody>,
+        tl_stack: &mut Vec<TranslatorStack>,
         errors: &mut Vec<ParseError<Token>>,
     ) {
         let test_step = TestStep::new(
@@ -53,7 +54,7 @@ impl NavigationAction for Navigation {
     fn REFRESH(
         testcase: &mut TestCase,
         token_stack: &mut Vec<Token>,
-        tl_stack: &mut Vec<TestcaseBody>,
+        tl_stack: &mut Vec<TranslatorStack>,
         errors: &mut Vec<ParseError<Token>>,
     ) {
         let test_step = TestStep::new(
