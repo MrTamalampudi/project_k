@@ -1,5 +1,31 @@
+use crate::ast::identifier_value::IdentifierValue;
+
+#[derive(Clone, PartialEq, Debug)]
 pub enum Primitives {
     Number,
     String,
-    Xpath,
+    Locators,
+    Element,
+}
+
+impl ToString for Primitives {
+    fn to_string(&self) -> String {
+        match self {
+            Primitives::Number => String::from("Number"),
+            Primitives::Element => String::from("Element"),
+            Primitives::Locators => String::from("Locators"),
+            Primitives::String => String::from("String"),
+        }
+    }
+}
+
+impl Primitives {
+    pub fn to_identifier_value(&self) -> IdentifierValue {
+        match self {
+            Primitives::Number => IdentifierValue::Number(None),
+            Primitives::Element => IdentifierValue::Element(None),
+            Primitives::Locators => IdentifierValue::Locators(None),
+            Primitives::String => IdentifierValue::String(None),
+        }
+    }
 }
