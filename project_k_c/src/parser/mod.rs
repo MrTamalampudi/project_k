@@ -1,12 +1,15 @@
 use testcase::parser_slr;
 
+use crate::ast::teststep::TestStep;
+use crate::ast::var_decl::VarDecl;
 use crate::lexer::Lexer;
 use crate::{CompilationContext, TokenType};
 
 mod actions;
-pub mod errors;
+mod errors;
 pub mod locator;
 pub mod testcase;
+pub mod translator_stack;
 
 #[derive(Debug)]
 pub struct Parser<'a, 'b> {

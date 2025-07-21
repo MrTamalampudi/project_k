@@ -1,8 +1,8 @@
 #![allow(non_camel_case_types, non_snake_case, unused_parens)]
 
-use crate::ast::testcase::{TestCase, TestcaseBody};
+use crate::ast::testcase::TestCase;
 use crate::ast::teststep::TestStep;
-use crate::ast::AST;
+use crate::parser::translator_stack::TranslatorStack;
 use crate::token::Token;
 use slr_parser::error::ParseError;
 use std::future::Future;
@@ -78,16 +78,16 @@ macro_rules! class_macro {
                 $(
                     ifdef! {[$($($action_returns)?)?]
                         {fn $method(
-                            ast: &mut TestCase,
+                            testcase: &mut TestCase,
                             token_stack: &mut Vec<Token>,
-                            tl_stack:&mut Vec<TestcaseBody>,
+                            tl_stack:&mut Vec<TranslatorStack>,
                             errors: &mut Vec<ParseError<Token>>
                         ) -> $($($action_returns)?)?;}
                         else
                         {fn $method(
-                            ast: &mut TestCase,
+                            testcase: &mut TestCase,
                             token_stack: &mut Vec<Token>,
-                            tl_stack:&mut Vec<TestcaseBody>,
+                            tl_stack:&mut Vec<TranslatorStack>,
                             errors: &mut Vec<ParseError<Token>>
                         );}
                     }
@@ -105,10 +105,10 @@ class_macro!(
             CLEAR,
             CLICK,
             SENDKEYS,
-            SUBMIT
+            SUBMIT,
+            GET_ATTRIBUTE
             // GET_ACCESSBILE_NAME,
             // GET_ARIA_ROLE,
-            // GET_ATTRIBUTE,
             // GET_CSS_VALUE,
             // GET_DOM_PROPERTY,
             // GET_LOCATION,
@@ -206,6 +206,13 @@ class_macro!(
             DELETE_DOWNLOADABLE_FILES,
             DOWNLOAD_FILE,
             GET_DOWNLOADABLE_FILES
+        }
+    },
+    {
+        action:CustomAction,
+        engine:CustomEngine,
+        CUSTOM {
+            VAR_DECLARATION
         }
     }
 );
