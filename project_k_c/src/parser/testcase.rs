@@ -9,15 +9,16 @@ use std::sync::Arc;
 
 use super::Parser;
 use crate::ast::testcase::{TestCase, TestcaseBody};
-use crate::ast::AST;
-use crate::class::NavigationAction;
+use crate::class::{CustomAction, NavigationAction};
 use crate::class::{ElementAction, WebDriverAction};
 use crate::engine::execute;
 use crate::error_handler::{parse_error_to_error_info, ErrorInfo};
 use crate::keywords::TokenType;
+use crate::parser::actions::custom::Custom;
 use crate::parser::actions::driver::Driver;
 use crate::parser::actions::element::Element;
 use crate::parser::actions::navigation::Navigation;
+use crate::parser::translator_stack::TranslatorStack;
 use crate::program::Program;
 use crate::token::Token;
 
@@ -55,11 +56,11 @@ pub fn parser_slr(parser: &mut Parser) {
         .filter(|t| t.get_token_type().ne(&TokenType::NEW_LINE))
         .collect();
     let d_string = || "".to_string();
-    let gr: Grammar<TestCase, Token, TestcaseBody> = grammar!(
+    let gr: Grammar<TestCase, Token, TranslatorStack> = grammar!(
         TokenType,
         TestCase,
         Token,
-        TestcaseBody,
+        TranslatorStack,
 
         TESTCASE -> Testcase TESTSTEPS {error:"Testing"};
 
@@ -101,9 +102,17 @@ pub fn parser_slr(parser: &mut Parser) {
         VAR_DECLARATION
         ;
 
-        VAR_DECLARATION -> Ident Assign VAR_RHS;
+        VAR_DECLARATION -> Ident Assign VAR_RHS
+        {action:|ast,token_stack,tl_stack,errors| {
+                Custom::VAR_DECLARATION(ast,token_stack,tl_stack,errors);
+        }}
+        ;
         VAR_RHS -> IDENT_OR_STRING | GETTER;
-        GETTER -> Get Attribute IDENT_OR_STRING From Element IDENT_OR_STRING;
+        GETTER -> Get Attribute IDENT_OR_STRING From Element IDENT_OR_STRING
+        {action:|ast,token_stack,tl_stack,errors| {
+                Element::GET_ATTRIBUTE(ast,token_stack,tl_stack,errors);
+        }}
+        ;
 
 
         IDENT_OR_STRING -> Ident | String;
@@ -144,8 +153,8 @@ pub fn parser_slr(parser: &mut Parser) {
     parser.ctx.program = Program {
         testcase: ast.clone(),
     };
-    println!("errors {:#?}", parser.ctx.errors);
-    execute(parser.ctx.program.testcase.clone());
+    // println!("errors {:#?}", parser.ctx.errors);
+    //execute(parser.ctx.program.testcase.clone());
 }
 
 fn refine_errors(errors: &mut Vec<ParseError<Token>>) {
