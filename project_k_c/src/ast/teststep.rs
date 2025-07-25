@@ -9,8 +9,8 @@ use crate::{
 #[derive(Debug, Clone)]
 #[allow(unused)]
 pub struct TestStep {
-    start: Location,
-    end: Location,
+    pub start: Location,
+    pub end: Location,
     pub class: Class,
     pub method: Method,
     pub arguments: HashMap<&'static str, Args>,

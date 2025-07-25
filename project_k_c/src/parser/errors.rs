@@ -6,4 +6,4 @@ pub const VARIABLE_NOT_DEFINED: &'static str = "Variable not yet defined";
 pub const MISMATCHED_TYPES: &'static str = "Mismatched Types";
 
 // ***** token *****
-pub const INVALID_TOKEN: &'static str = "Invalid token. Please check syntax";
+pub const _INVALID_TOKEN: &'static str = "Invalid token. Please check syntax";

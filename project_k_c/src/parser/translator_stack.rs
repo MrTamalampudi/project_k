@@ -1,7 +1,7 @@
 use crate::ast::{getter::Getter, teststep::TestStep, var_decl::VarDecl};
 
 #[derive(Clone, Debug)]
-pub(crate) enum TranslatorStack {
+pub enum TranslatorStack {
     TestStep(TestStep),
     Getter(Getter),
     VarDecl(VarDecl),

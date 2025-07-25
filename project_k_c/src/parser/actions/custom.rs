@@ -17,16 +17,16 @@ impl CustomAction for Custom {
     //var = var_rhs
     //fetch var_rhs from tl_stack last element;
     fn VAR_DECLARATION(
-        testcase: &mut TestCase,
-        token_stack: &mut Vec<Token>,
-        tl_stack: &mut Vec<TranslatorStack>,
-        errors: &mut Vec<ParseError<Token>>,
+        _testcase: &mut TestCase,
+        _token_stack: &mut Vec<Token>,
+        _tl_stack: &mut Vec<TranslatorStack>,
+        _errors: &mut Vec<ParseError<Token>>,
     ) {
-        let var_rhs = match tl_stack.last() {
+        let var_rhs = match _tl_stack.last() {
             Some(rhs) => rhs,
             None => {
                 //check if it is a identifier
-                let rhs_ident = token_stack.get(2);
+                let rhs_ident = _token_stack.get(2);
                 if let Some(ident) = rhs_ident {
                     match &ident.token_type {
                         TokenType::IDENTIFIER(ident_) => &TranslatorStack::Ident(ident_.clone()),
@@ -39,7 +39,7 @@ impl CustomAction for Custom {
             }
         };
 
-        let identifier = match token_stack.first() {
+        let identifier = match _token_stack.first() {
             Some(token) => match &token.token_type {
                 TokenType::IDENTIFIER(ident) => ident,
                 _ => {
@@ -52,27 +52,27 @@ impl CustomAction for Custom {
         };
 
         let var_decl = match var_rhs {
-            TranslatorStack::Getter(getter) => VarDecl {
-                name: identifier.clone(),
-                type_: getter.returns.clone(),
-                rhs: VarRHS::Getter(getter.clone()),
-            },
-            TranslatorStack::String(string) => VarDecl {
-                name: identifier.clone(),
-                type_: Primitives::String,
-                rhs: VarRHS::String(string.clone()),
-            },
+            TranslatorStack::Getter(getter) => VarDecl::new(
+                identifier.clone(),
+                getter.returns.clone(),
+                VarRHS::Getter(getter.clone()),
+            ),
+            TranslatorStack::String(string) => VarDecl::new(
+                identifier.clone(),
+                Primitives::String,
+                VarRHS::String(string.clone()),
+            ),
             TranslatorStack::Ident(ident) => {
-                let variable = testcase.variables.get(ident);
+                let variable = _testcase.variables.get(ident);
                 if let Some(variable_) = variable {
-                    VarDecl {
-                        name: identifier.clone(),
-                        type_: variable_.to_primitive(),
-                        rhs: VarRHS::Var(ident.clone()),
-                    }
+                    VarDecl::new(
+                        identifier.clone(),
+                        variable_.to_primitive(),
+                        VarRHS::Var(ident.clone()),
+                    )
                 } else {
-                    if let Some(token) = token_stack.get(2) {
-                        errors.push(ParseError {
+                    if let Some(token) = _token_stack.get(2) {
+                        _errors.push(ParseError {
                             token: token.clone(),
                             message: String::from(VARIABLE_NOT_DEFINED),
                             production_end: false,
@@ -87,10 +87,10 @@ impl CustomAction for Custom {
             }
         };
 
-        if let Some(variable) = testcase.variables.get(identifier) {
+        if let Some(variable) = _testcase.variables.get(identifier) {
             if variable.to_primitive().ne(&var_decl.type_) {
-                if let Some(token) = token_stack.get(2) {
-                    errors.push(ParseError {
+                if let Some(token) = _token_stack.get(2) {
+                    _errors.push(ParseError {
                         token: token.clone(),
                         message: String::from(format!(
                             "{}, expected {} found {}",
@@ -105,10 +105,9 @@ impl CustomAction for Custom {
             }
         }
 
-        testcase.insert_teststep(TestcaseBody::VarDecl(var_decl.clone()));
-        testcase.insert_variable(var_decl.clone());
-        // println!("variables {:#?}", testcase.variables);
-        tl_stack.clear();
-        token_stack.clear();
+        _testcase.insert_teststep(TestcaseBody::VarDecl(var_decl.clone()));
+        _testcase.insert_variable(var_decl.clone());
+        _tl_stack.clear();
+        _token_stack.clear();
     }
 }

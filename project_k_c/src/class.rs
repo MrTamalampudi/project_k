@@ -65,9 +65,9 @@ macro_rules! class_macro {
                 $(
                     ifdef! {
                         [$($($($engine_returns)?)?)?]
-                        {fn $method(&self,step:&TestStep) -> impl Future<Output = ($($($($engine_returns)?)?)?)>;}
+                        {fn $method(&self,_step:&TestStep) -> impl Future<Output = ($($($($engine_returns)?)?)?)>;}
                         else
-                        {fn $method(&self,step:&TestStep) -> impl Future<Output = ()>;}
+                        {fn $method(&self,_step:&TestStep) -> impl Future<Output = ()>;}
                     }
                 )+
             }
@@ -78,17 +78,17 @@ macro_rules! class_macro {
                 $(
                     ifdef! {[$($($action_returns)?)?]
                         {fn $method(
-                            testcase: &mut TestCase,
-                            token_stack: &mut Vec<Token>,
-                            tl_stack:&mut Vec<TranslatorStack>,
-                            errors: &mut Vec<ParseError<Token>>
+                            _testcase: &mut TestCase,
+                            _token_stack: &mut Vec<Token>,
+                            _tl_stack:&mut Vec<TranslatorStack>,
+                            _errors: &mut Vec<ParseError<Token>>
                         ) -> $($($action_returns)?)?;}
                         else
                         {fn $method(
-                            testcase: &mut TestCase,
-                            token_stack: &mut Vec<Token>,
-                            tl_stack:&mut Vec<TranslatorStack>,
-                            errors: &mut Vec<ParseError<Token>>
+                            _testcase: &mut TestCase,
+                            _token_stack: &mut Vec<Token>,
+                            _tl_stack:&mut Vec<TranslatorStack>,
+                            _errors: &mut Vec<ParseError<Token>>
                         );}
                     }
                 )+

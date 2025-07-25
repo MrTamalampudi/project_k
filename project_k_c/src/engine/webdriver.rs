@@ -40,20 +40,20 @@ impl<'a> WebDriver_<'a> {
 }
 
 impl<'a> WebDriverEngine for WebDriver_<'a> {
-    async fn NAVIGATE(&self, step: &TestStep) -> () {
-        let url = step.arguments.get(URL_ARGKEY).unwrap();
+    async fn NAVIGATE(&self, _step: &TestStep) -> () {
+        let url = _step.arguments.get(URL_ARGKEY).unwrap();
         if let Args::String(url) = url {
             if let Err(_) = self.driver.goto(url).await {
                 panic!("there is an error");
             }
         };
     }
-    async fn CLOSE(&self, step: &TestStep) -> () {}
-    async fn FIND_ELEMENT(&self, step: &TestStep) -> () {}
-    async fn GET_CURRENT_URL(&self, step: &TestStep) -> () {}
-    async fn GET_PAGE_SOURCE(&self, step: &TestStep) -> () {}
-    async fn GET_TITLE(&self, step: &TestStep) -> (String) {
+    async fn CLOSE(&self, _step: &TestStep) -> () {}
+    async fn FIND_ELEMENT(&self, _step: &TestStep) -> () {}
+    async fn GET_CURRENT_URL(&self, _step: &TestStep) -> () {}
+    async fn GET_PAGE_SOURCE(&self, _step: &TestStep) -> () {}
+    async fn GET_TITLE(&self, _step: &TestStep) -> String {
         todo!()
     }
-    async fn GET_WINDOW_HANDLE(&self, step: &TestStep) -> () {}
+    async fn GET_WINDOW_HANDLE(&self, _step: &TestStep) -> () {}
 }

@@ -1,7 +1,5 @@
 use testcase::parser_slr;
 
-use crate::ast::teststep::TestStep;
-use crate::ast::var_decl::VarDecl;
 use crate::lexer::Lexer;
 use crate::{CompilationContext, TokenType};
 

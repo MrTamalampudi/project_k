@@ -19,68 +19,68 @@ pub struct Element {}
 
 impl ElementAction for Element {
     fn CLICK(
-        testcase: &mut TestCase,
-        token_stack: &mut Vec<Token>,
-        tl_stack: &mut Vec<TranslatorStack>,
-        errors: &mut Vec<ParseError<Token>>,
+        _testcase: &mut TestCase,
+        _token_stack: &mut Vec<Token>,
+        _tl_stack: &mut Vec<TranslatorStack>,
+        _errors: &mut Vec<ParseError<Token>>,
     ) {
-        let locator_token = token_stack.last();
+        let locator_token = _token_stack.last();
         let locator = LocatorStrategy::parse(get_input_from_token_stack!(locator_token));
         let test_step = TestStep::new(
-            token_stack.first().unwrap().get_start_location(),
-            token_stack.last().unwrap().get_end_location(),
+            _token_stack.first().unwrap().get_start_location(),
+            _token_stack.last().unwrap().get_end_location(),
             Class::ELEMENT,
             Method::ELEMENT(ELEMENT::CLICK),
             HashMap::from([(LOCATOR_ARGKEY, Args::Locator(locator))]),
         );
 
-        testcase.insert_teststep(TestcaseBody::TESTSTEP(test_step));
+        _testcase.insert_teststep(TestcaseBody::TESTSTEP(test_step));
 
         // clear token_stack after every use
         // token stack is particular to production so it should be cleared
         // before any production using
-        token_stack.clear();
+        _token_stack.clear();
     }
     fn CLEAR(
-        testcase: &mut TestCase,
-        token_stack: &mut Vec<Token>,
-        tl_stack: &mut Vec<TranslatorStack>,
-        errors: &mut Vec<ParseError<Token>>,
+        _testcase: &mut TestCase,
+        _token_stack: &mut Vec<Token>,
+        _tl_stack: &mut Vec<TranslatorStack>,
+        _errors: &mut Vec<ParseError<Token>>,
     ) {
     }
     fn SENDKEYS(
-        testcase: &mut TestCase,
-        token_stack: &mut Vec<Token>,
-        tl_stack: &mut Vec<TranslatorStack>,
-        errors: &mut Vec<ParseError<Token>>,
+        _testcase: &mut TestCase,
+        _token_stack: &mut Vec<Token>,
+        _tl_stack: &mut Vec<TranslatorStack>,
+        _errors: &mut Vec<ParseError<Token>>,
     ) {
     }
     fn SUBMIT(
-        testcase: &mut TestCase,
-        token_stack: &mut Vec<Token>,
-        tl_stack: &mut Vec<TranslatorStack>,
-        errors: &mut Vec<ParseError<Token>>,
+        _testcase: &mut TestCase,
+        _token_stack: &mut Vec<Token>,
+        _tl_stack: &mut Vec<TranslatorStack>,
+        _errors: &mut Vec<ParseError<Token>>,
     ) {
     }
     //get attribute ident_or_string from element ident_or_string
     fn GET_ATTRIBUTE(
-        testcase: &mut TestCase,
-        token_stack: &mut Vec<Token>,
-        tl_stack: &mut Vec<TranslatorStack>,
-        errors: &mut Vec<ParseError<Token>>,
+        _testcase: &mut TestCase,
+        _token_stack: &mut Vec<Token>,
+        _tl_stack: &mut Vec<TranslatorStack>,
+        _errors: &mut Vec<ParseError<Token>>,
     ) {
-        let locator_token = token_stack
-            .get(token_stack.len().saturating_sub(1))
+        let locator_token = _token_stack
+            .get(_token_stack.len().saturating_sub(1))
             .unwrap();
-        let attribute_token = token_stack
-            .get(token_stack.len().saturating_sub(4))
+        let attribute_token = _token_stack
+            .get(_token_stack.len().saturating_sub(4))
             .unwrap();
 
         let locator_arg = match &locator_token.token_type {
             TokenType::STRING(locator) => Args::Locator(LocatorStrategy::parse(locator)),
             TokenType::IDENTIFIER(ident) => {
-                if let None = testcase.variables.get(ident) {
-                    errors.push(ParseError {
+                if let None = _testcase.variables.get(ident) {
+                    _errors.push(ParseError {
                         token: locator_token.clone(),
                         message: String::from(VARIABLE_NOT_DEFINED),
                         production_end: false,
@@ -91,7 +91,7 @@ impl ElementAction for Element {
                 }
             }
             _ => {
-                errors.push(ParseError {
+                _errors.push(ParseError {
                     token: locator_token.clone(),
                     message: String::from(VARIABLE_NOT_DEFINED),
                     production_end: false,
@@ -103,8 +103,8 @@ impl ElementAction for Element {
         let attribute_arg = match &attribute_token.token_type {
             TokenType::STRING(attribute) => Args::String(attribute.clone()),
             TokenType::IDENTIFIER(ident) => {
-                if let None = testcase.variables.get(ident) {
-                    errors.push(ParseError {
+                if let None = _testcase.variables.get(ident) {
+                    _errors.push(ParseError {
                         token: locator_token.clone(),
                         message: String::from(VARIABLE_NOT_DEFINED),
                         production_end: false,
@@ -115,7 +115,7 @@ impl ElementAction for Element {
                 }
             }
             _ => {
-                errors.push(ParseError {
+                _errors.push(ParseError {
                     token: locator_token.clone(),
                     message: String::from(VARIABLE_NOT_DEFINED),
                     production_end: false,
@@ -133,6 +133,6 @@ impl ElementAction for Element {
             returns: Primitives::String,
         };
 
-        tl_stack.push(TranslatorStack::Getter(teststep));
+        _tl_stack.push(TranslatorStack::Getter(teststep));
     }
 }

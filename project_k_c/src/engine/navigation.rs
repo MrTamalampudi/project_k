@@ -23,15 +23,15 @@ impl<'a> Navigation<'a> {
 }
 
 impl<'a> NavigationEngine for Navigation<'a> {
-    async fn REFRESH(&self, step: &TestStep) -> () {
+    async fn REFRESH(&self, _step: &TestStep) -> () {
         self.driver.refresh().await;
     }
 
-    async fn BACK(&self, step: &TestStep) -> () {
+    async fn BACK(&self, _step: &TestStep) -> () {
         self.driver.back().await;
     }
 
-    async fn FORWARD(&self, step: &TestStep) -> () {
+    async fn FORWARD(&self, _step: &TestStep) -> () {
         self.driver.forward().await;
     }
 }

@@ -24,12 +24,12 @@ impl<'a> Element<'a> {
 }
 
 impl<'a> ElementEngine for Element<'a> {
-    async fn CLEAR(&self, step: &TestStep) -> () {}
-    async fn SUBMIT(&self, step: &TestStep) -> () {}
-    async fn SENDKEYS(&self, step: &TestStep) -> () {}
-    async fn GET_ATTRIBUTE(&self, step: &TestStep) -> () {}
-    async fn CLICK(&self, step: &TestStep) -> () {
-        if let Args::Locator(locator) = step.arguments.get(LOCATOR_ARGKEY).unwrap() {
+    async fn CLEAR(&self, _step: &TestStep) -> () {}
+    async fn SUBMIT(&self, _step: &TestStep) -> () {}
+    async fn SENDKEYS(&self, _step: &TestStep) -> () {}
+    async fn GET_ATTRIBUTE(&self, _step: &TestStep) -> () {}
+    async fn CLICK(&self, _step: &TestStep) -> () {
+        if let Args::Locator(locator) = _step.arguments.get(LOCATOR_ARGKEY).unwrap() {
             let by = locator.to_by();
             let element = self.driver.find(by).await;
             if let Ok(element) = element {

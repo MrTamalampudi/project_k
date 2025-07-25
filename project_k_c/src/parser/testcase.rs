@@ -8,7 +8,7 @@ use slr_parser::terminal::Terminal;
 use std::sync::Arc;
 
 use super::Parser;
-use crate::ast::testcase::{TestCase, TestcaseBody};
+use crate::ast::testcase::TestCase;
 use crate::class::{CustomAction, NavigationAction};
 use crate::class::{ElementAction, WebDriverAction};
 use crate::engine::execute;
