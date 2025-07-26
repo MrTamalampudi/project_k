@@ -154,7 +154,7 @@ pub fn parser_slr(parser: &mut Parser) {
         testcase: ast.clone(),
     };
     // println!("errors {:#?}", parser.ctx.errors);
-    //execute(parser.ctx.program.testcase.clone());
+    execute(parser.ctx.program.testcase.clone());
 }
 
 fn refine_errors(errors: &mut Vec<ParseError<Token>>) {

@@ -1,7 +1,7 @@
 #![allow(non_camel_case_types, non_snake_case, unused_parens)]
 
 use crate::ast::testcase::TestCase;
-use crate::ast::teststep::TestStep;
+use crate::ast::testcase_body::TestcaseBody;
 use crate::parser::translator_stack::TranslatorStack;
 use crate::token::Token;
 use slr_parser::error::ParseError;
@@ -65,9 +65,9 @@ macro_rules! class_macro {
                 $(
                     ifdef! {
                         [$($($($engine_returns)?)?)?]
-                        {fn $method(&self,_step:&TestStep) -> impl Future<Output = ($($($($engine_returns)?)?)?)>;}
+                        {fn $method(&self,_step:&TestcaseBody) -> impl Future<Output = ($($($($engine_returns)?)?)?)>;}
                         else
-                        {fn $method(&self,_step:&TestStep) -> impl Future<Output = ()>;}
+                        {fn $method(&self,_step:&TestcaseBody) -> impl Future<Output = ()>;}
                     }
                 )+
             }
@@ -106,7 +106,11 @@ class_macro!(
             CLICK,
             SENDKEYS,
             SUBMIT,
-            GET_ATTRIBUTE
+            GET_ATTRIBUTE {
+                engine:{
+                    returns: String
+                }
+            }
             // GET_ACCESSBILE_NAME,
             // GET_ARIA_ROLE,
             // GET_CSS_VALUE,

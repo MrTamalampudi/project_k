@@ -2,7 +2,8 @@ use std::{cell::RefCell, collections::HashMap, rc::Rc};
 
 use crate::{
     ast::{
-        identifier_value::IdentifierValue, if_stmt::IfStmt, teststep::TestStep, var_decl::VarDecl,
+        identifier_value::IdentifierValue, testcase_body::TestcaseBody, teststep::TestStep,
+        var_decl::VarDecl,
     },
     enums::CapabilityValue,
 };
@@ -65,11 +66,4 @@ impl TestCase {
     pub fn get_teststeps(&self) -> &Vec<TestStep> {
         todo!()
     }
-}
-
-#[derive(Debug, Clone)]
-pub enum TestcaseBody {
-    TESTSTEP(TestStep),
-    IF(IfStmt),
-    VarDecl(VarDecl),
 }

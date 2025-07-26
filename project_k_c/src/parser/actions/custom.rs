@@ -1,6 +1,6 @@
 use crate::ast::primitives::Primitives;
 use crate::ast::testcase::TestCase;
-use crate::ast::testcase::TestcaseBody;
+use crate::ast::testcase_body::TestcaseBody;
 use crate::ast::var_decl::VarDecl;
 use crate::ast::var_decl::VarRHS;
 use crate::class::CustomAction;
@@ -105,7 +105,7 @@ impl CustomAction for Custom {
             }
         }
 
-        _testcase.insert_teststep(TestcaseBody::VarDecl(var_decl.clone()));
+        _testcase.insert_teststep(TestcaseBody::VAR_DECL(var_decl.clone()));
         _testcase.insert_variable(var_decl.clone());
         _tl_stack.clear();
         _token_stack.clear();

@@ -11,11 +11,12 @@ use thirtyfour::{DesiredCapabilities, WebDriver};
 use webdriver_manager::{chrome::ChromeManager, logger::Logger, WebdriverManager};
 
 use crate::{
-    ast::testcase::{TestCase, TestcaseBody},
+    ast::{testcase::TestCase, testcase_body::TestcaseBody},
     class::Method,
-    engine::{element::Element, navigation::Navigation, webdriver::WebDriver_},
+    engine::{custom::Custom, element::Element, navigation::Navigation, webdriver::WebDriver_},
 };
 
+mod custom;
 mod element;
 mod navigation;
 mod webdriver;
@@ -60,25 +61,24 @@ impl Engine {
 
     async fn start(&mut self) {
         while let Some(step_ref_cell) = self.testcase.test_step.take() {
-            let step = step_ref_cell.borrow();
+            let teststep = step_ref_cell.borrow();
+            let testcase_body = teststep.deref();
 
-            match step.deref() {
-                TestcaseBody::TESTSTEP(stepo) => {
-                    match stepo.method {
-                        Method::WEB_DRIVER(_) => WebDriver_::new(&mut self.driver, stepo).await,
-                        Method::ELEMENT(_) => Element::new(&mut self.driver, stepo).await,
-                        Method::NAVIGATION(_) => Navigation::new(&mut self.driver, stepo).await,
+            self.testcase.test_step = match testcase_body {
+                TestcaseBody::TESTSTEP(step) => {
+                    match step.method {
+                        Method::WEB_DRIVER(_) => WebDriver_::new(&self.driver, testcase_body).await,
+                        Method::ELEMENT(_) => Element::new(&self.driver, testcase_body).await,
+                        Method::NAVIGATION(_) => Navigation::new(&self.driver, testcase_body).await,
                         _ => {}
                     }
-                    if let Some(next_step) = &stepo.next {
-                        self.testcase.test_step = Some(next_step.clone());
-                    } else {
-                        self.testcase.test_step = None;
-                    }
+                    step.next.clone()
                 }
-                _ => {
-                    self.testcase.test_step = None;
+                TestcaseBody::VAR_DECL(step) => {
+                    Custom::new(&self.driver, testcase_body).await;
+                    step.next.clone()
                 }
+                _ => None,
             };
         }
     }

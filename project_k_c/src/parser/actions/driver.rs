@@ -1,7 +1,8 @@
 use std::collections::HashMap;
 
 use crate::ast::arguments::{Args, URL_ARGKEY};
-use crate::ast::testcase::{TestCase, TestcaseBody};
+use crate::ast::testcase::TestCase;
+use crate::ast::testcase_body::TestcaseBody;
 use crate::ast::teststep::TestStep;
 use crate::class::{Class, Method, WEB_DRIVER};
 use crate::parser::errors::{VALID_URL, VALID_URL_SHCEME};

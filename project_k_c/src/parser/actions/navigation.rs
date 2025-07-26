@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 use crate::ast::testcase::TestCase;
-use crate::ast::testcase::TestcaseBody;
+use crate::ast::testcase_body::TestcaseBody;
 use crate::ast::teststep::TestStep;
 use crate::class::NavigationAction;
 use crate::class::NAVIGATION;

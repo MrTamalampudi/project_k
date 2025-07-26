@@ -1,7 +1,10 @@
 use std::{cell::RefCell, collections::HashMap, rc::Rc};
 
 use crate::{
-    ast::{arguments::Args, testcase::TestcaseBody},
+    ast::{
+        arguments::Args,
+        testcase_body::{GetMethod, Next, TestcaseBody},
+    },
     class::{Class, Method},
     location::Location,
 };
@@ -33,5 +36,20 @@ impl TestStep {
             arguments,
             next: None,
         }
+    }
+}
+
+impl GetMethod for TestStep {
+    fn get_method(&self) -> Method {
+        self.method.clone()
+    }
+}
+
+impl Next for TestStep {
+    fn set_next(&mut self, next: Rc<RefCell<TestcaseBody>>) {
+        self.next = Some(next);
+    }
+    fn get_next(&self) -> Option<Rc<RefCell<TestcaseBody>>> {
+        self.next.clone()
     }
 }

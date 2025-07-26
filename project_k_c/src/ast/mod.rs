@@ -1,6 +1,9 @@
 use std::fmt;
 
-use crate::ast::{if_stmt::IfStmt, testcase::TestCase, teststep::TestStep};
+use crate::{
+    ast::{if_stmt::IfStmt, testcase::TestCase, teststep::TestStep},
+    class::Method,
+};
 
 pub mod arguments;
 pub mod expression;
@@ -9,6 +12,7 @@ pub mod identifier_value;
 pub mod if_stmt;
 pub mod primitives;
 pub mod testcase;
+pub mod testcase_body;
 pub mod teststep;
 pub mod var_decl;
 
