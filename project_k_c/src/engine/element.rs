@@ -18,9 +18,7 @@ impl<'a> Element<'a> {
                 ELEMENT::SENDKEYS => element.SENDKEYS(body).await,
                 ELEMENT::SUBMIT => element.SUBMIT(body).await,
                 ELEMENT::CLICK => element.CLICK(body).await,
-                ELEMENT::GET_ATTRIBUTE => {
-                    element.GET_ATTRIBUTE(body).await;
-                }
+                ELEMENT::GET_ATTRIBUTE => {}
             };
         };
     }
@@ -47,19 +45,13 @@ impl<'a> ElementEngine for Element<'a> {
                                 return String::from("H");
                             }
                         };
-                    } else {
-                        return String::from("H");
                     }
-                } else {
-                    return String::from("H");
                 }
-            } else {
-                return String::from("H");
             }
-        } else {
-            return String::from("D");
         }
+        return String::from("D");
     }
+
     async fn CLICK(&self, _body: &TestcaseBody) -> () {
         if let TestcaseBody::TESTSTEP(step) = _body {
             if let Args::Locator(locator) = step.arguments.get(LOCATOR_ARGKEY).unwrap() {

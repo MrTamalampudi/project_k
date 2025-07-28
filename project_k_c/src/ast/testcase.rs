@@ -55,6 +55,9 @@ impl TestCase {
             if let TestcaseBody::TESTSTEP(step) = teststep_deref {
                 step.next = Some(teststep_rc.clone());
             }
+            if let TestcaseBody::VAR_DECL(step) = teststep_deref {
+                step.next = Some(teststep_rc.clone());
+            }
         }
         self.test_steps.push(teststep_rc);
     }
