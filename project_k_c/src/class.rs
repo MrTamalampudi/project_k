@@ -33,7 +33,8 @@ macro_rules! class_macro {
                                 )?
                                 $(
                                     engine : {
-                                        $(returns : $engine_returns:ident)?
+                                        $(args: [$($engine_arg_ident:ident: $engine_arg_type:ty),*])?
+                                        $(returns : $engine_returns:ty)?
                                     }
                                 )?
                             }
@@ -64,15 +65,25 @@ macro_rules! class_macro {
             pub trait $engine{
                 $(
                     ifdef! {
-                        [$($($($engine_returns)?)?)?]
-                        {fn $method(&self,_step:&TestcaseBody) -> impl Future<Output = ($($($($engine_returns)?)?)?)>;}
+                        [$($($($engine_returns)?)?)?,$($($($($engine_arg_ident),*)?)?)?]
+                        {fn $method(&self,_step:&TestcaseBody,$($($($($engine_arg_ident:$engine_arg_type),*)?)?)?) -> impl Future<Output = Result<($($($($engine_returns)?)?)?),String>>;}
                         else
-                        {fn $method(&self,_step:&TestcaseBody) -> impl Future<Output = ()>;}
+                        { ifdef! {
+                            [$($($($engine_returns)?)?)?]
+                            {fn $method(&self,_step:&TestcaseBody) -> impl Future<Output = (Result<$($($($engine_returns)?)?)?,String>)>;}
+                            else
+                            { ifdef! {
+                                [$($($($($engine_arg_ident),*)?)?)?]
+                                {fn $method(&self,_step:&TestcaseBody,$($($($($engine_arg_ident:$engine_arg_type),*)?)?)?) -> impl Future<Output = (Result<(),String>)>;}
+                                else
+                                {fn $method(&self,_step:&TestcaseBody) -> impl Future<Output = (Result<(),String>)>;}
+                                }
+                            }}
+                        }
                     }
                 )+
             }
         )+
-
         $(
             pub trait $action{
                 $(
@@ -108,7 +119,7 @@ class_macro!(
             SUBMIT,
             GET_ATTRIBUTE {
                 engine:{
-                    returns: String
+                    returns: Option<String>
                 }
             }
             // GET_ACCESSBILE_NAME,
@@ -141,7 +152,7 @@ class_macro!(
         WEB_DRIVER {
             GET_TITLE {
                 engine: {
-                    returns: String
+                    returns: Option<String>
                 }
             },
             GET_CURRENT_URL,
@@ -216,7 +227,11 @@ class_macro!(
         action:CustomAction,
         engine:CustomEngine,
         CUSTOM {
-            VAR_DECLARATION
+            VAR_DECLARATION {
+                engine: {
+                    args: [_testcase : &mut TestCase]
+                }
+            }
         }
     }
 );
