@@ -1,0 +1,12 @@
+appenders:
+  stdout:
+    kind: console
+    encoder:
+      kind: pattern
+      #pattern: " ⚖️  {d(%d-%m-%y %H:%M:%S)} {h({l}):>7} {h({m})}{n}"
+      pattern: " ⚖️ {h({l}):>7} {h({m})}{n}"
+
+root:
+  level: debug
+  appenders:
+    - stdout
