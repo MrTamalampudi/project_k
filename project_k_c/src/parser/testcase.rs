@@ -1,3 +1,4 @@
+use log::{debug, error, info, warn};
 use slr_parser::error::ParseError;
 use slr_parser::grammar;
 use slr_parser::grammar::Grammar;
@@ -56,22 +57,17 @@ pub fn parser_slr(parser: &mut Parser) {
         .filter(|t| t.get_token_type().ne(&TokenType::NEW_LINE))
         .collect();
     let d_string = || "".to_string();
-    let gr: Grammar<TestCase, Token, TranslatorStack> = grammar!(
-        TokenType,
-        TestCase,
-        Token,
-        TranslatorStack,
-
-        TESTCASE -> Testcase TESTSTEPS {error:"Testing"};
+    let grammar: Grammar<TestCase, Token, TranslatorStack> = grammar!(
+        Start -> Testcase Teststeps {error:"Testing"};
 
         Testcase -> [TokenType::TESTCASE];
 
-        TESTSTEPS -> TESTSTEPS_BODY
+        Teststeps -> Teststep
         {error:"Teststeps body_"}
-        | TESTSTEPS_BODY TESTSTEPS
+        | Teststep Teststeps
         {error:"Teststeps body_ 2"};
 
-        TESTSTEPS_BODY -> Navigate String
+        Teststep -> Navigate String
         {error:"Expected syntax ' navigate \"url\" '"}
         {action:|ast,token_stack,tl_stack,errors| {
             Driver::NAVIGATE(ast,token_stack,tl_stack,errors);
@@ -139,11 +135,11 @@ pub fn parser_slr(parser: &mut Parser) {
         String      -> [TokenType::STRING(d_string())];
         Ident       -> [TokenType::IDENTIFIER(d_string())];
     );
-    let mut parsed = SLR_Parser::new(gr.productions);
-    parsed.compute_lr0_items();
+    let mut slr_parser = SLR_Parser::new(grammar.productions);
+    slr_parser.compute_lr0_items();
     let mut errors: Vec<ParseError<Token>> = Vec::new();
     let mut ast: TestCase = TestCase::new();
-    parsed.parse(tt, &mut errors, &mut ast);
+    slr_parser.parse(tt, &mut errors, &mut ast);
     refine_errors(&mut errors);
     let transformed_errors: Vec<ErrorInfo> = errors
         .iter()
@@ -153,7 +149,7 @@ pub fn parser_slr(parser: &mut Parser) {
     parser.ctx.program = Program {
         testcase: ast.clone(),
     };
-    // println!("errors {:#?}", parser.ctx.errors);
+    //println!("errors {:#?}", parser.ctx.program);
     execute(parser.ctx.program.testcase.clone());
 }
 
