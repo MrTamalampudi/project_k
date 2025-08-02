@@ -4,6 +4,7 @@ use std::env;
 use std::path::PathBuf;
 
 fn main() {
+    log4rs::init_file("./log_config.yml", Default::default()).unwrap();
     env::set_var("RUST_BACKTRACE", "1");
     let argss: Vec<String> = env::args().collect();
     let source_path = match argss.get(1) {

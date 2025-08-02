@@ -1,9 +1,6 @@
 use std::fmt;
 
-use crate::{
-    ast::{if_stmt::IfStmt, testcase::TestCase, teststep::TestStep},
-    class::Method,
-};
+use crate::ast::{if_stmt::IfStmt, testcase::TestCase, teststep::TestStep};
 
 pub mod arguments;
 pub mod expression;

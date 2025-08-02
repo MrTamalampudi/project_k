@@ -7,8 +7,9 @@ use std::{
     time::Duration,
 };
 
+use log::{error, info};
 use thirtyfour::{DesiredCapabilities, WebDriver};
-use webdriver_manager::{chrome::ChromeManager, logger::Logger, WebdriverManager};
+use webdriver_manager::{chrome::ChromeManager, WebdriverManager};
 
 use crate::{
     ast::{testcase::TestCase, testcase_body::TestcaseBody},
@@ -75,7 +76,7 @@ impl Engine {
                     step.next.clone()
                 }
                 TestcaseBody::VAR_DECL(step) => {
-                    Custom::new(&self.driver, testcase_body).await;
+                    Custom::new(&self.driver, testcase_body, &mut self.testcase).await;
                     step.next.clone()
                 }
                 _ => None,
@@ -97,14 +98,13 @@ async fn create_web_driver() -> Result<(WebDriver, Port), String> {
 }
 
 async fn manage_browser_driver() -> Result<Option<PathBuf>, String> {
-    let log = Logger::create("/home/manikanta-reddy/new.json", true, true, "");
     let manager = ChromeManager::new();
     let mut driver_path: Option<PathBuf> = None;
     if let Ok(mut manager) = manager {
         let driver_path_ = tokio::task::spawn_blocking(move || {
-            manager.set_logger(log);
             let browser_version = manager.discover_browser_version().unwrap_or_default();
             if let Some(version) = browser_version {
+                info!("Discoverd Chrome {}", &version);
                 manager.set_browser_version(version);
             };
             let driver_version = manager.request_driver_version();
@@ -112,7 +112,7 @@ async fn manage_browser_driver() -> Result<Option<PathBuf>, String> {
                 manager.set_driver_version(version);
             }
             if let Err(error) = manager.download_driver() {
-                println!("Error {error}");
+                error!("{error}");
             }
 
             let path = if let Ok(path) = manager.get_driver_path_in_cache() {
@@ -147,7 +147,7 @@ async fn start_driver() -> Result<Port, String> {
     }
 
     //to start chromedriver it will take a sec or two sec time till then sleep
-    // time may vary from machine to machine & 3sec for my machine
+    //time may vary from machine to machine & 3sec for my machine
     tokio::time::sleep(Duration::from_secs(1)).await;
 
     Ok(port)

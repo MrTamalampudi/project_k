@@ -2,7 +2,8 @@ use thirtyfour::WebDriver;
 
 use crate::{
     ast::{
-        getter::Getter,
+        identifier_value::IdentifierValue,
+        testcase::TestCase,
         testcase_body::{GetMethod, TestcaseBody},
         var_decl::VarRHS,
     },
@@ -15,18 +16,22 @@ pub struct Custom<'a> {
 }
 
 impl<'a> Custom<'a> {
-    pub async fn new(driver: &WebDriver, body: &TestcaseBody) {
+    pub async fn new(driver: &WebDriver, body: &TestcaseBody, testcase: &mut TestCase) {
         let custom = Custom { driver };
         if let Method::CUSTOM(method) = body.get_method() {
-            match method {
-                CUSTOM::VAR_DECLARATION => custom.VAR_DECLARATION(body).await,
+            let _ = match method {
+                CUSTOM::VAR_DECLARATION => custom.VAR_DECLARATION(body, testcase).await,
             };
         }
     }
 }
 
 impl<'a> CustomEngine for Custom<'a> {
-    async fn VAR_DECLARATION(&self, _body: &TestcaseBody) -> () {
+    async fn VAR_DECLARATION(
+        &self,
+        _body: &TestcaseBody,
+        _testcase: &mut TestCase,
+    ) -> Result<(), String> {
         if let TestcaseBody::VAR_DECL(step) = _body {
             match &step.rhs {
                 VarRHS::Getter(getter) => {
@@ -35,23 +40,27 @@ impl<'a> CustomEngine for Custom<'a> {
                             let element = Element {
                                 driver: &self.driver,
                             };
-                            let stri = element
+                            let attribute_value = element
                                 .GET_ATTRIBUTE(&TestcaseBody::GETTER(getter.clone()))
-                                .await;
-                            println!("---------- {}", stri);
+                                .await?;
+                            _testcase.insert_variable_value(
+                                step.name.clone(),
+                                IdentifierValue::String(attribute_value),
+                            );
                         }
                         _ => {
                             println!("Note yet handled");
                         }
                     };
                 }
-                VarRHS::String(string) => {
+                VarRHS::String(_) => {
                     todo!();
                 }
-                VarRHS::Var(var) => {
+                VarRHS::Var(_) => {
                     todo!();
                 }
             }
         }
+        Ok(())
     }
 }

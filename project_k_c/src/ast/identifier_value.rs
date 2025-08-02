@@ -1,6 +1,6 @@
-use thirtyfour::WebElement;
-
 use crate::{ast::primitives::Primitives, parser::locator::LocatorStrategy};
+use std::mem::discriminant;
+use thirtyfour::WebElement;
 
 #[derive(Debug, Clone)]
 pub enum IdentifierValue {
@@ -18,5 +18,9 @@ impl IdentifierValue {
             IdentifierValue::Locators(_) => Primitives::Locators,
             IdentifierValue::Element(_) => Primitives::Element,
         }
+    }
+
+    pub fn matches(&self, value: &IdentifierValue) -> bool {
+        discriminant(self) == discriminant(value)
     }
 }

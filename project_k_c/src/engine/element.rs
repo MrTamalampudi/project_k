@@ -14,21 +14,37 @@ impl<'a> Element<'a> {
         let element = Element { driver };
         if let Method::ELEMENT(method) = &body.get_method() {
             match method {
-                ELEMENT::CLEAR => element.CLEAR(body).await,
-                ELEMENT::SENDKEYS => element.SENDKEYS(body).await,
-                ELEMENT::SUBMIT => element.SUBMIT(body).await,
-                ELEMENT::CLICK => element.CLICK(body).await,
-                ELEMENT::GET_ATTRIBUTE => {}
+                ELEMENT::CLEAR => {
+                    let _ = element.CLEAR(body).await;
+                }
+                ELEMENT::SENDKEYS => {
+                    let _ = element.SENDKEYS(body).await;
+                }
+                ELEMENT::SUBMIT => {
+                    let _ = element.SUBMIT(body).await;
+                }
+                ELEMENT::CLICK => {
+                    let _ = element.CLICK(body).await;
+                }
+                ELEMENT::GET_ATTRIBUTE => {
+                    let _ = element.GET_ATTRIBUTE(body).await;
+                }
             };
         };
     }
 }
 
 impl<'a> ElementEngine for Element<'a> {
-    async fn CLEAR(&self, _body: &TestcaseBody) -> () {}
-    async fn SUBMIT(&self, _body: &TestcaseBody) -> () {}
-    async fn SENDKEYS(&self, _body: &TestcaseBody) -> () {}
-    async fn GET_ATTRIBUTE(&self, _body: &TestcaseBody) -> String {
+    async fn CLEAR(&self, _step: &TestcaseBody) -> Result<(), String> {
+        Ok(())
+    }
+    async fn SUBMIT(&self, _step: &TestcaseBody) -> Result<(), String> {
+        Ok(())
+    }
+    async fn SENDKEYS(&self, _step: &TestcaseBody) -> Result<(), String> {
+        Ok(())
+    }
+    async fn GET_ATTRIBUTE(&self, _body: &TestcaseBody) -> Result<Option<String>, String> {
         if let TestcaseBody::GETTER(getter) = _body {
             let locator_arg = getter.arguments.get(LOCATOR_ARGKEY);
             let attribute_arg = getter.arguments.get(ATTRIBUTE_ARGKEY);
@@ -37,30 +53,24 @@ impl<'a> ElementEngine for Element<'a> {
             {
                 if let Ok(element) = self.driver.find(locator.to_by()).await {
                     if let Ok(attr) = element.attr(attribute).await {
-                        match attr {
-                            Some(some_) => {
-                                return some_;
-                            }
-                            None => {
-                                return String::from("H");
-                            }
-                        };
+                        return Ok(attr);
                     }
                 }
             }
         }
-        return String::from("D");
+        Ok(None)
     }
 
-    async fn CLICK(&self, _body: &TestcaseBody) -> () {
+    async fn CLICK(&self, _body: &TestcaseBody) -> Result<(), String> {
         if let TestcaseBody::TESTSTEP(step) = _body {
             if let Args::Locator(locator) = step.arguments.get(LOCATOR_ARGKEY).unwrap() {
                 let by = locator.to_by();
                 let element = self.driver.find(by).await;
                 if let Ok(element) = element {
-                    element.click().await;
+                    let _ = element.click().await;
                 }
             }
         }
+        Ok(())
     }
 }

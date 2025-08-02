@@ -44,6 +44,15 @@ impl TestCase {
             .insert(var.name.clone(), var.type_.to_identifier_value());
     }
 
+    pub fn insert_variable_value(&mut self, ident: String, value: IdentifierValue) {
+        let variable = self.variables.get(&ident);
+        if let Some(val) = variable {
+            if val.matches(&value) {
+                self.variables.insert(ident, value);
+            }
+        }
+    }
+
     pub fn insert_teststep(&mut self, body: TestcaseBody) {
         let teststep_refcell = RefCell::new(body);
         let teststep_rc = Rc::new(teststep_refcell);

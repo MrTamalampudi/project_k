@@ -15,25 +15,25 @@ impl<'a> WebDriver_<'a> {
         if let Method::WEB_DRIVER(method) = &body.get_method() {
             match method {
                 WEB_DRIVER::CLOSE => {
-                    webdriver.CLOSE(body).await;
+                    let _ = webdriver.CLOSE(body).await;
                 }
                 WEB_DRIVER::NAVIGATE => {
-                    webdriver.NAVIGATE(body).await;
+                    let _ = webdriver.NAVIGATE(body).await;
                 }
                 WEB_DRIVER::FIND_ELEMENT => {
-                    webdriver.FIND_ELEMENT(body).await;
+                    let _ = webdriver.FIND_ELEMENT(body).await;
                 }
                 WEB_DRIVER::GET_CURRENT_URL => {
-                    webdriver.GET_CURRENT_URL(body).await;
+                    let _ = webdriver.GET_CURRENT_URL(body).await;
                 }
                 WEB_DRIVER::GET_PAGE_SOURCE => {
-                    webdriver.GET_PAGE_SOURCE(body).await;
+                    let _ = webdriver.GET_PAGE_SOURCE(body).await;
                 }
                 WEB_DRIVER::GET_TITLE => {
-                    webdriver.GET_TITLE(body).await;
+                    let _ = webdriver.GET_TITLE(body).await;
                 }
                 WEB_DRIVER::GET_WINDOW_HANDLE => {
-                    webdriver.GET_WINDOW_HANDLE(body).await;
+                    let _ = webdriver.GET_WINDOW_HANDLE(body).await;
                 }
             }
         }
@@ -41,7 +41,7 @@ impl<'a> WebDriver_<'a> {
 }
 
 impl<'a> WebDriverEngine for WebDriver_<'a> {
-    async fn NAVIGATE(&self, _body: &TestcaseBody) -> () {
+    async fn NAVIGATE(&self, _body: &TestcaseBody) -> Result<(), String> {
         if let TestcaseBody::TESTSTEP(step) = _body {
             let url = step.arguments.get(URL_ARGKEY).unwrap();
             if let Args::String(url) = url {
@@ -50,13 +50,24 @@ impl<'a> WebDriverEngine for WebDriver_<'a> {
                 }
             };
         }
+        Ok(())
     }
-    async fn CLOSE(&self, _body: &TestcaseBody) -> () {}
-    async fn FIND_ELEMENT(&self, _body: &TestcaseBody) -> () {}
-    async fn GET_CURRENT_URL(&self, _body: &TestcaseBody) -> () {}
-    async fn GET_PAGE_SOURCE(&self, _body: &TestcaseBody) -> () {}
-    async fn GET_TITLE(&self, _body: &TestcaseBody) -> String {
+    async fn CLOSE(&self, _body: &TestcaseBody) -> Result<(), String> {
+        Ok(())
+    }
+    async fn FIND_ELEMENT(&self, _body: &TestcaseBody) -> Result<(), String> {
+        Ok(())
+    }
+    async fn GET_CURRENT_URL(&self, _body: &TestcaseBody) -> Result<(), String> {
+        Ok(())
+    }
+    async fn GET_PAGE_SOURCE(&self, _body: &TestcaseBody) -> Result<(), String> {
+        Ok(())
+    }
+    async fn GET_TITLE(&self, _body: &TestcaseBody) -> Result<Option<String>, String> {
         todo!()
     }
-    async fn GET_WINDOW_HANDLE(&self, _body: &TestcaseBody) -> () {}
+    async fn GET_WINDOW_HANDLE(&self, _body: &TestcaseBody) -> Result<(), String> {
+        Ok(())
+    }
 }

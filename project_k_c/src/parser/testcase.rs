@@ -1,4 +1,3 @@
-use log::{debug, error, info, warn};
 use slr_parser::error::ParseError;
 use slr_parser::grammar;
 use slr_parser::grammar::Grammar;

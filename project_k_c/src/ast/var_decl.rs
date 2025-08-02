@@ -5,7 +5,6 @@ use crate::{
         getter::Getter,
         primitives::Primitives,
         testcase_body::{GetMethod, Next, TestcaseBody},
-        teststep::TestStep,
     },
     class::{Method, CUSTOM},
 };
