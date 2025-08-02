@@ -11,3 +11,4 @@ unicode-ident = { version = "1.0.18" }
 url = "2.5.4"
 slr-parser = { path = "../../manodae" }
 webdriver-manager = { path = "../../webdriver-manager" }
+log = "0.4.27"
