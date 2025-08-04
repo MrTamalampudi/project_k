@@ -39,7 +39,6 @@ impl<'a> CustomEngine for Custom<'a> {
         _testcase: &mut TestCase,
     ) -> EngineResult<()> {
         if let TestcaseBody::VAR_DECL(step) = _body {
-            info!("step 1 {:#?}", step);
             match &step.rhs {
                 VarRHS::Getter(getter) => {
                     match getter.get_method() {
@@ -56,14 +55,12 @@ impl<'a> CustomEngine for Custom<'a> {
                             );
                         }
                         Method::WEB_DRIVER(WEB_DRIVER::GET_CURRENT_URL) => {
-                            println!("checkkkkkkkkkkk");
                             let web_driver = WebDriver_ {
                                 driver: &self.driver,
                             };
                             let url = web_driver
                                 .GET_CURRENT_URL(&TestcaseBody::GETTER(getter.clone()))
                                 .await?;
-                            info!("url {:#?}", url);
                             _testcase.insert_variable_value(
                                 step.name.clone(),
                                 IdentifierValue::String(url),

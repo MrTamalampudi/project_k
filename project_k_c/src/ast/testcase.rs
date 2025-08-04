@@ -48,10 +48,8 @@ impl TestCase {
 
     pub fn insert_variable_value(&mut self, ident: String, value: IdentifierValue) {
         let variable = self.variables.get(&ident);
-        debug!("test 1 {:#?}", variable);
         if let Some(val) = variable {
             if val.matches(&value) {
-                debug!("test 2 {:#?}", value);
                 self.variables.insert(ident, value);
             }
         }

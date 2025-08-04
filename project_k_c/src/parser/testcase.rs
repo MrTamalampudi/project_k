@@ -67,30 +67,30 @@ pub fn parser_slr(parser: &mut Parser) {
         | Teststep Teststeps
         {error:"Teststeps body_ 2"};
 
-        Teststep -> Navigate String
+        Teststep -> navigate string
         {error:"Expected syntax ' navigate \"url\" '"}
         {action:|ast,token_stack,tl_stack,errors| {
             Driver::NAVIGATE(ast,token_stack,tl_stack,errors);
         }}
         |
-        Click String
+        click string
         {error:"Please check teststeps syntax"}
         {action:|ast,token_stack,tl_stack,errors| {
             Element::CLICK(ast,token_stack,tl_stack,errors);
         }}
         |
-        Back
+        back
         {error:"Please check teststeps syntax"}
         {action:|ast,token_stack,tl_stack,errors| {
             Navigation::BACK(ast,token_stack,tl_stack,errors);
         }}
         |
-        Forward
+        forward
         {action:|ast,token_stack,tl_stack,errors| {
             Navigation::FORWARD(ast,token_stack,tl_stack,errors);
         }}
         |
-        Refresh
+        refresh
         {action:|ast,token_stack,tl_stack,errors| {
             Navigation::REFRESH(ast,token_stack,tl_stack,errors);
         }}
@@ -98,52 +98,52 @@ pub fn parser_slr(parser: &mut Parser) {
         VAR_DECLARATION
         ;
 
-        VAR_DECLARATION -> Ident Assign VAR_RHS
+        VAR_DECLARATION -> ident assign VAR_RHS
         {action:|ast,token_stack,tl_stack,errors| {
                 Custom::VAR_DECLARATION(ast,token_stack,tl_stack,errors);
         }}
         ;
         VAR_RHS -> IDENT_OR_STRING | GETTER;
-        GETTER -> Get Attribute IDENT_OR_STRING From Element IDENT_OR_STRING
+        GETTER -> get attribute IDENT_OR_STRING from element IDENT_OR_STRING
         {action:|ast,token_stack,tl_stack,errors| {
                 Element::GET_ATTRIBUTE(ast,token_stack,tl_stack,errors);
         }}
         |
-        Get Current Url
+        get current url
         {action:|ast,token_stack,tl_stack,errors| {
                 Driver::GET_CURRENT_URL(ast,token_stack,tl_stack,errors);
         }}
         ;
 
 
-        IDENT_OR_STRING -> Ident | String;
+        IDENT_OR_STRING -> ident | string;
 
         //Actions
-        Navigate    -> [TokenType::NAVIGATE];
-        Click       -> [TokenType::CLICK];
-        Back        -> [TokenType::BACK];
-        Forward     -> [TokenType::FORWARD];
-        Refresh     -> [TokenType::REFRESH];
-        Get         -> [TokenType::GET];
+        navigate    -> [TokenType::NAVIGATE];
+        click       -> [TokenType::CLICK];
+        back        -> [TokenType::BACK];
+        forward     -> [TokenType::FORWARD];
+        refresh     -> [TokenType::REFRESH];
+        get         -> [TokenType::GET];
 
         //Nouns
-        Attribute   -> [TokenType::ATTRIBUTE];
-        Element     -> [TokenType::ELEMENT];
-        Url         -> [TokenType::URL];
+        attribute   -> [TokenType::ATTRIBUTE];
+        element     -> [TokenType::ELEMENT];
+        url         -> [TokenType::URL];
 
         //Prepositions
-        From        -> [TokenType::FROM];
-        To          -> [TokenType::TO];
+        from        -> [TokenType::FROM];
+        to          -> [TokenType::TO];
 
         //Adjectives
-        Current     -> [TokenType::CURRENT];
+        current     -> [TokenType::CURRENT];
 
         //Operators
-        Assign      -> [TokenType::ASSIGN_OP];
+        assign      -> [TokenType::ASSIGN_OP];
 
         //Inputs
-        String      -> [TokenType::STRING(d_string())];
-        Ident       -> [TokenType::IDENTIFIER(d_string())];
+        string      -> [TokenType::STRING(d_string())];
+        ident       -> [TokenType::IDENTIFIER(d_string())];
     );
     let mut slr_parser = SLR_Parser::new(grammar.productions);
     slr_parser.compute_lr0_items();
