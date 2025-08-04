@@ -14,12 +14,16 @@ use webdriver_manager::{chrome::ChromeManager, WebdriverManager};
 use crate::{
     ast::{testcase::TestCase, testcase_body::TestcaseBody},
     class::Method,
-    engine::{custom::Custom, element::Element, navigation::Navigation, webdriver::WebDriver_},
+    engine::{
+        custom::Custom, element::Element, navigation::Navigation, timeouts::Timeouts,
+        webdriver::WebDriver_,
+    },
 };
 
 mod custom;
 mod element;
 mod navigation;
+mod timeouts;
 mod webdriver;
 
 type Port = u16;
@@ -78,6 +82,7 @@ impl<'a> Engine<'a> {
                         Method::NAVIGATION(_) => {
                             Navigation::new(&self.driver, testcase_body).await?
                         }
+                        Method::TIMEOUTS(_) => Timeouts::new(&self.driver, testcase_body).await?,
                         _ => {}
                     }
                     step.next.clone()

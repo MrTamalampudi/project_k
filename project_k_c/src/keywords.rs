@@ -13,6 +13,7 @@ macro_rules! define_tokens {
             STRING(String),
             IDENTIFIER(String),
             CAPS(Capabilities),
+            NUMBER(usize),
             //capbilities
             BROWSER(Browser),
             XPATH(String),
@@ -55,6 +56,7 @@ macro_rules! define_tokens {
                     TokenType::STRING(_) => String::from("string"),
                     TokenType::IDENTIFIER(_) => String::from("identifier"),
                     TokenType::XPATH(_)  => String::from("xpath"),
+                    TokenType::NUMBER(_) => String::from("number"),
                     TokenType::NONE => "none".to_string(),
                     TokenType::CAPS(caps) => caps.to_string().clone(),
                     TokenType::BROWSER(browser) => browser.to_string().clone(),
@@ -112,6 +114,7 @@ define_tokens!(
     FORWARD,
     REFRESH,
     GET,
+    WAIT,
     //nouns
     ATTRIBUTE,
     ELEMENT,

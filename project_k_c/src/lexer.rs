@@ -108,6 +108,9 @@ impl<'a> Tokenizer<'a> {
                 ch if is_xid_start(*ch) || ch == &UNDERLINE => {
                     self.consume_identifier(state, tokens)
                 }
+                _ if cha.is_digit(10) => {
+                    self.consume_number(state, tokens);
+                }
                 _ => {
                     self.error(
                         "Unexpected character".to_string(),
@@ -156,6 +159,26 @@ impl<'a> Tokenizer<'a> {
                 break;
             }
         }
+    }
+
+    fn consume_number(&self, state: &mut State, tokens: &mut Vec<Token>) {
+        let start = state.location;
+        let mut string: String = String::new();
+        while let Some(ch) = state.peek() {
+            if *ch == NEW_LINE || !ch.is_digit(10) {
+                break;
+            }
+            string.push(*ch);
+            state.next();
+        }
+        let num: usize = string.parse().expect("msg");
+
+        tokens.push(Token::new(
+            TokenType::NUMBER(num),
+            start,
+            state.location,
+            self.get_source_path_as_string(),
+        ))
     }
 
     fn consume_identifier(&self, state: &mut State, tokens: &mut Vec<Token>) {

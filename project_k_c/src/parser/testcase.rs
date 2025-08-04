@@ -10,7 +10,7 @@ use std::sync::Arc;
 
 use super::Parser;
 use crate::ast::testcase::TestCase;
-use crate::class::{CustomAction, NavigationAction};
+use crate::class::{CustomAction, NavigationAction, TimeoutsAction};
 use crate::class::{ElementAction, WebDriverAction};
 use crate::engine::execute;
 use crate::error_handler::{parse_error_to_error_info, ErrorInfo};
@@ -19,6 +19,7 @@ use crate::parser::actions::custom::Custom;
 use crate::parser::actions::driver::Driver;
 use crate::parser::actions::element::Element;
 use crate::parser::actions::navigation::Navigation;
+use crate::parser::actions::timeouts::Timeouts;
 use crate::parser::translator_stack::TranslatorStack;
 use crate::program::Program;
 use crate::token::Token;
@@ -57,6 +58,7 @@ pub fn parser_slr(parser: &mut Parser) {
         .filter(|t| t.get_token_type().ne(&TokenType::NEW_LINE))
         .collect();
     let d_string = || "".to_string();
+    let d_num = || (1 as usize);
     let grammar: Grammar<TestCase, Token, TranslatorStack> = grammar!(
         Start -> Testcase Teststeps {error:"Testing"};
 
@@ -95,6 +97,11 @@ pub fn parser_slr(parser: &mut Parser) {
             Navigation::REFRESH(ast,token_stack,tl_stack,errors);
         }}
         |
+        wait number
+        {action:|ast,token_stack,tl_stack,errors| {
+            Timeouts::WAIT(ast,token_stack,tl_stack,errors);
+        }}
+        |
         VAR_DECLARATION
         ;
 
@@ -130,6 +137,7 @@ pub fn parser_slr(parser: &mut Parser) {
         forward     -> [TokenType::FORWARD];
         refresh     -> [TokenType::REFRESH];
         get         -> [TokenType::GET];
+        wait        -> [TokenType::WAIT];
 
         //Nouns
         attribute   -> [TokenType::ATTRIBUTE];
@@ -150,6 +158,7 @@ pub fn parser_slr(parser: &mut Parser) {
         //Inputs
         string      -> [TokenType::STRING(d_string())];
         ident       -> [TokenType::IDENTIFIER(d_string())];
+        number      -> [TokenType::NUMBER(d_num())];
     );
     let mut slr_parser = SLR_Parser::new(grammar.productions);
     slr_parser.compute_lr0_items();

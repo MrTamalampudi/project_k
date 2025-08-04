@@ -213,10 +213,11 @@ class_macro!(
         action: TimeoutsAction,
         engine: TimeoutsEngine,
         TIMEOUTS {
-            GET_IMPLICIT_TIMEOUT,
-            GET_PAGE_LOAD_TIMEOUT,
-            SET_IMPLICIT_TIMEOUT,
-            SET_PAGE_LOAD_TIMEOUT
+            WAIT
+            // GET_IMPLICIT_TIMEOUT,
+            // GET_PAGE_LOAD_TIMEOUT,
+            // SET_IMPLICIT_TIMEOUT,
+            // SET_PAGE_LOAD_TIMEOUT
         }
     },
     {
