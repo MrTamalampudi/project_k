@@ -63,8 +63,10 @@ impl<'a> WebDriverEngine for WebDriver_<'a> {
     async fn FIND_ELEMENT(&self, _body: &TestcaseBody) -> EngineResult<()> {
         Ok(())
     }
-    async fn GET_CURRENT_URL(&self, _body: &TestcaseBody) -> EngineResult<()> {
-        Ok(())
+    async fn GET_CURRENT_URL(&self, _body: &TestcaseBody) -> EngineResult<Option<String>> {
+        let url = self.driver.current_url().await?;
+        info!("urlllll {}", url);
+        Ok(Some(url.to_string()))
     }
     async fn GET_PAGE_SOURCE(&self, _body: &TestcaseBody) -> EngineResult<()> {
         Ok(())

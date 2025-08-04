@@ -1,6 +1,8 @@
 use std::collections::HashMap;
 
 use crate::ast::arguments::{Args, URL_ARGKEY};
+use crate::ast::getter::Getter;
+use crate::ast::primitives::Primitives;
 use crate::ast::testcase::TestCase;
 use crate::ast::testcase_body::TestcaseBody;
 use crate::ast::teststep::TestStep;
@@ -65,6 +67,13 @@ impl WebDriverAction for Driver {
         _tl_stack: &mut Vec<TranslatorStack>,
         _errors: &mut Vec<ParseError<Token>>,
     ) -> () {
+        let teststep = Getter {
+            method: Method::WEB_DRIVER(WEB_DRIVER::GET_CURRENT_URL),
+            arguments: HashMap::new(),
+            returns: Primitives::String,
+        };
+
+        _tl_stack.push(TranslatorStack::Getter(teststep));
     }
 
     fn FIND_ELEMENT(
@@ -81,6 +90,13 @@ impl WebDriverAction for Driver {
         _tl_stack: &mut Vec<TranslatorStack>,
         _errors: &mut Vec<ParseError<Token>>,
     ) -> () {
+        let teststep = Getter {
+            method: Method::WEB_DRIVER(WEB_DRIVER::GET_CURRENT_URL),
+            arguments: HashMap::new(),
+            returns: Primitives::String,
+        };
+
+        _tl_stack.push(TranslatorStack::Getter(teststep));
     }
 
     fn GET_PAGE_SOURCE(

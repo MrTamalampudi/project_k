@@ -26,7 +26,7 @@ type Port = u16;
 type EngineResult<T> = Result<T, WebDriverError>;
 
 #[tokio::main]
-pub async fn execute(testcase: TestCase) {
+pub async fn execute(testcase: &mut TestCase) {
     let mut engine = Engine::new(testcase).await;
     if let Err(error) = engine.start().await {
         error!("{:#?}", error);
@@ -34,14 +34,14 @@ pub async fn execute(testcase: TestCase) {
     engine.kill();
 }
 
-pub struct Engine {
-    testcase: TestCase,
+pub struct Engine<'a> {
+    testcase: &'a mut TestCase,
     driver: WebDriver,
     port: Port,
 }
 
-impl Engine {
-    async fn new(testcase: TestCase) -> Engine {
+impl<'a> Engine<'a> {
+    async fn new(testcase: &'a mut TestCase) -> Engine<'a> {
         let (driver, port) = match create_web_driver().await {
             Ok((driver, port)) => (driver, port),
             Err(error) => panic!("{error}"),

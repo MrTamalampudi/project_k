@@ -1,3 +1,4 @@
+use log::debug;
 use slr_parser::error::ParseError;
 use slr_parser::grammar;
 use slr_parser::grammar::Grammar;
@@ -107,6 +108,11 @@ pub fn parser_slr(parser: &mut Parser) {
         {action:|ast,token_stack,tl_stack,errors| {
                 Element::GET_ATTRIBUTE(ast,token_stack,tl_stack,errors);
         }}
+        |
+        Get Current Url
+        {action:|ast,token_stack,tl_stack,errors| {
+                Driver::GET_CURRENT_URL(ast,token_stack,tl_stack,errors);
+        }}
         ;
 
 
@@ -123,9 +129,14 @@ pub fn parser_slr(parser: &mut Parser) {
         //Nouns
         Attribute   -> [TokenType::ATTRIBUTE];
         Element     -> [TokenType::ELEMENT];
+        Url         -> [TokenType::URL];
 
         //Prepositions
         From        -> [TokenType::FROM];
+        To          -> [TokenType::TO];
+
+        //Adjectives
+        Current     -> [TokenType::CURRENT];
 
         //Operators
         Assign      -> [TokenType::ASSIGN_OP];
@@ -148,8 +159,8 @@ pub fn parser_slr(parser: &mut Parser) {
     parser.ctx.program = Program {
         testcase: ast.clone(),
     };
-    //println!("errors {:#?}", parser.ctx.program);
-    execute(parser.ctx.program.testcase.clone());
+    execute(&mut parser.ctx.program.testcase);
+    log::info!("variables {:#?}", parser.ctx.program.testcase.variables);
 }
 
 fn refine_errors(errors: &mut Vec<ParseError<Token>>) {

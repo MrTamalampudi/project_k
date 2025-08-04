@@ -112,13 +112,16 @@ define_tokens!(
     FORWARD,
     REFRESH,
     GET,
-    // ***** prepositions
-    FROM,
     //nouns
     ATTRIBUTE,
     ELEMENT,
+    URL,
+    //prepositions
+    FROM,
     TO,
-    // ***** operators
+    //adjective
+    CURRENT,
+    //operators
     ASSIGN_OP = '=',
     //High level tokens
     TESTSTEPS,

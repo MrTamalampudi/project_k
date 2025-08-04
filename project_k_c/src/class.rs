@@ -156,7 +156,11 @@ class_macro!(
                     returns: Option<String>
                 }
             },
-            GET_CURRENT_URL,
+            GET_CURRENT_URL {
+                engine: {
+                    returns: Option<String>
+                }
+            },
             GET_PAGE_SOURCE,
             GET_WINDOW_HANDLE,
             CLOSE,

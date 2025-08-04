@@ -1,3 +1,4 @@
+use log::info;
 use thirtyfour::{error::WebDriverError, WebDriver};
 
 use crate::{
@@ -7,8 +8,8 @@ use crate::{
         testcase_body::{GetMethod, TestcaseBody},
         var_decl::VarRHS,
     },
-    class::{CustomEngine, ElementEngine, Method, CUSTOM, ELEMENT},
-    engine::{element::Element, EngineResult},
+    class::{CustomEngine, ElementEngine, Method, WebDriverEngine, CUSTOM, ELEMENT, WEB_DRIVER},
+    engine::{element::Element, webdriver::WebDriver_, EngineResult},
 };
 
 pub struct Custom<'a> {
@@ -38,6 +39,7 @@ impl<'a> CustomEngine for Custom<'a> {
         _testcase: &mut TestCase,
     ) -> EngineResult<()> {
         if let TestcaseBody::VAR_DECL(step) = _body {
+            info!("step 1 {:#?}", step);
             match &step.rhs {
                 VarRHS::Getter(getter) => {
                     match getter.get_method() {
@@ -51,6 +53,20 @@ impl<'a> CustomEngine for Custom<'a> {
                             _testcase.insert_variable_value(
                                 step.name.clone(),
                                 IdentifierValue::String(attribute_value),
+                            );
+                        }
+                        Method::WEB_DRIVER(WEB_DRIVER::GET_CURRENT_URL) => {
+                            println!("checkkkkkkkkkkk");
+                            let web_driver = WebDriver_ {
+                                driver: &self.driver,
+                            };
+                            let url = web_driver
+                                .GET_CURRENT_URL(&TestcaseBody::GETTER(getter.clone()))
+                                .await?;
+                            info!("url {:#?}", url);
+                            _testcase.insert_variable_value(
+                                step.name.clone(),
+                                IdentifierValue::String(url),
                             );
                         }
                         _ => {
