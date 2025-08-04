@@ -6,6 +6,7 @@ use crate::parser::translator_stack::TranslatorStack;
 use crate::token::Token;
 use slr_parser::error::ParseError;
 use std::future::Future;
+use thirtyfour::error::WebDriverError;
 
 macro_rules! ifdef {
     ([$($_:tt)+] { $($then:tt)* } $(else { $($_else:tt)* })?) => {
@@ -66,17 +67,17 @@ macro_rules! class_macro {
                 $(
                     ifdef! {
                         [$($($($engine_returns)?)?)?,$($($($($engine_arg_ident),*)?)?)?]
-                        {fn $method(&self,_step:&TestcaseBody,$($($($($engine_arg_ident:$engine_arg_type),*)?)?)?) -> impl Future<Output = Result<($($($($engine_returns)?)?)?),String>>;}
+                        {fn $method(&self,_step:&TestcaseBody,$($($($($engine_arg_ident:$engine_arg_type),*)?)?)?) -> impl Future<Output = Result<($($($($engine_returns)?)?)?),WebDriverError>>;}
                         else
                         { ifdef! {
                             [$($($($engine_returns)?)?)?]
-                            {fn $method(&self,_step:&TestcaseBody) -> impl Future<Output = (Result<$($($($engine_returns)?)?)?,String>)>;}
+                            {fn $method(&self,_step:&TestcaseBody) -> impl Future<Output = (Result<$($($($engine_returns)?)?)?,WebDriverError>)>;}
                             else
                             { ifdef! {
                                 [$($($($($engine_arg_ident),*)?)?)?]
-                                {fn $method(&self,_step:&TestcaseBody,$($($($($engine_arg_ident:$engine_arg_type),*)?)?)?) -> impl Future<Output = (Result<(),String>)>;}
+                                {fn $method(&self,_step:&TestcaseBody,$($($($($engine_arg_ident:$engine_arg_type),*)?)?)?) -> impl Future<Output = (Result<(),WebDriverError>)>;}
                                 else
-                                {fn $method(&self,_step:&TestcaseBody) -> impl Future<Output = (Result<(),String>)>;}
+                                {fn $method(&self,_step:&TestcaseBody) -> impl Future<Output = (Result<(),WebDriverError>)>;}
                                 }
                             }}
                         }
