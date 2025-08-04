@@ -116,6 +116,7 @@ define_tokens!(
     ATTRIBUTE,
     ELEMENT,
     URL,
+    TITLE,
     //prepositions
     FROM,
     TO,

@@ -113,6 +113,11 @@ pub fn parser_slr(parser: &mut Parser) {
         {action:|ast,token_stack,tl_stack,errors| {
                 Driver::GET_CURRENT_URL(ast,token_stack,tl_stack,errors);
         }}
+        |
+        get title
+        {action:|ast,token_stack,tl_stack,errors| {
+                Driver::GET_TITLE(ast,token_stack,tl_stack,errors);
+        }}
         ;
 
 
@@ -130,6 +135,7 @@ pub fn parser_slr(parser: &mut Parser) {
         attribute   -> [TokenType::ATTRIBUTE];
         element     -> [TokenType::ELEMENT];
         url         -> [TokenType::URL];
+        title       -> [TokenType::TITLE];
 
         //Prepositions
         from        -> [TokenType::FROM];

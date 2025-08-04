@@ -66,6 +66,18 @@ impl<'a> CustomEngine for Custom<'a> {
                                 IdentifierValue::String(url),
                             );
                         }
+                        Method::WEB_DRIVER(WEB_DRIVER::GET_TITLE) => {
+                            let web_driver = WebDriver_ {
+                                driver: &self.driver,
+                            };
+                            let title = web_driver
+                                .GET_TITLE(&TestcaseBody::GETTER(getter.clone()))
+                                .await?;
+                            _testcase.insert_variable_value(
+                                step.name.clone(),
+                                IdentifierValue::String(title),
+                            );
+                        }
                         _ => {
                             println!("Note yet handled");
                         }

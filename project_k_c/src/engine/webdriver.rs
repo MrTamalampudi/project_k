@@ -71,7 +71,8 @@ impl<'a> WebDriverEngine for WebDriver_<'a> {
         Ok(())
     }
     async fn GET_TITLE(&self, _body: &TestcaseBody) -> EngineResult<Option<String>> {
-        todo!()
+        let title = self.driver.title().await?;
+        Ok(Some(title.to_string()))
     }
     async fn GET_WINDOW_HANDLE(&self, _body: &TestcaseBody) -> EngineResult<()> {
         Ok(())

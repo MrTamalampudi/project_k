@@ -113,6 +113,13 @@ impl WebDriverAction for Driver {
         _tl_stack: &mut Vec<TranslatorStack>,
         _errors: &mut Vec<ParseError<Token>>,
     ) -> () {
+        let teststep = Getter {
+            method: Method::WEB_DRIVER(WEB_DRIVER::GET_TITLE),
+            arguments: HashMap::new(),
+            returns: Primitives::String,
+        };
+
+        _tl_stack.push(TranslatorStack::Getter(teststep));
     }
     fn GET_WINDOW_HANDLE(
         _testcase: &mut TestCase,
