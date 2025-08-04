@@ -1,50 +1,56 @@
+use std::error::Error;
+
+use log::debug;
+use thirtyfour::error::WebDriverError;
 use thirtyfour::WebDriver;
 
 use crate::ast::arguments::{Args, ATTRIBUTE_ARGKEY, LOCATOR_ARGKEY};
 use crate::ast::testcase_body::GetMethod;
 use crate::ast::testcase_body::TestcaseBody;
 use crate::class::{ElementEngine, Method, ELEMENT};
+use crate::engine::EngineResult;
 
 pub struct Element<'a> {
     pub driver: &'a WebDriver,
 }
 
 impl<'a> Element<'a> {
-    pub async fn new(driver: &WebDriver, body: &TestcaseBody) {
+    pub async fn new(driver: &WebDriver, body: &TestcaseBody) -> EngineResult<()> {
         let element = Element { driver };
         if let Method::ELEMENT(method) = &body.get_method() {
             match method {
                 ELEMENT::CLEAR => {
-                    let _ = element.CLEAR(body).await;
+                    let _ = element.CLEAR(body).await?;
                 }
                 ELEMENT::SENDKEYS => {
-                    let _ = element.SENDKEYS(body).await;
+                    let _ = element.SENDKEYS(body).await?;
                 }
                 ELEMENT::SUBMIT => {
-                    let _ = element.SUBMIT(body).await;
+                    let _ = element.SUBMIT(body).await?;
                 }
                 ELEMENT::CLICK => {
-                    let _ = element.CLICK(body).await;
+                    let _ = element.CLICK(body).await?;
                 }
                 ELEMENT::GET_ATTRIBUTE => {
-                    let _ = element.GET_ATTRIBUTE(body).await;
+                    let _ = element.GET_ATTRIBUTE(body).await?;
                 }
             };
         };
+        Ok(())
     }
 }
 
 impl<'a> ElementEngine for Element<'a> {
-    async fn CLEAR(&self, _step: &TestcaseBody) -> Result<(), String> {
+    async fn CLEAR(&self, _step: &TestcaseBody) -> EngineResult<()> {
         Ok(())
     }
-    async fn SUBMIT(&self, _step: &TestcaseBody) -> Result<(), String> {
+    async fn SUBMIT(&self, _step: &TestcaseBody) -> EngineResult<()> {
         Ok(())
     }
-    async fn SENDKEYS(&self, _step: &TestcaseBody) -> Result<(), String> {
+    async fn SENDKEYS(&self, _step: &TestcaseBody) -> EngineResult<()> {
         Ok(())
     }
-    async fn GET_ATTRIBUTE(&self, _body: &TestcaseBody) -> Result<Option<String>, String> {
+    async fn GET_ATTRIBUTE(&self, _body: &TestcaseBody) -> EngineResult<Option<String>> {
         if let TestcaseBody::GETTER(getter) = _body {
             let locator_arg = getter.arguments.get(LOCATOR_ARGKEY);
             let attribute_arg = getter.arguments.get(ATTRIBUTE_ARGKEY);
@@ -61,14 +67,12 @@ impl<'a> ElementEngine for Element<'a> {
         Ok(None)
     }
 
-    async fn CLICK(&self, _body: &TestcaseBody) -> Result<(), String> {
+    async fn CLICK(&self, _body: &TestcaseBody) -> EngineResult<()> {
         if let TestcaseBody::TESTSTEP(step) = _body {
             if let Args::Locator(locator) = step.arguments.get(LOCATOR_ARGKEY).unwrap() {
                 let by = locator.to_by();
-                let element = self.driver.find(by).await;
-                if let Ok(element) = element {
-                    let _ = element.click().await;
-                }
+                let element = self.driver.find(by).await?;
+                element.click().await?;
             }
         }
         Ok(())

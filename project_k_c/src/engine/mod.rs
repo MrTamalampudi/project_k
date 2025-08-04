@@ -8,7 +8,7 @@ use std::{
 };
 
 use log::{error, info};
-use thirtyfour::{DesiredCapabilities, WebDriver};
+use thirtyfour::{error::WebDriverError, DesiredCapabilities, WebDriver};
 use webdriver_manager::{chrome::ChromeManager, WebdriverManager};
 
 use crate::{
@@ -23,11 +23,14 @@ mod navigation;
 mod webdriver;
 
 type Port = u16;
+type EngineResult<T> = Result<T, WebDriverError>;
 
 #[tokio::main]
 pub async fn execute(testcase: TestCase) {
     let mut engine = Engine::new(testcase).await;
-    engine.start().await;
+    if let Err(error) = engine.start().await {
+        error!("{:#?}", error);
+    }
     engine.kill();
 }
 
@@ -60,7 +63,7 @@ impl Engine {
         };
     }
 
-    async fn start(&mut self) {
+    async fn start(&mut self) -> EngineResult<()> {
         while let Some(step_ref_cell) = self.testcase.test_step.take() {
             let teststep = step_ref_cell.borrow();
             let testcase_body = teststep.deref();
@@ -68,20 +71,25 @@ impl Engine {
             self.testcase.test_step = match testcase_body {
                 TestcaseBody::TESTSTEP(step) => {
                     match step.method {
-                        Method::WEB_DRIVER(_) => WebDriver_::new(&self.driver, testcase_body).await,
-                        Method::ELEMENT(_) => Element::new(&self.driver, testcase_body).await,
-                        Method::NAVIGATION(_) => Navigation::new(&self.driver, testcase_body).await,
+                        Method::WEB_DRIVER(_) => {
+                            WebDriver_::new(&self.driver, testcase_body).await?
+                        }
+                        Method::ELEMENT(_) => Element::new(&self.driver, testcase_body).await?,
+                        Method::NAVIGATION(_) => {
+                            Navigation::new(&self.driver, testcase_body).await?
+                        }
                         _ => {}
                     }
                     step.next.clone()
                 }
                 TestcaseBody::VAR_DECL(step) => {
-                    Custom::new(&self.driver, testcase_body, &mut self.testcase).await;
+                    Custom::new(&self.driver, testcase_body, &mut self.testcase).await?;
                     step.next.clone()
                 }
                 _ => None,
             };
         }
+        Ok(())
     }
 }
 
@@ -111,16 +119,17 @@ async fn manage_browser_driver() -> Result<Option<PathBuf>, String> {
             if let Ok(version) = driver_version {
                 manager.set_driver_version(version);
             }
-            if let Err(error) = manager.download_driver() {
-                error!("{error}");
-            }
 
-            let path = if let Ok(path) = manager.get_driver_path_in_cache() {
+            let path = manager.get_driver_path_in_cache().ok().expect("");
+            if path.exists() {
                 Some(path)
             } else {
-                None
-            };
-            path
+                if let Ok(_) = manager.download_driver() {
+                    Some(path)
+                } else {
+                    None
+                }
+            }
         })
         .await;
 

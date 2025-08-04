@@ -1,4 +1,4 @@
-use thirtyfour::WebDriver;
+use thirtyfour::{error::WebDriverError, WebDriver};
 
 use crate::{
     ast::{
@@ -8,7 +8,7 @@ use crate::{
         var_decl::VarRHS,
     },
     class::{CustomEngine, ElementEngine, Method, CUSTOM, ELEMENT},
-    engine::element::Element,
+    engine::{element::Element, EngineResult},
 };
 
 pub struct Custom<'a> {
@@ -16,13 +16,18 @@ pub struct Custom<'a> {
 }
 
 impl<'a> Custom<'a> {
-    pub async fn new(driver: &WebDriver, body: &TestcaseBody, testcase: &mut TestCase) {
+    pub async fn new(
+        driver: &WebDriver,
+        body: &TestcaseBody,
+        testcase: &mut TestCase,
+    ) -> EngineResult<()> {
         let custom = Custom { driver };
         if let Method::CUSTOM(method) = body.get_method() {
-            let _ = match method {
-                CUSTOM::VAR_DECLARATION => custom.VAR_DECLARATION(body, testcase).await,
+            match method {
+                CUSTOM::VAR_DECLARATION => custom.VAR_DECLARATION(body, testcase).await?,
             };
         }
+        Ok(())
     }
 }
 
@@ -31,7 +36,7 @@ impl<'a> CustomEngine for Custom<'a> {
         &self,
         _body: &TestcaseBody,
         _testcase: &mut TestCase,
-    ) -> Result<(), String> {
+    ) -> EngineResult<()> {
         if let TestcaseBody::VAR_DECL(step) = _body {
             match &step.rhs {
                 VarRHS::Getter(getter) => {

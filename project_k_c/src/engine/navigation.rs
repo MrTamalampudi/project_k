@@ -1,8 +1,9 @@
-use thirtyfour::WebDriver;
+use thirtyfour::{error::WebDriverError, WebDriver};
 
 use crate::{
-    ast::{testcase_body::GetMethod, testcase_body::TestcaseBody},
+    ast::testcase_body::{GetMethod, TestcaseBody},
     class::{Method, NavigationEngine, NAVIGATION},
+    engine::EngineResult,
 };
 
 pub struct Navigation<'a> {
@@ -10,31 +11,32 @@ pub struct Navigation<'a> {
 }
 
 impl<'a> Navigation<'a> {
-    pub async fn new(driver: &WebDriver, body: &TestcaseBody) {
+    pub async fn new(driver: &WebDriver, body: &TestcaseBody) -> EngineResult<()> {
         let navigation = Navigation { driver };
         if let Method::NAVIGATION(method) = &body.get_method() {
-            let _ = match method {
-                NAVIGATION::BACK => navigation.BACK(body).await,
-                NAVIGATION::REFRESH => navigation.REFRESH(body).await,
-                NAVIGATION::FORWARD => navigation.FORWARD(body).await,
+            match method {
+                NAVIGATION::BACK => navigation.BACK(body).await?,
+                NAVIGATION::REFRESH => navigation.REFRESH(body).await?,
+                NAVIGATION::FORWARD => navigation.FORWARD(body).await?,
             };
         };
+        Ok(())
     }
 }
 
 impl<'a> NavigationEngine for Navigation<'a> {
-    async fn REFRESH(&self, _body: &TestcaseBody) -> Result<(), String> {
-        let _ = self.driver.refresh().await;
+    async fn REFRESH(&self, _body: &TestcaseBody) -> EngineResult<()> {
+        self.driver.refresh().await?;
         Ok(())
     }
 
-    async fn BACK(&self, _body: &TestcaseBody) -> Result<(), String> {
-        let _ = self.driver.back().await;
+    async fn BACK(&self, _body: &TestcaseBody) -> EngineResult<()> {
+        self.driver.back().await?;
         Ok(())
     }
 
-    async fn FORWARD(&self, _body: &TestcaseBody) -> Result<(), String> {
-        let _ = self.driver.forward().await;
+    async fn FORWARD(&self, _body: &TestcaseBody) -> EngineResult<()> {
+        self.driver.forward().await?;
         Ok(())
     }
 }
