@@ -15,6 +15,7 @@ const BACKSLASH: char = '\\';
 const FORWARDSLASH: char = '/';
 const ASSIGN: char = '=';
 const UNDERLINE: char = '_';
+const HYPHEN: char = '-';
 
 impl fmt::Display for TokenType {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -108,7 +109,7 @@ impl<'a> Tokenizer<'a> {
                 ch if is_xid_start(*ch) || ch == &UNDERLINE => {
                     self.consume_identifier(state, tokens)
                 }
-                _ if cha.is_digit(10) => {
+                _ if cha.is_digit(10) || *cha == HYPHEN => {
                     self.consume_number(state, tokens);
                 }
                 _ => {
@@ -165,13 +166,13 @@ impl<'a> Tokenizer<'a> {
         let start = state.location;
         let mut string: String = String::new();
         while let Some(ch) = state.peek() {
-            if *ch == NEW_LINE || !ch.is_digit(10) {
+            if *ch == NEW_LINE || (!ch.is_digit(10) && !(string.is_empty() && *ch == HYPHEN)) {
                 break;
             }
             string.push(*ch);
             state.next();
         }
-        let num: usize = string.parse().expect("msg");
+        let num: isize = string.parse().expect("msg");
 
         tokens.push(Token::new(
             TokenType::NUMBER(num),

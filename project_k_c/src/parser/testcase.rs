@@ -58,7 +58,7 @@ pub fn parser_slr(parser: &mut Parser) {
         .filter(|t| t.get_token_type().ne(&TokenType::NEW_LINE))
         .collect();
     let d_string = || "".to_string();
-    let d_num = || (1 as usize);
+    let d_num = || (1 as isize);
     let grammar: Grammar<TestCase, Token, TranslatorStack> = grammar!(
         Start -> Testcase Teststeps {error:"Testing"};
 
@@ -174,7 +174,11 @@ pub fn parser_slr(parser: &mut Parser) {
     parser.ctx.program = Program {
         testcase: ast.clone(),
     };
-    execute(&mut parser.ctx.program.testcase);
+    if parser.ctx.errors.errors.is_empty() {
+        execute(&mut parser.ctx.program.testcase);
+    } else {
+        log::error!("Errors {:#?}", parser.ctx.errors.errors);
+    }
     log::info!("variables {:#?}", parser.ctx.program.testcase.variables);
 }
 

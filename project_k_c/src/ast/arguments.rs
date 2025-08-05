@@ -10,6 +10,6 @@ pub enum Args {
     String(String),
     Locator(LocatorStrategy),
     Ident(String),
-    Number(usize),
+    Number(isize),
     None,
 }

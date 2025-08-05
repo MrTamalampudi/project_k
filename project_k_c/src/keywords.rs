@@ -13,7 +13,7 @@ macro_rules! define_tokens {
             STRING(String),
             IDENTIFIER(String),
             CAPS(Capabilities),
-            NUMBER(usize),
+            NUMBER(isize),
             //capbilities
             BROWSER(Browser),
             XPATH(String),
