@@ -1,4 +1,4 @@
-use log::debug;
+use log::{debug, info};
 use slr_parser::error::ParseError;
 use slr_parser::grammar;
 use slr_parser::grammar::Grammar;
@@ -130,35 +130,86 @@ pub fn parser_slr(parser: &mut Parser) {
 
         IDENT_OR_STRING -> ident | string;
 
+        Expression  -> LiteralExpression
+        | OperatorExpression
+        | GroupedExpression
+        ;
+
+        LiteralExpression -> number | string | ident | true_ | false_ ;
+
+        GroupedExpression -> left_paran Expression right_paran;
+
+        OperatorExpression -> NegationExpression
+        | ComparisionExpression
+        | ArthimaticExpression ;
+
+        NegationExpression -> negation Expression;
+
+        ComparisionExpression -> Expression equality Expression
+        | Expression not_equal Expression
+        | Expression greater_than Expression
+        | Expression lesser_than Expression
+        | Expression greater_than_equal Expression
+        | Expression lesser_than_equal Expression;
+
+        ArthimaticExpression -> Expression plus Expression
+        | Expression minus Expression
+        | Expression Expression // special case where 1-1 here we need to number + number
+        | Expression multiply Expression
+        | Expression forward_slash Expression
+        | Expression modulus Expression;
+
+
         //Actions
-        navigate    -> [TokenType::NAVIGATE];
-        click       -> [TokenType::CLICK];
-        back        -> [TokenType::BACK];
-        forward     -> [TokenType::FORWARD];
-        refresh     -> [TokenType::REFRESH];
-        get         -> [TokenType::GET];
-        wait        -> [TokenType::WAIT];
+        navigate            -> [TokenType::NAVIGATE];
+        click               -> [TokenType::CLICK];
+        back                -> [TokenType::BACK];
+        forward             -> [TokenType::FORWARD];
+        refresh             -> [TokenType::REFRESH];
+        get                 -> [TokenType::GET];
+        wait                -> [TokenType::WAIT];
+        assert              -> [TokenType::ASSERT];
 
         //Nouns
-        attribute   -> [TokenType::ATTRIBUTE];
-        element     -> [TokenType::ELEMENT];
-        url         -> [TokenType::URL];
-        title       -> [TokenType::TITLE];
+        attribute           -> [TokenType::ATTRIBUTE];
+        element             -> [TokenType::ELEMENT];
+        url                 -> [TokenType::URL];
+        title               -> [TokenType::TITLE];
 
         //Prepositions
-        from        -> [TokenType::FROM];
-        to          -> [TokenType::TO];
+        from                -> [TokenType::FROM];
+        to                  -> [TokenType::TO];
 
         //Adjectives
-        current     -> [TokenType::CURRENT];
+        current             -> [TokenType::CURRENT];
 
         //Operators
-        assign      -> [TokenType::ASSIGN_OP];
+        assign              -> [TokenType::ASSIGN_OP];
+        negation            -> [TokenType::NEGATION];
+        plus                -> [TokenType::PLUS];
+        minus               -> [TokenType::MINUS];
+        multiply            -> [TokenType::MULTIPLY];
+        forward_slash       -> [TokenType::FORWARDSLASH];
+        modulus             -> [TokenType::MODULUS];
+        equality            -> [TokenType::EQUALITY];
+        not_equal           -> [TokenType::NOT_EQUAL];
+        greater_than        -> [TokenType::GREATER_THAN];
+        lesser_than         -> [TokenType::LESSER_THAN];
+        greater_than_equal  -> [TokenType::GREATER_THAN_EQUAL_TO];
+        lesser_than_equal   -> [TokenType::LESSER_THAN_EQUAL_TO];
+
+        //chars
+        left_paran          -> [TokenType::LEFT_PARAN];
+        right_paran         -> [TokenType::RIGHT_PARAN];
 
         //Inputs
-        string      -> [TokenType::STRING(d_string())];
-        ident       -> [TokenType::IDENTIFIER(d_string())];
-        number      -> [TokenType::NUMBER(d_num())];
+        string              -> [TokenType::STRING(d_string())];
+        ident               -> [TokenType::IDENTIFIER(d_string())];
+        number              -> [TokenType::NUMBER(d_num())];
+
+        //Boolean
+        true_               -> [TokenType::TRUE];
+        false_              -> [TokenType::FALSE];
     );
     let mut slr_parser = SLR_Parser::new(grammar.productions);
     slr_parser.compute_lr0_items();
