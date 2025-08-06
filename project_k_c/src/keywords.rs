@@ -107,7 +107,7 @@ define_tokens!(
     TESTCASE,
     TESTSUITE,
     TESTPLAN,
-    // ***** actions
+    //actions
     NAVIGATE,
     CLICK,
     BACK,
@@ -115,6 +115,7 @@ define_tokens!(
     REFRESH,
     GET,
     WAIT,
+    ASSERT,
     //nouns
     ATTRIBUTE,
     ELEMENT,
@@ -127,6 +128,23 @@ define_tokens!(
     CURRENT,
     //operators
     ASSIGN_OP = '=',
+    NEGATION = '!', //from here
+    PLUS = '+',
+    MINUS = '-',
+    MULTIPLY = '*',
+    FORWARDSLASH = '/',
+    MODULUS = '%',
+    LEFT_PARAN = '(',
+    RIGHT_PARAN = ')',
+    EQUALITY = "==",
+    NOT_EQUAL = "!=",
+    GREATER_THAN = '>',
+    LESSER_THAN = '<',
+    GREATER_THAN_EQUAL_TO = ">=",
+    LESSER_THAN_EQUAL_TO = "<=",
+    //boolean
+    TRUE,
+    FALSE,
     //High level tokens
     TESTSTEPS,
     CAPABILITIES,

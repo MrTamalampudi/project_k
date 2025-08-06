@@ -3,6 +3,7 @@ use crate::location::Location;
 use crate::token::Token;
 use crate::CompilationContext;
 use std::iter::Peekable;
+use std::os::linux::raw::stat;
 use std::str::Chars;
 use std::{fmt, path::PathBuf};
 use unicode_ident::{is_xid_continue, is_xid_start};
@@ -12,10 +13,18 @@ const NEW_LINE: char = '\n';
 const DOUBLE_QUOTE: char = '\"';
 const HASH_TAG: char = '#';
 const BACKSLASH: char = '\\';
-const FORWARDSLASH: char = '/';
 const ASSIGN: char = '=';
+const NEGATION: char = '!';
+const LEFT_PARAN: char = '(';
+const RIGHT_PARAN: char = ')';
 const UNDERLINE: char = '_';
+const PLUS: char = '+';
 const HYPHEN: char = '-';
+const MULTIPLY: char = '*';
+const FORWARDSLASH: char = '/';
+const MODULUS: char = '%';
+const GREATER_THAN: char = '>';
+const LESSER_THAN: char = '<';
 
 impl fmt::Display for TokenType {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -98,19 +107,29 @@ impl<'a> Tokenizer<'a> {
         while let Some(cha) = state.peek() {
             match cha {
                 &WHITESPACE => Tokenizer::counsume_unwanted_token(state),
+                &NEGATION => self.consume_negation_or_not_equal_op(state, tokens),
+                &ASSIGN => self.consume_assign_or_equality_op(state, tokens),
+                &LESSER_THAN => self.consume_lesser_or_lesser_than_equal(state, tokens),
+                &GREATER_THAN => self.consume_greater_or_greater_than_equal(state, tokens),
                 &NEW_LINE => self.consume_operator_token(TokenType::NEW_LINE, state, tokens, 1),
+                &LEFT_PARAN => self.consume_operator_token(TokenType::LEFT_PARAN, state, tokens, 1),
+                &RIGHT_PARAN => {
+                    self.consume_operator_token(TokenType::RIGHT_PARAN, state, tokens, 1)
+                }
+                &PLUS => self.consume_operator_token(TokenType::PLUS, state, tokens, 1),
+                &MULTIPLY => self.consume_operator_token(TokenType::MULTIPLY, state, tokens, 1),
+                &MODULUS => self.consume_operator_token(TokenType::MODULUS, state, tokens, 1),
                 &DOUBLE_QUOTE => self.consume_string_token(state, tokens),
-                &ASSIGN => self.consume_operator_token(TokenType::ASSIGN_OP, state, tokens, 1),
-                &FORWARDSLASH => self.consume_comments(state),
+                &FORWARDSLASH => self.consume_comments_or_division_op(state, tokens),
                 &HASH_TAG => {
                     state.next(); // consume '#' token
                     self.consume_identifier(state, tokens);
                 }
-                ch if is_xid_start(*ch) || ch == &UNDERLINE => {
+                ch if is_xid_start(*ch) || *ch == UNDERLINE => {
                     self.consume_identifier(state, tokens)
                 }
                 _ if cha.is_digit(10) || *cha == HYPHEN => {
-                    self.consume_number(state, tokens);
+                    self.consume_number_or_minus_op(state, tokens);
                 }
                 _ => {
                     self.error(
@@ -134,23 +153,81 @@ impl<'a> Tokenizer<'a> {
         ));
     }
 
-    fn consume_comments(&mut self, state: &mut State) {
+    fn consume_lesser_or_lesser_than_equal(&mut self, state: &mut State, tokens: &mut Vec<Token>) {
         let start = state.location;
+        state.next(); //consume '<'
+        if let Some('=') = state.peek() {
+            self.consume_operator_token(TokenType::LESSER_THAN_EQUAL_TO, state, tokens, 1);
+        } else {
+            tokens.push(Token::new(
+                TokenType::LESSER_THAN,
+                start,
+                state.location,
+                self.get_source_path_as_string(),
+            ));
+        }
+    }
+
+    fn consume_greater_or_greater_than_equal(
+        &mut self,
+        state: &mut State,
+        tokens: &mut Vec<Token>,
+    ) {
+        let start = state.location;
+        state.next(); //consume '>'
+        if let Some('=') = state.peek() {
+            self.consume_operator_token(TokenType::GREATER_THAN_EQUAL_TO, state, tokens, 1);
+        } else {
+            tokens.push(Token::new(
+                TokenType::GREATER_THAN,
+                start,
+                state.location,
+                self.get_source_path_as_string(),
+            ));
+        }
+    }
+
+    fn consume_assign_or_equality_op(&mut self, state: &mut State, tokens: &mut Vec<Token>) {
+        let start = state.location;
+        state.next(); //consume '='
+        if let Some('=') = state.peek() {
+            self.consume_operator_token(TokenType::EQUALITY, state, tokens, 1);
+        } else {
+            tokens.push(Token::new(
+                TokenType::ASSIGN_OP,
+                start,
+                state.location,
+                self.get_source_path_as_string(),
+            ));
+        }
+    }
+
+    fn consume_negation_or_not_equal_op(&mut self, state: &mut State, tokens: &mut Vec<Token>) {
+        let start = state.location;
+        state.next(); //consume '!'
+        if let Some('=') = state.peek() {
+            self.consume_operator_token(TokenType::NOT_EQUAL, state, tokens, 1);
+        } else {
+            tokens.push(Token::new(
+                TokenType::NEGATION,
+                start,
+                state.location,
+                self.get_source_path_as_string(),
+            ));
+        }
+    }
+
+    fn consume_comments_or_division_op(&mut self, state: &mut State, tokens: &mut Vec<Token>) {
         state.next(); //consume first '/' of a comment
         if let Some(ch) = state.peek() {
             match ch {
                 &FORWARDSLASH => {
                     state.next();
                 } //consume second '/' of a comment
-                _ => self.error(
-                    "Expected '/'".to_string(),
-                    start,
-                    {
-                        state.next();
-                        state.location
-                    },
-                    self.get_source_path_as_string(),
-                ),
+                _ => {
+                    self.consume_operator_token(TokenType::FORWARDSLASH, state, tokens, 1);
+                    return;
+                }
             }
         }
 
@@ -162,11 +239,17 @@ impl<'a> Tokenizer<'a> {
         }
     }
 
-    fn consume_number(&self, state: &mut State, tokens: &mut Vec<Token>) {
+    fn consume_number_or_minus_op(&self, state: &mut State, tokens: &mut Vec<Token>) {
         let start = state.location;
         let mut string: String = String::new();
         while let Some(ch) = state.peek() {
-            if *ch == NEW_LINE || (!ch.is_digit(10) && !(string.is_empty() && *ch == HYPHEN)) {
+            if *ch == NEW_LINE
+                || *ch == WHITESPACE
+                || (!ch.is_digit(10) && !(string.is_empty() && *ch == HYPHEN))
+            {
+                if string.eq("-") {
+                    self.consume_operator_token(TokenType::MINUS, state, tokens, 1);
+                }
                 break;
             }
             string.push(*ch);
