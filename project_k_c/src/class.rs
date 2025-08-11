@@ -239,5 +239,27 @@ class_macro!(
                 }
             }
         }
+    },
+    {
+        action:ArthimaticExpressionAction,
+        engine:ArthimaticExpressionEngine,
+        ARTHIMATICEXPRESSION {
+            PLUS,
+            MINUS,
+            SP_MINUS,
+            MULTIPLY,
+            DIVISION,
+            MODULUS
+        }
+    },
+    {
+        action:LiteralExpressionAction,
+        engine:LiteralExpressionEngine,
+        LITERALEXPRESSION {
+            STRING,
+            NUMBER,
+            IDENT,
+            BOOLEAN
+        }
     }
 );
