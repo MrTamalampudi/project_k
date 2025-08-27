@@ -117,7 +117,7 @@ impl Browser {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum CapabilityValue {
     BROWSER(Browser),
     STRING(String),

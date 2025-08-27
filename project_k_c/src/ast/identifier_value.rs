@@ -2,7 +2,7 @@ use crate::{ast::primitives::Primitives, parser::locator::LocatorStrategy};
 use std::mem::discriminant;
 use thirtyfour::WebElement;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum IdentifierValue {
     String(Option<String>),
     Number(Option<isize>),

@@ -1,10 +1,11 @@
-use crate::ast::{getter::Getter, teststep::TestStep, var_decl::VarDecl};
+use crate::ast::{expression::Expression, getter::Getter, teststep::TestStep, var_decl::VarDecl};
 
-#[derive(Clone, Debug)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum TranslatorStack {
     TestStep(TestStep),
     Getter(Getter),
     VarDecl(VarDecl),
     String(String),
     Ident(String),
+    Expression(Expression),
 }

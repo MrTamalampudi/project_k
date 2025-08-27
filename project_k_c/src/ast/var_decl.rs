@@ -9,7 +9,7 @@ use crate::{
     class::{Method, CUSTOM},
 };
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct VarDecl {
     pub name: String,
     pub type_: Primitives,
@@ -30,7 +30,7 @@ impl VarDecl {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum VarRHS {
     Getter(Getter),
     String(String),

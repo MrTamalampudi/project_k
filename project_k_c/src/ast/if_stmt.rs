@@ -6,7 +6,7 @@ use crate::{
     location::Location,
 };
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct IfStmt {
     pub start: Location,
     pub end: Location,
@@ -16,7 +16,7 @@ pub struct IfStmt {
     pub method: Method,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum AlternateStatement {
     IF(Box<IfStmt>),
     ELSE(Vec<TestStep>),

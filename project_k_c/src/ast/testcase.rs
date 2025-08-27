@@ -10,7 +10,7 @@ use crate::{
     enums::CapabilityValue,
 };
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 #[allow(unused)]
 pub struct TestCase {
     capabilities: HashMap<String, CapabilityValue>,

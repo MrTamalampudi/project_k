@@ -1,10 +1,8 @@
 use std::fmt;
 
-use slr_parser::terminal::Terminal;
-
 use crate::{keywords::TokenType, location::Location};
 
-#[derive(Clone, Debug)]
+#[derive(Debug, Clone, PartialEq)]
 #[allow(unused)]
 pub struct Token {
     pub token_type: TokenType,
@@ -13,9 +11,9 @@ pub struct Token {
     pub source_path: String,
 }
 
-impl fmt::Display for Token {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{:#?}", self)
+impl ToString for Token {
+    fn to_string(&self) -> String {
+        self.token_type.to_string()
     }
 }
 
@@ -43,19 +41,5 @@ impl Token {
 
     pub fn get_source_path(&self) -> String {
         self.source_path.clone()
-    }
-}
-
-impl Terminal for Token {
-    fn get_ending_token() -> String {
-        "EOF".to_string()
-    }
-
-    fn to_string_c(&self) -> String {
-        self.token_type.to_string()
-    }
-
-    fn get_value(&self) -> Option<String> {
-        self.token_type.get_value()
     }
 }

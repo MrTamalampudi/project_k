@@ -5,7 +5,7 @@ use crate::{
     class::Method,
 };
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct Getter {
     pub method: Method,
     pub arguments: HashMap<&'static str, Args>,

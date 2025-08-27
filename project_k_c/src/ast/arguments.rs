@@ -5,7 +5,7 @@ pub const URL_ARGKEY: &'static str = "url";
 pub const ATTRIBUTE_ARGKEY: &'static str = "attribute";
 pub const SECS_ARGKEY: &'static str = "seconds";
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum Args {
     String(String),
     Locator(LocatorStrategy),

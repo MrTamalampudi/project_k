@@ -9,7 +9,7 @@ use crate::{
     location::Location,
 };
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 #[allow(unused)]
 pub struct TestStep {
     pub start: Location,

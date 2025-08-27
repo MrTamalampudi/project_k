@@ -8,7 +8,7 @@ const ID: &'static str = "id:";
 const NAME: &'static str = "name:";
 const TAG: &'static str = "tag:";
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum LocatorStrategy {
     CLASSNAME(String),
     CSS_SELECTOR(String),
@@ -34,7 +34,7 @@ impl LocatorStrategy {
         } else if locator.starts_with("//") || locator.starts_with("/") {
             return LocatorStrategy::XPATH(locator_.clone());
         } else {
-            return LocatorStrategy::XPATH(format!("//*[text()=\"{}\"", locator_));
+            return LocatorStrategy::XPATH(format!("//*[text()=\"{}\"]", locator_));
         }
     }
 

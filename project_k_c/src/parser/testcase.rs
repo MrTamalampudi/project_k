@@ -2,10 +2,9 @@ use log::{debug, info};
 use slr_parser::error::ParseError;
 use slr_parser::grammar;
 use slr_parser::grammar::Grammar;
-use slr_parser::parser::Parser as SLR_Parser;
+use slr_parser::parser::LR1_Parser;
 use slr_parser::production::Production;
 use slr_parser::symbol::Symbol;
-use slr_parser::terminal::Terminal;
 use std::sync::Arc;
 
 use super::Parser;
@@ -103,6 +102,8 @@ pub fn parser_slr(parser: &mut Parser) {
         }}
         |
         VAR_DECLARATION
+        |
+        Expression
         ;
 
         VAR_DECLARATION -> ident assign VAR_RHS
@@ -141,7 +142,8 @@ pub fn parser_slr(parser: &mut Parser) {
 
         OperatorExpression -> NegationExpression
         | ComparisionExpression
-        | ArthimaticExpression ;
+        | ArthimaticExpression
+        ;
 
         NegationExpression -> negation Expression;
 
@@ -150,7 +152,8 @@ pub fn parser_slr(parser: &mut Parser) {
         | Expression greater_than Expression
         | Expression lesser_than Expression
         | Expression greater_than_equal Expression
-        | Expression lesser_than_equal Expression;
+        | Expression lesser_than_equal Expression
+        ;
 
         ArthimaticExpression -> Expression plus Expression
         | Expression minus Expression
@@ -211,11 +214,11 @@ pub fn parser_slr(parser: &mut Parser) {
         true_               -> [TokenType::TRUE];
         false_              -> [TokenType::FALSE];
     );
-    let mut slr_parser = SLR_Parser::new(grammar.productions);
-    slr_parser.compute_lr0_items();
+    let mut lalr_parser = LR1_Parser::new(&grammar);
+    lalr_parser.construct_LALR_Table();
     let mut errors: Vec<ParseError<Token>> = Vec::new();
     let mut ast: TestCase = TestCase::new();
-    slr_parser.parse(tt, &mut errors, &mut ast);
+    lalr_parser.parse(tt, &mut errors, &mut ast);
     refine_errors(&mut errors);
     let transformed_errors: Vec<ErrorInfo> = errors
         .iter()

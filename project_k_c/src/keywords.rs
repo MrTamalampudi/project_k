@@ -1,5 +1,3 @@
-use slr_parser::terminal::Terminal;
-
 use crate::enums::CapabilityValue;
 use crate::enums::{Browser, Capabilities};
 use std::collections::HashMap;
@@ -74,22 +72,6 @@ macro_rules! define_tokens {
             }
         }
     };
-}
-
-impl Terminal for TokenType {
-    fn get_ending_token() -> String {
-        "EOF".to_string()
-    }
-    fn to_string_c(&self) -> String {
-        self.to_string()
-    }
-    fn get_value(&self) -> Option<String> {
-        match self {
-            TokenType::STRING(string) => Some(string.clone()),
-            TokenType::IDENTIFIER(identifier) => Some(identifier.clone()),
-            _ => None,
-        }
-    }
 }
 
 impl TokenType {
