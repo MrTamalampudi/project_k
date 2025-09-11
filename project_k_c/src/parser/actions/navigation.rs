@@ -8,7 +8,7 @@ use crate::class::NAVIGATION;
 use crate::class::{Class, Method};
 use crate::parser::translator_stack::TranslatorStack;
 use crate::token::Token;
-use slr_parser::error::ParseError;
+use manodae::error::ParseError;
 
 pub struct Navigation {}
 

@@ -1,4 +1,4 @@
-use slr_parser::error::ParseError;
+use manodae::error::ParseError;
 
 use crate::{location::Location, token::Token};
 

@@ -4,7 +4,7 @@ use crate::ast::testcase::TestCase;
 use crate::ast::testcase_body::TestcaseBody;
 use crate::parser::translator_stack::TranslatorStack;
 use crate::token::Token;
-use slr_parser::error::ParseError;
+use manodae::error::ParseError;
 use std::future::Future;
 use thirtyfour::error::WebDriverError;
 

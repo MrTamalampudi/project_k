@@ -10,7 +10,7 @@ use crate::class::{Class, Method, WEB_DRIVER};
 use crate::parser::errors::{VALID_URL, VALID_URL_SHCEME};
 use crate::parser::translator_stack::TranslatorStack;
 use crate::token::Token;
-use slr_parser::error::ParseError;
+use manodae::error::ParseError;
 use url::Url;
 
 use crate::keywords::TokenType;

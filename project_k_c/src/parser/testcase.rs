@@ -1,10 +1,10 @@
 use log::{debug, info};
-use slr_parser::error::ParseError;
-use slr_parser::grammar;
-use slr_parser::grammar::Grammar;
-use slr_parser::parser::LR1_Parser;
-use slr_parser::production::Production;
-use slr_parser::symbol::Symbol;
+use manodae::error::ParseError;
+use manodae::grammar;
+use manodae::grammar::Grammar;
+use manodae::parser::LR1_Parser;
+use manodae::production::Production;
+use manodae::symbol::Symbol;
 use std::sync::Arc;
 
 use super::Parser;

@@ -14,7 +14,7 @@ use crate::parser::locator::LocatorStrategy;
 use crate::parser::translator_stack::TranslatorStack;
 use crate::token::Token;
 use crate::TokenType;
-use slr_parser::error::ParseError;
+use manodae::error::ParseError;
 
 pub struct Element {}
 
