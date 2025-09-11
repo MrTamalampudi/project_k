@@ -1,4 +1,3 @@
-use log::{debug, info};
 use manodae::error::ParseError;
 use manodae::grammar;
 use manodae::grammar::Grammar;
@@ -9,7 +8,7 @@ use std::sync::Arc;
 
 use super::Parser;
 use crate::ast::testcase::TestCase;
-use crate::class::{CustomAction, NavigationAction, TimeoutsAction};
+use crate::class::{CustomAction, LiteralExpressionAction, NavigationAction, TimeoutsAction};
 use crate::class::{ElementAction, WebDriverAction};
 use crate::engine::execute;
 use crate::error_handler::{parse_error_to_error_info, ErrorInfo};
@@ -17,6 +16,7 @@ use crate::keywords::TokenType;
 use crate::parser::actions::custom::Custom;
 use crate::parser::actions::driver::Driver;
 use crate::parser::actions::element::Element;
+use crate::parser::actions::literal_expression::LiteralExpression;
 use crate::parser::actions::navigation::Navigation;
 use crate::parser::actions::timeouts::Timeouts;
 use crate::parser::translator_stack::TranslatorStack;
@@ -136,7 +136,32 @@ pub fn parser_slr(parser: &mut Parser) {
         | GroupedExpression
         ;
 
-        LiteralExpression -> number | string | ident | true_ | false_ ;
+        LiteralExpression ->
+        number
+        {action:|ast,token_stack,tl_stack,errors| {
+            LiteralExpression::NUMBER(ast, token_stack, tl_stack, errors);
+        }}
+        |
+        string
+        {action:|ast,token_stack,tl_stack,errors| {
+            LiteralExpression::STRING(ast, token_stack, tl_stack, errors);
+        }}
+        |
+        ident
+        {action:|ast,token_stack,tl_stack,errors| {
+            LiteralExpression::IDENT(ast, token_stack, tl_stack, errors);
+        }}
+        |
+        true_
+        {action:|ast,token_stack,tl_stack,errors| {
+            LiteralExpression::BOOLEAN(ast, token_stack, tl_stack, errors);
+        }}
+        |
+        false_
+        {action:|ast,token_stack,tl_stack,errors| {
+            LiteralExpression::BOOLEAN(ast, token_stack, tl_stack, errors);
+        }}
+        ;
 
         GroupedExpression -> left_paran Expression right_paran;
 
