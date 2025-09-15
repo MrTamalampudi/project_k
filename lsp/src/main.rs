@@ -47,12 +47,12 @@ impl Backend {
                 .push(Diagnostic {
                     range: Range {
                         start: Position {
-                            line: (error.start_location.line - 1) as u32,
-                            character: (error.start_location.column - 1) as u32,
+                            line: (error.span.start.line - 1) as u32,
+                            character: (error.span.start.column - 1) as u32,
                         },
                         end: Position {
-                            line: (error.end_location.line - 1) as u32,
-                            character: (error.end_location.column - 1) as u32,
+                            line: (error.span.end.line - 1) as u32,
+                            character: (error.span.end.column - 1) as u32,
                         },
                     },
                     message: error.message.clone(),

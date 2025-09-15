@@ -1,13 +1,15 @@
 use std::fmt;
 
-use crate::{keywords::TokenType, location::Location};
+use crate::{
+    keywords::TokenType,
+    location::{Location, Span},
+};
 
 #[derive(Debug, Clone, PartialEq)]
 #[allow(unused)]
 pub struct Token {
     pub token_type: TokenType,
-    pub start: Location,
-    pub end: Location,
+    pub span: Span,
     pub source_path: String,
 }
 
@@ -19,20 +21,20 @@ impl ToString for Token {
 
 impl Token {
     pub fn new(token_type: TokenType, start: Location, end: Location, source_path: String) -> Self {
+        let span = Span { start, end };
         Self {
             token_type,
-            start,
-            end,
+            span,
             source_path,
         }
     }
 
     pub fn get_start_location(&self) -> Location {
-        self.start
+        self.span.start
     }
 
     pub fn get_end_location(&self) -> Location {
-        self.end
+        self.span.end
     }
 
     pub fn get_token_type(&self) -> TokenType {

@@ -265,5 +265,5 @@ fn refine_errors(errors: &mut Vec<ParseError<Token>>) {
     errors
         .iter_mut()
         .filter(|e| e.production_end)
-        .for_each(|e| e.token.start = e.token.end);
+        .for_each(|e| e.token.span.start = e.token.span.end);
 }

@@ -3,7 +3,6 @@ use crate::location::Location;
 use crate::token::Token;
 use crate::CompilationContext;
 use std::iter::Peekable;
-use std::os::linux::raw::stat;
 use std::str::Chars;
 use std::{fmt, path::PathBuf};
 use unicode_ident::{is_xid_continue, is_xid_start};

@@ -1,12 +1,14 @@
 use manodae::error::ParseError;
 
-use crate::{location::Location, token::Token};
+use crate::{
+    location::{Location, Span},
+    token::Token,
+};
 
 #[derive(Debug, Clone)]
 pub struct ErrorInfo {
     pub message: String,
-    pub start_location: Location,
-    pub end_location: Location,
+    pub span: Span,
     pub source_path: String,
 }
 
@@ -18,8 +20,7 @@ pub struct ErrorManager {
 pub fn parse_error_to_error_info(error: ParseError<Token>) -> ErrorInfo {
     ErrorInfo {
         message: error.message,
-        start_location: error.token.start,
-        end_location: error.token.end,
+        span: error.token.span,
         source_path: error.token.source_path,
     }
 }
@@ -32,8 +33,7 @@ impl ErrorManager {
     pub fn insert_parsing_error(&mut self, message: String, token: &Token) {
         self.errors.push(ErrorInfo {
             message,
-            start_location: token.get_start_location(),
-            end_location: token.get_end_location(),
+            span: token.span.clone(),
             source_path: token.get_source_path(),
         });
     }
@@ -45,10 +45,13 @@ impl ErrorManager {
         end_location: Location,
         source_path: String,
     ) {
+        let span = Span {
+            start: start_location,
+            end: end_location,
+        };
         self.errors.push(ErrorInfo {
             message,
-            start_location,
-            end_location,
+            span,
             source_path,
         });
     }
