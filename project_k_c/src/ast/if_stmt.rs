@@ -1,7 +1,7 @@
 #![allow(non_camel_case_types, unused)]
 
 use crate::{
-    ast::{expression::Expression, testcase_body::GetMethod, teststep::TestStep},
+    ast::{expression::Expr, testcase_body::GetMethod, teststep::TestStep},
     class::Method,
     location::Location,
 };
@@ -10,7 +10,7 @@ use crate::{
 pub struct IfStmt {
     pub start: Location,
     pub end: Location,
-    pub test: Expression,
+    pub test: Expr,
     pub consequent: Vec<TestStep>,
     pub alternate: AlternateStatement,
     pub method: Method,

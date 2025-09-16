@@ -163,14 +163,14 @@ pub fn parser_slr(parser: &mut Parser) {
         }}
         ;
 
+        NegationExpression -> negation GroupedExpression;
+
         GroupedExpression -> left_paran Expression right_paran;
 
         OperatorExpression -> NegationExpression
         | ComparisionExpression
         | ArthimaticExpression
         ;
-
-        NegationExpression -> negation Expression;
 
         ComparisionExpression -> Expression equality Expression
         | Expression not_equal Expression

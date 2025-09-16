@@ -4,4 +4,5 @@ pub mod element;
 pub mod expression;
 pub mod literal_expression;
 pub mod navigation;
+pub mod operator_expression;
 pub mod timeouts;

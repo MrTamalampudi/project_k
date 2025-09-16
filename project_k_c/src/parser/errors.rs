@@ -8,3 +8,7 @@ pub const MISMATCHED_TYPES: &'static str = "Mismatched Types";
 
 // ***** token *****
 pub const _INVALID_TOKEN: &'static str = "Invalid token. Please check syntax";
+
+// ***** expression *****
+pub const _INVALID_NEGATION_EXPR_USE: &'static str =
+    "Use Negation operator only on boolean operations";

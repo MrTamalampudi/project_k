@@ -41,4 +41,11 @@ impl Span {
     pub fn new(start: Location, end: Location) -> Self {
         Self { start, end }
     }
+
+    pub fn to(&self, span: &Span) -> Span {
+        Span {
+            start: self.start,
+            end: span.end,
+        }
+    }
 }

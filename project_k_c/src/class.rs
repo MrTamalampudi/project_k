@@ -261,5 +261,12 @@ class_macro!(
             IDENT,
             BOOLEAN
         }
+    },
+    {
+        action:NegationExpressionAction,
+        engine:NegationExpressionEngine,
+        NEGATIONEXPRESSION  {
+            NEGATION
+        }
     }
 );
