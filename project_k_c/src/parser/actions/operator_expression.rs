@@ -5,14 +5,14 @@ use crate::{
         expression::{ExpKind, Expr, Literal, UnOp},
         testcase::TestCase,
     },
-    class::NegationExpressionAction,
+    class::UnaryExpressionAction,
     parser::{errors::_INVALID_NEGATION_EXPR_USE, translator_stack::TranslatorStack},
     token::Token,
 };
 
-pub struct NegationExpression {}
+pub struct UnaryExpression {}
 
-impl NegationExpressionAction for NegationExpression {
+impl UnaryExpressionAction for UnaryExpression {
     fn NEGATION(
         _testcase: &mut TestCase,
         _token_stack: &mut Vec<Token>,

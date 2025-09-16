@@ -108,6 +108,9 @@ define_tokens!(
     TO,
     //adjective
     CURRENT,
+    //conjunctions
+    AND,
+    OR,
     //operators
     ASSIGN_OP = '=',
     NEGATION = '!', //from here

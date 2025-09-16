@@ -132,8 +132,8 @@ pub fn parser_slr(parser: &mut Parser) {
         IDENT_OR_STRING -> ident | string;
 
         Expression  -> LiteralExpression
-        | OperatorExpression
-        | GroupedExpression
+        | BinaryExpression
+        | UnaryExpression
         ;
 
         LiteralExpression ->
@@ -163,14 +163,18 @@ pub fn parser_slr(parser: &mut Parser) {
         }}
         ;
 
+        UnaryExpression -> NegationExpression;
+
         NegationExpression -> negation GroupedExpression;
 
         GroupedExpression -> left_paran Expression right_paran;
 
-        OperatorExpression -> NegationExpression
-        | ComparisionExpression
+        BinaryExpression -> ComparisionExpression
         | ArthimaticExpression
+        | LogicalExpression
         ;
+
+        LogicalExpression -> Expression and Expression | Expression or Expression;
 
         ComparisionExpression -> Expression equality Expression
         | Expression not_equal Expression
@@ -225,6 +229,10 @@ pub fn parser_slr(parser: &mut Parser) {
         lesser_than         -> [TokenType::LESSER_THAN];
         greater_than_equal  -> [TokenType::GREATER_THAN_EQUAL_TO];
         lesser_than_equal   -> [TokenType::LESSER_THAN_EQUAL_TO];
+
+        //Conjunctions
+        and                 -> [TokenType::AND];
+        or                  -> [TokenType::OR];
 
         //chars
         left_paran          -> [TokenType::LEFT_PARAN];

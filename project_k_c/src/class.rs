@@ -263,9 +263,9 @@ class_macro!(
         }
     },
     {
-        action:NegationExpressionAction,
-        engine:NegationExpressionEngine,
-        NEGATIONEXPRESSION  {
+        action:UnaryExpressionAction,
+        engine:UnaryExpressionEngine,
+        UNARYEXPRESSION  {
             NEGATION
         }
     }
