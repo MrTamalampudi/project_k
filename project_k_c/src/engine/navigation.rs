@@ -1,4 +1,4 @@
-use thirtyfour::{error::WebDriverError, WebDriver};
+use thirtyfour::WebDriver;
 
 use crate::{
     ast::testcase_body::{GetMethod, TestcaseBody},

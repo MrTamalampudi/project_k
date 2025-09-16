@@ -1,7 +1,3 @@
-use std::error::Error;
-
-use log::debug;
-use thirtyfour::error::WebDriverError;
 use thirtyfour::WebDriver;
 
 use crate::ast::arguments::{Args, ATTRIBUTE_ARGKEY, LOCATOR_ARGKEY};

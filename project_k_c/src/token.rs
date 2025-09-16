@@ -1,5 +1,3 @@
-use std::fmt;
-
 use crate::{
     keywords::TokenType,
     location::{Location, Span},

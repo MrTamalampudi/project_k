@@ -1,5 +1,4 @@
 use log::info;
-use thirtyfour::error::WebDriverError;
 use thirtyfour::WebDriver;
 
 use crate::ast::arguments::{Args, URL_ARGKEY};

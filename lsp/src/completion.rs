@@ -5,9 +5,7 @@ use project_k::{
     keywords::TokenType,
     token::Token,
 };
-use tower_lsp::lsp_types::{CompletionItem, MessageType, Position};
-
-use crate::Backend;
+use tower_lsp::lsp_types::{CompletionItem, Position};
 
 pub struct IntelliSense {
     tokens: Vec<Token>,

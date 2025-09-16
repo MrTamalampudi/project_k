@@ -1,18 +1,14 @@
-use std::collections::HashMap;
-use std::fmt::format;
-use std::path::{Path, PathBuf};
-use std::str::FromStr;
-use std::time::SystemTime;
-
-use completion::IntelliSense;
 use parking_lot::RwLock;
 use project_k::parser::Parser;
 use project_k::token::Token;
-use project_k::{compile, compile_for_errors, source_code_to_lexer, CompilationContext};
+use project_k::{source_code_to_lexer, CompilationContext};
+use std::collections::HashMap;
 use std::env;
+use std::path::PathBuf;
+use std::str::FromStr;
 use tokio_util::sync::CancellationToken;
 use tower_lsp::jsonrpc::Result;
-use tower_lsp::jsonrpc::{Error, Result as LspResult};
+use tower_lsp::jsonrpc::Result as LspResult;
 use tower_lsp::lsp_types::*;
 use tower_lsp::{Client, LanguageServer, LspService, Server};
 

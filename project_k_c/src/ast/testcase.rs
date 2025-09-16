@@ -1,7 +1,5 @@
 use std::{cell::RefCell, collections::HashMap, rc::Rc};
 
-use log::debug;
-
 use crate::{
     ast::{
         identifier_value::IdentifierValue, testcase_body::TestcaseBody, teststep::TestStep,

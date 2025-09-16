@@ -1,7 +1,6 @@
 use std::time::{Duration, SystemTime};
 
 use thirtyfour::{By, WebDriver};
-use tokio::time::Timeout;
 
 use crate::{
     ast::{
