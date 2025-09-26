@@ -7,6 +7,7 @@ use crate::{
         testcase_body::{GetMethod, Next, TestcaseBody},
     },
     class::{Method, CUSTOM},
+    location::{Span, Span_Trait},
 };
 
 #[derive(Debug, Clone, PartialEq)]
@@ -16,16 +17,18 @@ pub struct VarDecl {
     pub rhs: VarRHS,
     pub method: Method,
     pub next: Option<Rc<RefCell<TestcaseBody>>>,
+    pub span: Span,
 }
 
 impl VarDecl {
-    pub fn new(name: String, type_: Primitives, rhs: VarRHS) -> VarDecl {
+    pub fn new(name: String, type_: Primitives, rhs: VarRHS, span: Span) -> VarDecl {
         VarDecl {
             name,
             type_,
             rhs,
             method: Method::CUSTOM(CUSTOM::VAR_DECLARATION),
             next: None,
+            span,
         }
     }
 }
@@ -49,5 +52,11 @@ impl Next for VarDecl {
     }
     fn get_next(&self) -> Option<Rc<RefCell<TestcaseBody>>> {
         self.next.clone()
+    }
+}
+
+impl Span_Trait for VarDecl {
+    fn get_span(&self) -> Span {
+        self.span.clone()
     }
 }

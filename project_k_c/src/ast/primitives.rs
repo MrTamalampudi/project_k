@@ -6,6 +6,7 @@ pub enum Primitives {
     String,
     Locators,
     Element,
+    Boolean,
 }
 
 impl ToString for Primitives {
@@ -15,6 +16,7 @@ impl ToString for Primitives {
             Primitives::Element => String::from("Element"),
             Primitives::Locators => String::from("Locators"),
             Primitives::String => String::from("String"),
+            Primitives::Boolean => String::from("Boolean"),
         }
     }
 }
@@ -26,6 +28,7 @@ impl Primitives {
             Primitives::Element => IdentifierValue::Element(None),
             Primitives::Locators => IdentifierValue::Locators(None),
             Primitives::String => IdentifierValue::String(None),
+            Primitives::Boolean => IdentifierValue::Boolean(None),
         }
     }
 }

@@ -7,6 +7,7 @@ use crate::ast::testcase::TestCase;
 use crate::ast::testcase_body::TestcaseBody;
 use crate::ast::teststep::TestStep;
 use crate::class::{Class, Method, WEB_DRIVER};
+use crate::location::Span;
 use crate::parser::errors::{VALID_URL, VALID_URL_SHCEME};
 use crate::parser::translator_stack::TranslatorStack;
 use crate::token::Token;
@@ -46,10 +47,13 @@ impl WebDriverAction for Driver {
         };
 
         let arguments = HashMap::from([(URL_ARGKEY, Args::String(url_.clone()))]);
+        let span = Span {
+            start: _token_stack.first().unwrap().get_start_location(),
+            end: _token_stack.last().unwrap().get_end_location(),
+        };
 
         let test_step = TestStep::new(
-            _token_stack.first().unwrap().get_start_location(),
-            _token_stack.last().unwrap().get_end_location(),
+            span,
             Class::WEB_DRIVER,
             Method::WEB_DRIVER(WEB_DRIVER::NAVIGATE),
             arguments,

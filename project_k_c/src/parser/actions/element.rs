@@ -9,6 +9,7 @@ use crate::ast::teststep::TestStep;
 use crate::class::ELEMENT;
 use crate::class::{Class, ElementAction, Method};
 use crate::get_input_from_token_stack;
+use crate::location::Span;
 use crate::parser::errors::VARIABLE_NOT_DEFINED;
 use crate::parser::locator::LocatorStrategy;
 use crate::parser::translator_stack::TranslatorStack;
@@ -27,9 +28,13 @@ impl ElementAction for Element {
     ) {
         let locator_token = _token_stack.last();
         let locator = LocatorStrategy::parse(get_input_from_token_stack!(locator_token));
+        let span = Span {
+            start: _token_stack.first().unwrap().get_start_location(),
+            end: _token_stack.last().unwrap().get_end_location(),
+        };
+
         let test_step = TestStep::new(
-            _token_stack.first().unwrap().get_start_location(),
-            _token_stack.last().unwrap().get_end_location(),
+            span,
             Class::ELEMENT,
             Method::ELEMENT(ELEMENT::CLICK),
             HashMap::from([(LOCATOR_ARGKEY, Args::Locator(locator))]),

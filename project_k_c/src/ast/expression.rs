@@ -1,6 +1,9 @@
 #![allow(non_camel_case_types, unused)]
 
-use crate::{ast::primitives::Primitives, location::Span};
+use crate::{
+    ast::primitives::Primitives,
+    location::{Span, Span_Trait},
+};
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum Literal {
@@ -16,7 +19,13 @@ pub struct Expr {
     pub span: Span,
 }
 
-#[derive(Debug, Clone, PartialEq)]
+impl Span_Trait for Expr {
+    fn get_span(&self) -> Span {
+        self.span.clone()
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Copy)]
 pub enum BinOpKind {
     /// The `+` operator (addition)
     Add,

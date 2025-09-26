@@ -12,3 +12,5 @@ pub const _INVALID_TOKEN: &'static str = "Invalid token. Please check syntax";
 // ***** expression *****
 pub const _INVALID_NEGATION_EXPR_USE: &'static str =
     "Use Negation operator only on boolean operations";
+pub const ASSERT_SUPPORTS_ONLY_BOOL: &'static str =
+    "Assertion action supports only boolean expression";

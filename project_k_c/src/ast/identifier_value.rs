@@ -8,6 +8,7 @@ pub enum IdentifierValue {
     Number(Option<isize>),
     Locators(Option<LocatorStrategy>),
     Element(Option<WebElement>),
+    Boolean(Option<bool>),
 }
 
 impl IdentifierValue {
@@ -17,6 +18,7 @@ impl IdentifierValue {
             IdentifierValue::Number(_) => Primitives::Number,
             IdentifierValue::Locators(_) => Primitives::Locators,
             IdentifierValue::Element(_) => Primitives::Element,
+            IdentifierValue::Boolean(_) => Primitives::Boolean,
         }
     }
 

@@ -6,6 +6,7 @@ use crate::ast::teststep::TestStep;
 use crate::class::NavigationAction;
 use crate::class::NAVIGATION;
 use crate::class::{Class, Method};
+use crate::location::Span;
 use crate::parser::translator_stack::TranslatorStack;
 use crate::token::Token;
 use manodae::error::ParseError;
@@ -19,9 +20,12 @@ impl NavigationAction for Navigation {
         _tl_stack: &mut Vec<TranslatorStack>,
         _errors: &mut Vec<ParseError<Token>>,
     ) {
+        let span = Span {
+            start: _token_stack.first().unwrap().get_start_location(),
+            end: _token_stack.last().unwrap().get_end_location(),
+        };
         let test_step = TestStep::new(
-            _token_stack.first().unwrap().get_start_location(),
-            _token_stack.last().unwrap().get_end_location(),
+            span,
             Class::NAVIGATION,
             Method::NAVIGATION(NAVIGATION::BACK),
             HashMap::new(),
@@ -38,9 +42,12 @@ impl NavigationAction for Navigation {
         _tl_stack: &mut Vec<TranslatorStack>,
         _errors: &mut Vec<ParseError<Token>>,
     ) {
+        let span = Span {
+            start: _token_stack.first().unwrap().get_start_location(),
+            end: _token_stack.last().unwrap().get_end_location(),
+        };
         let test_step = TestStep::new(
-            _token_stack.first().unwrap().get_start_location(),
-            _token_stack.last().unwrap().get_end_location(),
+            span,
             Class::NAVIGATION,
             Method::NAVIGATION(NAVIGATION::FORWARD),
             HashMap::new(),
@@ -57,9 +64,12 @@ impl NavigationAction for Navigation {
         _tl_stack: &mut Vec<TranslatorStack>,
         _errors: &mut Vec<ParseError<Token>>,
     ) {
+        let span = Span {
+            start: _token_stack.first().unwrap().get_start_location(),
+            end: _token_stack.last().unwrap().get_end_location(),
+        };
         let test_step = TestStep::new(
-            _token_stack.first().unwrap().get_start_location(),
-            _token_stack.last().unwrap().get_end_location(),
+            span,
             Class::NAVIGATION,
             Method::NAVIGATION(NAVIGATION::REFRESH),
             HashMap::new(),
