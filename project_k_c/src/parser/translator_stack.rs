@@ -13,8 +13,8 @@ pub enum TranslatorStack {
     Expression(Expr),
 }
 
-impl TranslatorStack {
-    fn span(&self) -> Span {
+impl Span_Trait for TranslatorStack {
+    fn get_span(&self) -> Span {
         use TranslatorStack::*;
         match self {
             TestStep(teststep) => teststep.get_span(),

@@ -2,6 +2,7 @@ use std::{cell::RefCell, rc::Rc};
 
 use crate::{
     ast::{
+        expression::Expr,
         getter::Getter,
         primitives::Primitives,
         testcase_body::{GetMethod, Next, TestcaseBody},
@@ -36,8 +37,16 @@ impl VarDecl {
 #[derive(Debug, Clone, PartialEq)]
 pub enum VarRHS {
     Getter(Getter),
-    String(String),
-    Var(String),
+    Expression(Expr),
+}
+
+impl VarRHS {
+    pub fn get_type(&self) -> Primitives {
+        match self {
+            VarRHS::Getter(getter) => getter.returns.clone(),
+            VarRHS::Expression(expr) => expr.primitive.clone(),
+        }
+    }
 }
 
 impl GetMethod for VarDecl {
@@ -58,5 +67,14 @@ impl Next for VarDecl {
 impl Span_Trait for VarDecl {
     fn get_span(&self) -> Span {
         self.span.clone()
+    }
+}
+
+impl Span_Trait for VarRHS {
+    fn get_span(&self) -> Span {
+        match self {
+            VarRHS::Expression(expr) => expr.span.clone(),
+            VarRHS::Getter(getter) => getter.span.clone(),
+        }
     }
 }

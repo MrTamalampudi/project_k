@@ -17,6 +17,7 @@ pub enum Literal {
 pub struct Expr {
     pub kind: ExpKind,
     pub span: Span,
+    pub primitive: Primitives,
 }
 
 impl Span_Trait for Expr {

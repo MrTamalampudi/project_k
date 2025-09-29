@@ -103,7 +103,7 @@ pub fn parser_slr(parser: &mut Parser) {
         |
         VAR_DECLARATION
         |
-        Expression
+        assert Expression
         ;
 
         VAR_DECLARATION -> ident assign VAR_RHS
@@ -111,7 +111,9 @@ pub fn parser_slr(parser: &mut Parser) {
                 Custom::VAR_DECLARATION(ast,token_stack,tl_stack,errors);
         }}
         ;
-        VAR_RHS -> IDENT_OR_STRING | GETTER;
+
+        VAR_RHS -> Expression | GETTER;
+
         GETTER -> get attribute IDENT_OR_STRING from element IDENT_OR_STRING
         {action:|ast,token_stack,tl_stack,errors| {
                 Element::GET_ATTRIBUTE(ast,token_stack,tl_stack,errors);
@@ -127,7 +129,6 @@ pub fn parser_slr(parser: &mut Parser) {
                 Driver::GET_TITLE(ast,token_stack,tl_stack,errors);
         }}
         ;
-
 
         IDENT_OR_STRING -> ident | string;
 
@@ -174,7 +175,8 @@ pub fn parser_slr(parser: &mut Parser) {
         | LogicalExpression
         ;
 
-        LogicalExpression -> Expression and Expression | Expression or Expression;
+        LogicalExpression -> Expression and Expression
+        | Expression or Expression;
 
         ComparisionExpression -> Expression equality Expression
         | Expression not_equal Expression
@@ -190,6 +192,9 @@ pub fn parser_slr(parser: &mut Parser) {
         | Expression multiply Expression
         | Expression forward_slash Expression
         | Expression modulus Expression;
+
+        //helpers
+        ATTRIBUTE -> indent | string;
 
 
         //Actions

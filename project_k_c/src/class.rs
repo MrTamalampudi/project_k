@@ -237,7 +237,8 @@ class_macro!(
                 engine: {
                     args: [_testcase : &mut TestCase]
                 }
-            }
+            },
+            ASSERT
         }
     },
     {
@@ -267,6 +268,13 @@ class_macro!(
         engine:UnaryExpressionEngine,
         UNARYEXPRESSION  {
             NEGATION
+        }
+    },
+    {
+        action:HelpersAction,
+        engine:HelpersEngine,
+        HELPERS {
+            ATTRIBUTE
         }
     }
 );

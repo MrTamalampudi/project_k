@@ -3,6 +3,7 @@ use manodae::error::ParseError;
 use crate::{
     ast::{
         expression::{ExpKind, Expr, Literal as LE},
+        primitives::Primitives,
         testcase::TestCase,
     },
     class::LiteralExpressionAction,
@@ -24,6 +25,7 @@ impl LiteralExpressionAction for LiteralExpression {
         if let TokenType::STRING(string) = string_token.get_token_type() {
             let expr_kind = ExpKind::Lit(LE::String(string));
             _tl_stack.push(TranslatorStack::Expression(Expr {
+                primitive: Primitives::String,
                 span: string_token.span,
                 kind: expr_kind,
             }));
@@ -39,6 +41,7 @@ impl LiteralExpressionAction for LiteralExpression {
         if let TokenType::NUMBER(number) = number_token.get_token_type() {
             let expr_kind = ExpKind::Lit(LE::Number(number));
             _tl_stack.push(TranslatorStack::Expression(Expr {
+                primitive: Primitives::Number,
                 span: number_token.span,
                 kind: expr_kind,
             }));
@@ -58,6 +61,7 @@ impl LiteralExpressionAction for LiteralExpression {
             let truth_value = matches!(bool.as_str(), "true" | "1");
             let expr_kind = ExpKind::Lit(LE::Boolean(truth_value));
             _tl_stack.push(TranslatorStack::Expression(Expr {
+                primitive: Primitives::Boolean,
                 span: boolean_token.span,
                 kind: expr_kind,
             }));
@@ -80,8 +84,9 @@ impl LiteralExpressionAction for LiteralExpression {
                 });
             }
             let variable_type = variable.unwrap().to_primitive();
-            let expr_kind = ExpKind::Lit(LE::Ident(ident, variable_type));
+            let expr_kind = ExpKind::Lit(LE::Ident(ident, variable_type.clone()));
             _tl_stack.push(TranslatorStack::Expression(Expr {
+                primitive: variable_type,
                 span: ident_token.span,
                 kind: expr_kind,
             }));

@@ -3,6 +3,7 @@ use manodae::error::ParseError;
 use crate::{
     ast::{
         expression::{ExpKind, Expr, Literal, UnOp},
+        primitives::Primitives,
         testcase::TestCase,
     },
     class::UnaryExpressionAction,
@@ -26,6 +27,7 @@ impl UnaryExpressionAction for UnaryExpression {
                 ExpKind::Binary(binop, _, _) => {
                     if binop.is_bool_op() {
                         let expr = Expr {
+                            primitive: Primitives::Boolean,
                             kind: ExpKind::Unary(UnOp::Not, Box::new(_expr.clone())),
                             span: negation_token.span.to(&_expr.span),
                         };
@@ -42,6 +44,7 @@ impl UnaryExpressionAction for UnaryExpression {
                 ExpKind::Unary(unop, _) => {
                     if &UnOp::Not == unop {
                         let expr = Expr {
+                            primitive: Primitives::Boolean,
                             kind: ExpKind::Unary(UnOp::Not, Box::new(_expr.clone())),
                             span: negation_token.span.to(&_expr.span),
                         };
@@ -58,6 +61,7 @@ impl UnaryExpressionAction for UnaryExpression {
                 ExpKind::Lit(lit) => {
                     if let Literal::Boolean(_) = lit {
                         let expr = Expr {
+                            primitive: Primitives::Boolean,
                             kind: ExpKind::Unary(UnOp::Not, Box::new(_expr.clone())),
                             span: negation_token.span.to(&_expr.span),
                         };
