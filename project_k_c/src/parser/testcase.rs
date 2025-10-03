@@ -68,7 +68,7 @@ pub fn parser_slr(parser: &mut Parser) {
         | Teststep Teststeps
         {error:"Teststeps body_ 2"};
 
-        Teststep -> navigate string
+        Teststep -> navigate Expression
         {error:"Expected syntax ' navigate \"url\" '"}
         {action:|ast,token_stack,tl_stack,errors| {
             Driver::NAVIGATE(ast,token_stack,tl_stack,errors);

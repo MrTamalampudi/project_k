@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 
 use crate::ast::arguments::{Args, ATTRIBUTE_ARGKEY, LOCATOR_ARGKEY};
+use crate::ast::expression::{ExpKind, Literal};
 use crate::ast::getter::Getter;
 use crate::ast::primitives::Primitives;
 use crate::ast::testcase::TestCase;
@@ -9,8 +10,9 @@ use crate::ast::teststep::TestStep;
 use crate::class::ELEMENT;
 use crate::class::{Class, ElementAction, Method};
 use crate::get_input_from_token_stack;
-use crate::location::Span;
-use crate::parser::errors::VARIABLE_NOT_DEFINED;
+use crate::location::{Span, Span_Trait};
+use crate::parser::errors::{EXPECT_EXPR, EXPECT_STRING_EXPR};
+use crate::parser::errorss::ActionError;
 use crate::parser::locator::LocatorStrategy;
 use crate::parser::translator_stack::TranslatorStack;
 use crate::token::Token;
@@ -68,69 +70,72 @@ impl ElementAction for Element {
         _errors: &mut Vec<ParseError<Token>>,
     ) {
     }
-    //get attribute ident_or_string from element ident_or_string
+
+    //get attribute expression from element expression
     fn GET_ATTRIBUTE(
         _testcase: &mut TestCase,
         _token_stack: &mut Vec<Token>,
         _tl_stack: &mut Vec<TranslatorStack>,
         _errors: &mut Vec<ParseError<Token>>,
     ) {
-        let locator_token = _token_stack
-            .get(_token_stack.len().saturating_sub(1))
-            .unwrap();
-        let attribute_token = _token_stack
-            .get(_token_stack.len().saturating_sub(4))
-            .unwrap();
+        let locator_tl = _tl_stack.pop().unwrap();
+        let attribute_tl = _tl_stack.pop().unwrap();
+        let _element_token = _token_stack.pop().unwrap();
+        let _from_token = _token_stack.pop().unwrap();
+        let _attribute_token = _token_stack.pop().unwrap();
+        let get_token = _token_stack.pop().unwrap();
 
-        let locator_arg = match &locator_token.token_type {
-            TokenType::STRING(locator) => Args::Locator(LocatorStrategy::parse(locator)),
-            TokenType::IDENTIFIER(ident) => {
-                if let None = _testcase.variables.get(ident) {
-                    _errors.push(ParseError {
-                        token: locator_token.clone(),
-                        message: String::from(VARIABLE_NOT_DEFINED),
-                        production_end: false,
-                    });
-                    Args::None
-                } else {
-                    Args::Ident(ident.clone())
-                }
-            }
-            _ => {
-                _errors.push(ParseError {
-                    token: locator_token.clone(),
-                    message: String::from(VARIABLE_NOT_DEFINED),
-                    production_end: false,
-                });
-                Args::None
-            }
+        let locator_expr = if let TranslatorStack::Expression(locator_expr) = &locator_tl {
+            locator_expr
+        } else {
+            _errors.push_error(&get_token, &locator_tl.get_span(), EXPECT_EXPR.to_string());
+            return;
         };
 
-        let attribute_arg = match &attribute_token.token_type {
-            TokenType::STRING(attribute) => Args::String(attribute.clone()),
-            TokenType::IDENTIFIER(ident) => {
-                if let None = _testcase.variables.get(ident) {
-                    _errors.push(ParseError {
-                        token: locator_token.clone(),
-                        message: String::from(VARIABLE_NOT_DEFINED),
-                        production_end: false,
-                    });
-                    Args::None
-                } else {
-                    Args::Ident(ident.clone())
-                }
-            }
-            _ => {
-                _errors.push(ParseError {
-                    token: locator_token.clone(),
-                    message: String::from(VARIABLE_NOT_DEFINED),
-                    production_end: false,
-                });
-                Args::None
-            }
+        let attribute_expr = if let TranslatorStack::Expression(attribute_expr) = attribute_tl {
+            attribute_expr
+        } else {
+            _errors.push_error(
+                &get_token,
+                &attribute_tl.get_span(),
+                EXPECT_EXPR.to_string(),
+            );
+            return;
         };
 
-        let teststep = Getter {
+        if Primitives::String != attribute_expr.primitive {
+            _errors.push_error(
+                &get_token,
+                &attribute_expr.span,
+                EXPECT_STRING_EXPR.to_string(),
+            );
+            return;
+        }
+
+        if Primitives::String != locator_expr.primitive {
+            _errors.push_error(
+                &get_token,
+                &locator_expr.span,
+                EXPECT_STRING_EXPR.to_string(),
+            );
+            return;
+        }
+
+        let locator_arg = if let ExpKind::Lit(Literal::String(locator)) = &locator_expr.kind {
+            Args::Locator(LocatorStrategy::parse(locator))
+        } else {
+            Args::Expr(locator_expr.clone())
+        };
+
+        let attribute_arg = if let ExpKind::Lit(Literal::String(attribute)) = attribute_expr.kind {
+            Args::String(attribute)
+        } else {
+            Args::Expr(attribute_expr)
+        };
+
+        let span = get_token.span.to(&locator_expr.span);
+        let getter = Getter {
+            span,
             method: Method::ELEMENT(ELEMENT::GET_ATTRIBUTE),
             arguments: HashMap::from([
                 (ATTRIBUTE_ARGKEY, attribute_arg),
@@ -139,6 +144,6 @@ impl ElementAction for Element {
             returns: Primitives::String,
         };
 
-        _tl_stack.push(TranslatorStack::Getter(teststep));
+        _tl_stack.push(TranslatorStack::Getter(getter));
     }
 }

@@ -42,4 +42,11 @@ impl Token {
     pub fn get_source_path(&self) -> String {
         self.source_path.clone()
     }
+
+    ///Creates a dummy token with a new span
+    pub fn make_dummy_token(&self, span: &Span) -> Token {
+        let mut new = self.clone();
+        new.span = span.clone();
+        new
+    }
 }
