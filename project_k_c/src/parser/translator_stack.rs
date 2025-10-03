@@ -8,8 +8,6 @@ pub enum TranslatorStack {
     TestStep(TestStep),
     Getter(Getter),
     VarDecl(VarDecl),
-    String(String),
-    Ident(String),
     Expression(Expr),
 }
 
