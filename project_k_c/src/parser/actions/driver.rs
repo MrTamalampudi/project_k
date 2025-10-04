@@ -1,12 +1,12 @@
 use std::collections::HashMap;
 
+use crate::ast::action::Action;
 use crate::ast::arguments::{Args, URL_ARGKEY};
 use crate::ast::expression::{ExpKind, Literal};
 use crate::ast::getter::Getter;
 use crate::ast::primitives::Primitives;
 use crate::ast::testcase::TestCase;
-use crate::ast::testcase_body::TestcaseBody;
-use crate::ast::teststep::TestStep;
+use crate::ast::teststep::Teststep;
 use crate::class::WebDriverAction;
 use crate::class::{Class, Method, WEB_DRIVER};
 use crate::location::Span_Trait;
@@ -64,14 +64,14 @@ impl WebDriverAction for Driver {
         let span = navigate_token.span.to(&url_expr.span);
         let arguments = HashMap::from([(URL_ARGKEY, Args::Expr(url_expr))]);
 
-        let test_step = TestStep::new(
+        let test_step = Action::new(
             span,
             Class::WEB_DRIVER,
             Method::WEB_DRIVER(WEB_DRIVER::NAVIGATE),
             arguments,
         );
 
-        _testcase.insert_teststep(TestcaseBody::TESTSTEP(test_step));
+        _testcase.insert_teststep(Teststep::Action(test_step));
     }
 
     fn CLOSE(
@@ -81,7 +81,7 @@ impl WebDriverAction for Driver {
         _errors: &mut Vec<ParseError<Token>>,
     ) -> () {
         let close_token = _token_stack.pop().unwrap();
-        let teststep = TestStep::new(
+        let teststep = Action::new(
             close_token.span,
             Class::WEB_DRIVER,
             Method::WEB_DRIVER(WEB_DRIVER::CLOSE),

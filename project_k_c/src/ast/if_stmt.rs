@@ -1,7 +1,7 @@
 #![allow(non_camel_case_types, unused)]
 
 use crate::{
-    ast::{expression::Expr, testcase_body::GetMethod, teststep::TestStep},
+    ast::{action::Action, expression::Expr, teststep::GetMethod},
     class::Method,
     location::Location,
 };
@@ -11,7 +11,7 @@ pub struct IfStmt {
     pub start: Location,
     pub end: Location,
     pub test: Expr,
-    pub consequent: Vec<TestStep>,
+    pub consequent: Vec<Action>,
     pub alternate: AlternateStatement,
     pub method: Method,
 }
@@ -19,7 +19,7 @@ pub struct IfStmt {
 #[derive(Debug, Clone, PartialEq)]
 pub enum AlternateStatement {
     IF(Box<IfStmt>),
-    ELSE(Vec<TestStep>),
+    ELSE(Vec<Action>),
 }
 
 impl GetMethod for IfStmt {

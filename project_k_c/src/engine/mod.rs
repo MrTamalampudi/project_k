@@ -12,7 +12,7 @@ use thirtyfour::{error::WebDriverError, DesiredCapabilities, WebDriver};
 use webdriver_manager::{chrome::ChromeManager, WebdriverManager};
 
 use crate::{
-    ast::{testcase::TestCase, testcase_body::TestcaseBody},
+    ast::{testcase::TestCase, teststep::Teststep},
     class::Method,
     engine::{
         custom::Custom, element::Element, navigation::Navigation, timeouts::Timeouts,
@@ -73,7 +73,7 @@ impl<'a> Engine<'a> {
             let testcase_body = teststep.deref();
 
             self.testcase.test_step = match testcase_body {
-                TestcaseBody::TESTSTEP(step) => {
+                Teststep::Action(step) => {
                     match step.method {
                         Method::WEB_DRIVER(_) => {
                             WebDriver_::new(&self.driver, testcase_body).await?
@@ -87,7 +87,7 @@ impl<'a> Engine<'a> {
                     }
                     step.next.clone()
                 }
-                TestcaseBody::VAR_DECL(step) => {
+                Teststep::VAR_DECL(step) => {
                     Custom::new(&self.driver, testcase_body, &mut self.testcase).await?;
                     step.next.clone()
                 }

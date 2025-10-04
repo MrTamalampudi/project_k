@@ -1,13 +1,13 @@
 use std::collections::HashMap;
 
+use crate::ast::action::Action;
 use crate::ast::arguments::Args;
 use crate::ast::arguments::EXPR_ARGKEY;
 use crate::ast::expression::ExpKind;
 use crate::ast::expression::Literal;
 use crate::ast::primitives::Primitives;
 use crate::ast::testcase::TestCase;
-use crate::ast::testcase_body::TestcaseBody;
-use crate::ast::teststep::TestStep;
+use crate::ast::teststep::Teststep;
 use crate::ast::var_decl::VarDecl;
 use crate::ast::var_decl::VarRHS;
 use crate::class::CustomAction;
@@ -76,7 +76,7 @@ impl CustomAction for Custom {
             }
         }
 
-        _testcase.insert_teststep(TestcaseBody::VAR_DECL(var_decl.clone()));
+        _testcase.insert_teststep(Teststep::VAR_DECL(var_decl.clone()));
         _testcase.insert_variable(var_decl);
         _tl_stack.clear();
         _token_stack.clear();
@@ -130,7 +130,7 @@ impl CustomAction for Custom {
             });
             return;
         } else {
-            let teststep = TestStep::new(
+            let teststep = Action::new(
                 Span {
                     start: assert_token.get_start_location(),
                     end: expression.span.end,
@@ -139,7 +139,7 @@ impl CustomAction for Custom {
                 crate::class::Method::CUSTOM(CUSTOM::ASSERT),
                 HashMap::from([(EXPR_ARGKEY, Args::Expr(expression))]),
             );
-            _testcase.insert_teststep(TestcaseBody::TESTSTEP(teststep));
+            _testcase.insert_teststep(Teststep::Action(teststep));
             _token_stack.clear();
         }
     }

@@ -1,9 +1,9 @@
 use std::collections::HashMap;
 
+use crate::ast::action::Action;
 use crate::ast::arguments::{Args, SECS_ARGKEY};
 use crate::ast::testcase::TestCase;
-use crate::ast::testcase_body::TestcaseBody;
-use crate::ast::teststep::TestStep;
+use crate::ast::teststep::Teststep;
 use crate::class::{Method, TimeoutsAction, TIMEOUTS};
 use crate::keywords::TokenType;
 use crate::location::Span;
@@ -36,13 +36,13 @@ impl TimeoutsAction for Timeouts {
                     start: _token_stack.first().unwrap().get_start_location(),
                     end: _token_stack.last().unwrap().get_end_location(),
                 };
-                let teststep = TestStep::new(
+                let teststep = Action::new(
                     span,
                     crate::class::Class::TIMEOUTS,
                     Method::TIMEOUTS(TIMEOUTS::WAIT),
                     HashMap::from([(SECS_ARGKEY, Args::Number(secs))]),
                 );
-                _testcase.insert_teststep(TestcaseBody::TESTSTEP(teststep));
+                _testcase.insert_teststep(Teststep::Action(teststep));
             }
         }
         _token_stack.clear();

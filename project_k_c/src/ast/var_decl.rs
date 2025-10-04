@@ -5,7 +5,7 @@ use crate::{
         expression::Expr,
         getter::Getter,
         primitives::Primitives,
-        testcase_body::{GetMethod, Next, TestcaseBody},
+        teststep::{GetMethod, Next, Teststep},
     },
     class::{Method, CUSTOM},
     location::{Span, Span_Trait},
@@ -17,7 +17,7 @@ pub struct VarDecl {
     pub type_: Primitives,
     pub rhs: VarRHS,
     pub method: Method,
-    pub next: Option<Rc<RefCell<TestcaseBody>>>,
+    pub next: Option<Rc<RefCell<Teststep>>>,
     pub span: Span,
 }
 
@@ -56,10 +56,10 @@ impl GetMethod for VarDecl {
 }
 
 impl Next for VarDecl {
-    fn set_next(&mut self, next: Rc<RefCell<TestcaseBody>>) {
+    fn set_next(&mut self, next: Rc<RefCell<Teststep>>) {
         self.next = Some(next);
     }
-    fn get_next(&self) -> Option<Rc<RefCell<TestcaseBody>>> {
+    fn get_next(&self) -> Option<Rc<RefCell<Teststep>>> {
         self.next.clone()
     }
 }

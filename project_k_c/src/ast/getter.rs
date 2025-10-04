@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 use crate::{
-    ast::{arguments::Args, primitives::Primitives, testcase_body::GetMethod},
+    ast::{arguments::Args, primitives::Primitives, teststep::GetMethod},
     class::Method,
     location::{Span, Span_Trait},
 };

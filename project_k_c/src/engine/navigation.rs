@@ -1,7 +1,7 @@
 use thirtyfour::WebDriver;
 
 use crate::{
-    ast::testcase_body::{GetMethod, TestcaseBody},
+    ast::teststep::{GetMethod, Teststep},
     class::{Method, NavigationEngine, NAVIGATION},
     engine::EngineResult,
 };
@@ -11,7 +11,7 @@ pub struct Navigation<'a> {
 }
 
 impl<'a> Navigation<'a> {
-    pub async fn new(driver: &WebDriver, body: &TestcaseBody) -> EngineResult<()> {
+    pub async fn new(driver: &WebDriver, body: &Teststep) -> EngineResult<()> {
         let navigation = Navigation { driver };
         if let Method::NAVIGATION(method) = &body.get_method() {
             match method {
@@ -25,17 +25,17 @@ impl<'a> Navigation<'a> {
 }
 
 impl<'a> NavigationEngine for Navigation<'a> {
-    async fn REFRESH(&self, _body: &TestcaseBody) -> EngineResult<()> {
+    async fn REFRESH(&self, _body: &Teststep) -> EngineResult<()> {
         self.driver.refresh().await?;
         Ok(())
     }
 
-    async fn BACK(&self, _body: &TestcaseBody) -> EngineResult<()> {
+    async fn BACK(&self, _body: &Teststep) -> EngineResult<()> {
         self.driver.back().await?;
         Ok(())
     }
 
-    async fn FORWARD(&self, _body: &TestcaseBody) -> EngineResult<()> {
+    async fn FORWARD(&self, _body: &Teststep) -> EngineResult<()> {
         self.driver.forward().await?;
         Ok(())
     }

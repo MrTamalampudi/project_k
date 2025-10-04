@@ -1,8 +1,8 @@
 use thirtyfour::WebDriver;
 
 use crate::ast::arguments::{Args, ATTRIBUTE_ARGKEY, LOCATOR_ARGKEY};
-use crate::ast::testcase_body::GetMethod;
-use crate::ast::testcase_body::TestcaseBody;
+use crate::ast::teststep::GetMethod;
+use crate::ast::teststep::Teststep;
 use crate::class::{ElementEngine, Method, ELEMENT};
 use crate::engine::EngineResult;
 
@@ -11,7 +11,7 @@ pub struct Element<'a> {
 }
 
 impl<'a> Element<'a> {
-    pub async fn new(driver: &WebDriver, body: &TestcaseBody) -> EngineResult<()> {
+    pub async fn new(driver: &WebDriver, body: &Teststep) -> EngineResult<()> {
         let element = Element { driver };
         if let Method::ELEMENT(method) = &body.get_method() {
             match method {
@@ -37,17 +37,17 @@ impl<'a> Element<'a> {
 }
 
 impl<'a> ElementEngine for Element<'a> {
-    async fn CLEAR(&self, _step: &TestcaseBody) -> EngineResult<()> {
+    async fn CLEAR(&self, _step: &Teststep) -> EngineResult<()> {
         Ok(())
     }
-    async fn SUBMIT(&self, _step: &TestcaseBody) -> EngineResult<()> {
+    async fn SUBMIT(&self, _step: &Teststep) -> EngineResult<()> {
         Ok(())
     }
-    async fn SENDKEYS(&self, _step: &TestcaseBody) -> EngineResult<()> {
+    async fn SENDKEYS(&self, _step: &Teststep) -> EngineResult<()> {
         Ok(())
     }
-    async fn GET_ATTRIBUTE(&self, _body: &TestcaseBody) -> EngineResult<Option<String>> {
-        if let TestcaseBody::GETTER(getter) = _body {
+    async fn GET_ATTRIBUTE(&self, _body: &Teststep) -> EngineResult<Option<String>> {
+        if let Teststep::GETTER(getter) = _body {
             let locator_arg = getter.arguments.get(LOCATOR_ARGKEY);
             let attribute_arg = getter.arguments.get(ATTRIBUTE_ARGKEY);
             if let (Some(Args::Locator(locator)), Some(Args::String(attribute))) =
@@ -63,8 +63,8 @@ impl<'a> ElementEngine for Element<'a> {
         Ok(None)
     }
 
-    async fn CLICK(&self, _body: &TestcaseBody) -> EngineResult<()> {
-        if let TestcaseBody::TESTSTEP(step) = _body {
+    async fn CLICK(&self, _body: &Teststep) -> EngineResult<()> {
+        if let Teststep::Action(step) = _body {
             if let Args::Locator(locator) = step.arguments.get(LOCATOR_ARGKEY).unwrap() {
                 let by = locator.to_by();
                 let element = self.driver.find(by).await?;

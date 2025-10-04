@@ -1,8 +1,8 @@
 use std::collections::HashMap;
 
+use crate::ast::action::Action;
 use crate::ast::testcase::TestCase;
-use crate::ast::testcase_body::TestcaseBody;
-use crate::ast::teststep::TestStep;
+use crate::ast::teststep::Teststep;
 use crate::class::NavigationAction;
 use crate::class::NAVIGATION;
 use crate::class::{Class, Method};
@@ -24,14 +24,14 @@ impl NavigationAction for Navigation {
             start: _token_stack.first().unwrap().get_start_location(),
             end: _token_stack.last().unwrap().get_end_location(),
         };
-        let test_step = TestStep::new(
+        let test_step = Action::new(
             span,
             Class::NAVIGATION,
             Method::NAVIGATION(NAVIGATION::BACK),
             HashMap::new(),
         );
 
-        _testcase.insert_teststep(TestcaseBody::TESTSTEP(test_step));
+        _testcase.insert_teststep(Teststep::Action(test_step));
 
         //clear token_stack after every use
         _token_stack.clear();
@@ -46,14 +46,14 @@ impl NavigationAction for Navigation {
             start: _token_stack.first().unwrap().get_start_location(),
             end: _token_stack.last().unwrap().get_end_location(),
         };
-        let test_step = TestStep::new(
+        let test_step = Action::new(
             span,
             Class::NAVIGATION,
             Method::NAVIGATION(NAVIGATION::FORWARD),
             HashMap::new(),
         );
 
-        _testcase.insert_teststep(TestcaseBody::TESTSTEP(test_step));
+        _testcase.insert_teststep(Teststep::Action(test_step));
 
         //clear token_stack after every use
         _token_stack.clear();
@@ -68,14 +68,14 @@ impl NavigationAction for Navigation {
             start: _token_stack.first().unwrap().get_start_location(),
             end: _token_stack.last().unwrap().get_end_location(),
         };
-        let test_step = TestStep::new(
+        let test_step = Action::new(
             span,
             Class::NAVIGATION,
             Method::NAVIGATION(NAVIGATION::REFRESH),
             HashMap::new(),
         );
 
-        _testcase.insert_teststep(TestcaseBody::TESTSTEP(test_step));
+        _testcase.insert_teststep(Teststep::Action(test_step));
 
         //clear token_stack after every use
         _token_stack.clear();

@@ -1,7 +1,7 @@
 #![allow(non_camel_case_types, non_snake_case, unused_parens)]
 
 use crate::ast::testcase::TestCase;
-use crate::ast::testcase_body::TestcaseBody;
+use crate::ast::teststep::Teststep;
 use crate::parser::translator_stack::TranslatorStack;
 use crate::token::Token;
 use manodae::error::ParseError;
@@ -67,17 +67,17 @@ macro_rules! class_macro {
                 $(
                     ifdef! {
                         [$($($($engine_returns)?)?)?,$($($($($engine_arg_ident),*)?)?)?]
-                        {fn $method(&self,_step:&TestcaseBody,$($($($($engine_arg_ident:$engine_arg_type),*)?)?)?) -> impl Future<Output = Result<($($($($engine_returns)?)?)?),WebDriverError>>;}
+                        {fn $method(&self,_step:&Teststep,$($($($($engine_arg_ident:$engine_arg_type),*)?)?)?) -> impl Future<Output = Result<($($($($engine_returns)?)?)?),WebDriverError>>;}
                         else
                         { ifdef! {
                             [$($($($engine_returns)?)?)?]
-                            {fn $method(&self,_step:&TestcaseBody) -> impl Future<Output = (Result<$($($($engine_returns)?)?)?,WebDriverError>)>;}
+                            {fn $method(&self,_step:&Teststep) -> impl Future<Output = (Result<$($($($engine_returns)?)?)?,WebDriverError>)>;}
                             else
                             { ifdef! {
                                 [$($($($($engine_arg_ident),*)?)?)?]
-                                {fn $method(&self,_step:&TestcaseBody,$($($($($engine_arg_ident:$engine_arg_type),*)?)?)?) -> impl Future<Output = (Result<(),WebDriverError>)>;}
+                                {fn $method(&self,_step:&Teststep,$($($($($engine_arg_ident:$engine_arg_type),*)?)?)?) -> impl Future<Output = (Result<(),WebDriverError>)>;}
                                 else
-                                {fn $method(&self,_step:&TestcaseBody) -> impl Future<Output = (Result<(),WebDriverError>)>;}
+                                {fn $method(&self,_step:&Teststep) -> impl Future<Output = (Result<(),WebDriverError>)>;}
                                 }
                             }}
                         }

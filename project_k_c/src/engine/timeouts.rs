@@ -5,7 +5,7 @@ use thirtyfour::{By, WebDriver};
 use crate::{
     ast::{
         arguments::{Args, SECS_ARGKEY},
-        testcase_body::{GetMethod, TestcaseBody},
+        teststep::{GetMethod, Teststep},
     },
     class::{Method, TimeoutsEngine, TIMEOUTS},
     engine::EngineResult,
@@ -16,7 +16,7 @@ pub struct Timeouts<'a> {
 }
 
 impl<'a> Timeouts<'a> {
-    pub async fn new(driver: &WebDriver, body: &TestcaseBody) -> EngineResult<()> {
+    pub async fn new(driver: &WebDriver, body: &Teststep) -> EngineResult<()> {
         let timeouts = Timeouts { driver };
         if let Method::TIMEOUTS(method) = body.get_method() {
             match method {
@@ -28,8 +28,8 @@ impl<'a> Timeouts<'a> {
 }
 
 impl<'a> TimeoutsEngine for Timeouts<'a> {
-    async fn WAIT(&self, _step: &TestcaseBody) -> Result<(), thirtyfour::prelude::WebDriverError> {
-        if let TestcaseBody::TESTSTEP(step) = _step {
+    async fn WAIT(&self, _step: &Teststep) -> Result<(), thirtyfour::prelude::WebDriverError> {
+        if let Teststep::Action(step) = _step {
             let secs_arg = step.arguments.get(SECS_ARGKEY);
             if let Some(Args::Number(secs)) = secs_arg {
                 let current_time = SystemTime::now();

@@ -1,12 +1,12 @@
 use std::collections::HashMap;
 
+use crate::ast::action::Action;
 use crate::ast::arguments::{Args, ATTRIBUTE_ARGKEY, LOCATOR_ARGKEY};
 use crate::ast::expression::{ExpKind, Literal};
 use crate::ast::getter::Getter;
 use crate::ast::primitives::Primitives;
 use crate::ast::testcase::TestCase;
-use crate::ast::testcase_body::TestcaseBody;
-use crate::ast::teststep::TestStep;
+use crate::ast::teststep::Teststep;
 use crate::class::ELEMENT;
 use crate::class::{Class, ElementAction, Method};
 use crate::get_input_from_token_stack;
@@ -35,14 +35,14 @@ impl ElementAction for Element {
             end: _token_stack.last().unwrap().get_end_location(),
         };
 
-        let test_step = TestStep::new(
+        let test_step = Action::new(
             span,
             Class::ELEMENT,
             Method::ELEMENT(ELEMENT::CLICK),
             HashMap::from([(LOCATOR_ARGKEY, Args::Locator(locator))]),
         );
 
-        _testcase.insert_teststep(TestcaseBody::TESTSTEP(test_step));
+        _testcase.insert_teststep(Teststep::Action(test_step));
 
         // clear token_stack after every use
         // token stack is particular to production so it should be cleared

@@ -1,11 +1,11 @@
 use crate::{
-    ast::{expression::Expr, getter::Getter, teststep::TestStep, var_decl::VarDecl},
+    ast::{action::Action, expression::Expr, getter::Getter, var_decl::VarDecl},
     location::{Span, Span_Trait},
 };
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum TranslatorStack {
-    TestStep(TestStep),
+    TestStep(Action),
     Getter(Getter),
     VarDecl(VarDecl),
     Expression(Expr),

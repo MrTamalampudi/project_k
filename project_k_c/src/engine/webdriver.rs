@@ -2,8 +2,8 @@ use log::info;
 use thirtyfour::WebDriver;
 
 use crate::ast::arguments::{Args, URL_ARGKEY};
-use crate::ast::testcase_body::GetMethod;
-use crate::ast::testcase_body::TestcaseBody;
+use crate::ast::teststep::GetMethod;
+use crate::ast::teststep::Teststep;
 use crate::class::{Method, WebDriverEngine, WEB_DRIVER};
 use crate::engine::EngineResult;
 
@@ -12,7 +12,7 @@ pub struct WebDriver_<'a> {
 }
 
 impl<'a> WebDriver_<'a> {
-    pub async fn new(driver: &WebDriver, body: &TestcaseBody) -> EngineResult<()> {
+    pub async fn new(driver: &WebDriver, body: &Teststep) -> EngineResult<()> {
         let webdriver = WebDriver_ { driver };
         if let Method::WEB_DRIVER(method) = &body.get_method() {
             match method {
@@ -44,8 +44,8 @@ impl<'a> WebDriver_<'a> {
 }
 
 impl<'a> WebDriverEngine for WebDriver_<'a> {
-    async fn NAVIGATE(&self, _body: &TestcaseBody) -> EngineResult<()> {
-        if let TestcaseBody::TESTSTEP(step) = _body {
+    async fn NAVIGATE(&self, _body: &Teststep) -> EngineResult<()> {
+        if let Teststep::Action(step) = _body {
             let url = step.arguments.get(URL_ARGKEY).unwrap();
             if let Args::String(url) = url {
                 self.driver.goto(url).await?;
@@ -54,26 +54,26 @@ impl<'a> WebDriverEngine for WebDriver_<'a> {
         }
         Ok(())
     }
-    async fn CLOSE(&self, _body: &TestcaseBody) -> EngineResult<()> {
+    async fn CLOSE(&self, _body: &Teststep) -> EngineResult<()> {
         self.driver.close_window().await?;
         info!("closed browser");
         Ok(())
     }
-    async fn FIND_ELEMENT(&self, _body: &TestcaseBody) -> EngineResult<()> {
+    async fn FIND_ELEMENT(&self, _body: &Teststep) -> EngineResult<()> {
         Ok(())
     }
-    async fn GET_CURRENT_URL(&self, _body: &TestcaseBody) -> EngineResult<Option<String>> {
+    async fn GET_CURRENT_URL(&self, _body: &Teststep) -> EngineResult<Option<String>> {
         let url = self.driver.current_url().await?;
         Ok(Some(url.to_string()))
     }
-    async fn GET_PAGE_SOURCE(&self, _body: &TestcaseBody) -> EngineResult<()> {
+    async fn GET_PAGE_SOURCE(&self, _body: &Teststep) -> EngineResult<()> {
         Ok(())
     }
-    async fn GET_TITLE(&self, _body: &TestcaseBody) -> EngineResult<Option<String>> {
+    async fn GET_TITLE(&self, _body: &Teststep) -> EngineResult<Option<String>> {
         let title = self.driver.title().await?;
         Ok(Some(title.to_string()))
     }
-    async fn GET_WINDOW_HANDLE(&self, _body: &TestcaseBody) -> EngineResult<()> {
+    async fn GET_WINDOW_HANDLE(&self, _body: &Teststep) -> EngineResult<()> {
         Ok(())
     }
 }

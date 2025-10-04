@@ -2,8 +2,7 @@ use std::{cell::RefCell, collections::HashMap, rc::Rc};
 
 use crate::{
     ast::{
-        identifier_value::IdentifierValue, testcase_body::TestcaseBody, teststep::TestStep,
-        var_decl::VarDecl,
+        action::Action, identifier_value::IdentifierValue, teststep::Teststep, var_decl::VarDecl,
     },
     enums::CapabilityValue,
 };
@@ -13,8 +12,8 @@ use crate::{
 pub struct TestCase {
     capabilities: HashMap<String, CapabilityValue>,
     pub variables: HashMap<String, IdentifierValue>,
-    test_steps: Vec<Rc<RefCell<TestcaseBody>>>,
-    pub test_step: Option<Rc<RefCell<TestcaseBody>>>,
+    test_steps: Vec<Rc<RefCell<Teststep>>>,
+    pub test_step: Option<Rc<RefCell<Teststep>>>,
 }
 
 impl TestCase {
@@ -53,7 +52,7 @@ impl TestCase {
         }
     }
 
-    pub fn insert_teststep(&mut self, body: TestcaseBody) {
+    pub fn insert_teststep(&mut self, body: Teststep) {
         let teststep_refcell = RefCell::new(body);
         let teststep_rc = Rc::new(teststep_refcell);
         if self.test_step.is_none() {
@@ -61,21 +60,21 @@ impl TestCase {
         } else {
             let teststep = self.get_last_teststep_entry().unwrap();
             let teststep_deref = &mut *teststep.borrow_mut();
-            if let TestcaseBody::TESTSTEP(step) = teststep_deref {
+            if let Teststep::Action(step) = teststep_deref {
                 step.next = Some(teststep_rc.clone());
             }
-            if let TestcaseBody::VAR_DECL(step) = teststep_deref {
+            if let Teststep::VAR_DECL(step) = teststep_deref {
                 step.next = Some(teststep_rc.clone());
             }
         }
         self.test_steps.push(teststep_rc);
     }
 
-    pub fn get_last_teststep_entry(&mut self) -> Option<Rc<RefCell<TestcaseBody>>> {
+    pub fn get_last_teststep_entry(&mut self) -> Option<Rc<RefCell<Teststep>>> {
         self.test_steps.last().cloned()
     }
 
-    pub fn get_teststeps(&self) -> &Vec<TestStep> {
+    pub fn get_teststeps(&self) -> &Vec<Action> {
         todo!()
     }
 }
