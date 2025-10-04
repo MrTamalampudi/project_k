@@ -47,7 +47,7 @@ impl<'a> ElementEngine for Element<'a> {
         Ok(())
     }
     async fn GET_ATTRIBUTE(&self, _body: &Teststep) -> EngineResult<Option<String>> {
-        if let Teststep::GETTER(getter) = _body {
+        if let Teststep::Getter(getter) = _body {
             let locator_arg = getter.arguments.get(LOCATOR_ARGKEY);
             let attribute_arg = getter.arguments.get(ATTRIBUTE_ARGKEY);
             if let (Some(Args::Locator(locator)), Some(Args::String(attribute))) =

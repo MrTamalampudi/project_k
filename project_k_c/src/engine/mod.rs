@@ -87,7 +87,7 @@ impl<'a> Engine<'a> {
                     }
                     step.next.clone()
                 }
-                Teststep::VAR_DECL(step) => {
+                Teststep::VarDecl(step) => {
                     Custom::new(&self.driver, testcase_body, &mut self.testcase).await?;
                     step.next.clone()
                 }

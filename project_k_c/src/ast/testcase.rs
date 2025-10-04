@@ -63,7 +63,7 @@ impl TestCase {
             if let Teststep::Action(step) = teststep_deref {
                 step.next = Some(teststep_rc.clone());
             }
-            if let Teststep::VAR_DECL(step) = teststep_deref {
+            if let Teststep::VarDecl(step) = teststep_deref {
                 step.next = Some(teststep_rc.clone());
             }
         }

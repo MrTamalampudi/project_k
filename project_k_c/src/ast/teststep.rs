@@ -9,9 +9,9 @@ use crate::{
 #[allow(non_camel_case_types)]
 pub enum Teststep {
     Action(Action),
-    IF(IfStmt),
-    GETTER(Getter),
-    VAR_DECL(VarDecl),
+    If(IfStmt),
+    Getter(Getter),
+    VarDecl(VarDecl),
 }
 
 pub trait GetMethod {
@@ -21,10 +21,10 @@ pub trait GetMethod {
 impl GetMethod for Teststep {
     fn get_method(&self) -> Method {
         match self {
-            Teststep::GETTER(step) => step.get_method(),
+            Teststep::Getter(step) => step.get_method(),
             Teststep::Action(step) => step.get_method(),
-            Teststep::IF(step) => step.get_method(),
-            Teststep::VAR_DECL(step) => step.get_method(),
+            Teststep::If(step) => step.get_method(),
+            Teststep::VarDecl(step) => step.get_method(),
         }
     }
 }

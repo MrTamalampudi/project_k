@@ -76,7 +76,7 @@ impl CustomAction for Custom {
             }
         }
 
-        _testcase.insert_teststep(Teststep::VAR_DECL(var_decl.clone()));
+        _testcase.insert_teststep(Teststep::VarDecl(var_decl.clone()));
         _testcase.insert_variable(var_decl);
         _tl_stack.clear();
         _token_stack.clear();
