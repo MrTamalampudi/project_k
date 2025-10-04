@@ -6,7 +6,7 @@ use crate::{
         teststep::{GetMethod, Next, Teststep},
     },
     class::{Class, Method},
-    location::{Span, Span_Trait},
+    location::{Span, SpanTrait},
 };
 
 #[derive(Debug, Clone, PartialEq)]
@@ -51,7 +51,7 @@ impl Next for Action {
     }
 }
 
-impl Span_Trait for Action {
+impl SpanTrait for Action {
     fn get_span(&self) -> Span {
         self.span.clone()
     }

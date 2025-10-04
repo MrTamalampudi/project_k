@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use crate::{
     ast::{arguments::Args, primitives::Primitives, teststep::GetMethod},
     class::Method,
-    location::{Span, Span_Trait},
+    location::{Span, SpanTrait},
 };
 
 #[derive(Debug, Clone, PartialEq)]
@@ -20,7 +20,7 @@ impl GetMethod for Getter {
     }
 }
 
-impl Span_Trait for Getter {
+impl SpanTrait for Getter {
     fn get_span(&self) -> Span {
         self.span.clone()
     }

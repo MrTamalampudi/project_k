@@ -50,6 +50,6 @@ impl Span {
     }
 }
 
-pub trait Span_Trait {
+pub trait SpanTrait {
     fn get_span(&self) -> Span;
 }

@@ -10,7 +10,7 @@ use crate::ast::teststep::Teststep;
 use crate::class::ELEMENT;
 use crate::class::{Class, ElementAction, Method};
 use crate::get_input_from_token_stack;
-use crate::location::{Span, Span_Trait};
+use crate::location::{Span, SpanTrait};
 use crate::parser::errors::{EXPECT_EXPR, EXPECT_STRING_EXPR};
 use crate::parser::errorss::ActionError;
 use crate::parser::locator::LocatorStrategy;

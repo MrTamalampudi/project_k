@@ -8,7 +8,7 @@ use crate::{
         teststep::{GetMethod, Next, Teststep},
     },
     class::{Method, CUSTOM},
-    location::{Span, Span_Trait},
+    location::{Span, SpanTrait},
 };
 
 #[derive(Debug, Clone, PartialEq)]
@@ -64,13 +64,13 @@ impl Next for VarDecl {
     }
 }
 
-impl Span_Trait for VarDecl {
+impl SpanTrait for VarDecl {
     fn get_span(&self) -> Span {
         self.span.clone()
     }
 }
 
-impl Span_Trait for VarRHS {
+impl SpanTrait for VarRHS {
     fn get_span(&self) -> Span {
         match self {
             VarRHS::Expression(expr) => expr.span.clone(),

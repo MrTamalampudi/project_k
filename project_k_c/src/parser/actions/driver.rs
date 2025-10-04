@@ -9,7 +9,7 @@ use crate::ast::testcase::TestCase;
 use crate::ast::teststep::Teststep;
 use crate::class::WebDriverAction;
 use crate::class::{Class, Method, WEB_DRIVER};
-use crate::location::Span_Trait;
+use crate::location::SpanTrait;
 use crate::parser::errors::{EXPECT_EXPR, EXPECT_STRING_EXPR, VALID_URL, VALID_URL_SHCEME};
 use crate::parser::translator_stack::TranslatorStack;
 use crate::token::Token;

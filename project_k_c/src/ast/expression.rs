@@ -2,7 +2,7 @@
 
 use crate::{
     ast::primitives::Primitives,
-    location::{Span, Span_Trait},
+    location::{Span, SpanTrait},
 };
 
 #[derive(Debug, Clone, PartialEq)]
@@ -20,7 +20,7 @@ pub struct Expr {
     pub primitive: Primitives,
 }
 
-impl Span_Trait for Expr {
+impl SpanTrait for Expr {
     fn get_span(&self) -> Span {
         self.span.clone()
     }

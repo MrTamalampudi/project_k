@@ -1,6 +1,6 @@
 use crate::{
     ast::{action::Action, expression::Expr, getter::Getter, var_decl::VarDecl},
-    location::{Span, Span_Trait},
+    location::{Span, SpanTrait},
 };
 
 #[derive(Debug, Clone, PartialEq)]
@@ -11,7 +11,7 @@ pub enum TranslatorStack {
     Expression(Expr),
 }
 
-impl Span_Trait for TranslatorStack {
+impl SpanTrait for TranslatorStack {
     fn get_span(&self) -> Span {
         use TranslatorStack::*;
         match self {

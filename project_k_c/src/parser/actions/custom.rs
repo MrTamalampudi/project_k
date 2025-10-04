@@ -14,7 +14,7 @@ use crate::class::CustomAction;
 use crate::class::CUSTOM;
 use crate::keywords::TokenType;
 use crate::location::Span;
-use crate::location::Span_Trait;
+use crate::location::SpanTrait;
 use crate::parser::errors::EXPECT_BOOL_EXPR;
 use crate::parser::errors::EXPECT_EXPR_OR_GETTER;
 use crate::parser::errors::MISMATCHED_TYPES;
