@@ -9,6 +9,9 @@ pub const INT_OVERFLOW: &'static str = "Integer Overflowed";
 pub const EXPECT_LITERAL: &'static str = "Expected literal expression";
 
 //***** Binary *****
+pub const INVALID_UNARY_OP: &'static str = "Invalid unary operation";
+
+//***** Binary *****
 pub const EXPECT_BINARY: &'static str = "Expected binary expression";
 pub const INVALID_ADD_OP: &'static str = "Invalid addition operation";
 pub const INVALID_SUB_OP: &'static str = "Invalid subtraction operation";

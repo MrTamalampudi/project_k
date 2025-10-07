@@ -8,7 +8,7 @@ use crate::{
     engine::{
         errors::{
             ExpressionEvalResult, EXPECT_LITERAL, INT_OVERFLOW, INVALID_ADD_OP, INVALID_AND_OP,
-            INVALID_EQ_OP, INVALID_OR_OP, INVALID_SUB_OP,
+            INVALID_EQ_OP, INVALID_OR_OP, INVALID_SUB_OP, INVALID_UNARY_OP,
         },
         Engine,
     },
@@ -171,6 +171,15 @@ impl<'a> Expression<'a> {
     }
 
     fn unary_eval(&self, op: &UnOp, expr: &Expr) -> ExpressionEvalResult {
-        Err(INVALID_ADD_OP.to_string())
+        if &UnOp::Not == op {
+            let value = self.eval(expr)?;
+            if let IdentifierValue::Boolean(bool) = value {
+                return Ok(IdentifierValue::Boolean(Some(!bool.unwrap())));
+            } else {
+                return Err(INVALID_UNARY_OP.to_string());
+            }
+        } else {
+            return Err(INVALID_UNARY_OP.to_string());
+        }
     }
 }
