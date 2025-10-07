@@ -1,10 +1,15 @@
+use std::ops::BitXor;
+
 use crate::{
     ast::{
         expression::{BinOpKind, ExpKind, Expr, Literal, UnOp},
         identifier_value::IdentifierValue,
     },
     engine::{
-        errors::{ExpressionEvalResult, EXPECT_LITERAL, INVALID_ADD_OP},
+        errors::{
+            ExpressionEvalResult, EXPECT_LITERAL, INT_OVERFLOW, INVALID_ADD_OP, INVALID_AND_OP,
+            INVALID_EQ_OP, INVALID_OR_OP, INVALID_SUB_OP,
+        },
         Engine,
     },
 };
@@ -54,7 +59,114 @@ impl<'a> Expression<'a> {
                 ),
                 (_, _) => Err(INVALID_ADD_OP.to_string()),
             },
-            _ => Err(INVALID_ADD_OP.to_string()),
+            Sub => match (expr1_value, expr2_value) {
+                (IdentifierValue::Number(num1), IdentifierValue::Number(num2)) => Ok(
+                    IdentifierValue::Number(Some(match num1.unwrap().checked_sub(num2.unwrap()) {
+                        Some(res) => res,
+                        None => return Err(INT_OVERFLOW.to_string()),
+                    })),
+                ),
+                (_, _) => Err(INVALID_SUB_OP.to_string()),
+            },
+            Mul => match (expr1_value, expr2_value) {
+                (IdentifierValue::Number(num1), IdentifierValue::Number(num2)) => Ok(
+                    IdentifierValue::Number(Some(match num1.unwrap().checked_mul(num2.unwrap()) {
+                        Some(res) => res,
+                        None => return Err(INT_OVERFLOW.to_string()),
+                    })),
+                ),
+                (_, _) => Err(INVALID_SUB_OP.to_string()),
+            },
+            Div => match (expr1_value, expr2_value) {
+                (IdentifierValue::Number(num1), IdentifierValue::Number(num2)) => Ok(
+                    IdentifierValue::Number(Some(match num1.unwrap().checked_div(num2.unwrap()) {
+                        Some(res) => res,
+                        None => return Err(INT_OVERFLOW.to_string()),
+                    })),
+                ),
+                (_, _) => Err(INVALID_SUB_OP.to_string()),
+            },
+            Rem => match (expr1_value, expr2_value) {
+                (IdentifierValue::Number(num1), IdentifierValue::Number(num2)) => Ok(
+                    IdentifierValue::Number(Some(match num1.unwrap().checked_rem(num2.unwrap()) {
+                        Some(res) => res,
+                        None => return Err(INT_OVERFLOW.to_string()),
+                    })),
+                ),
+                (_, _) => Err(INVALID_SUB_OP.to_string()),
+            },
+            And => match (expr1_value, expr2_value) {
+                (IdentifierValue::Boolean(bool1), IdentifierValue::Boolean(bool2)) => Ok(
+                    IdentifierValue::Boolean(Some(bool1.unwrap() && bool2.unwrap())),
+                ),
+                (_, _) => Err(INVALID_AND_OP.to_string()),
+            },
+            Or => match (expr1_value, expr2_value) {
+                (IdentifierValue::Boolean(bool1), IdentifierValue::Boolean(bool2)) => Ok(
+                    IdentifierValue::Boolean(Some(bool1.unwrap() || bool2.unwrap())),
+                ),
+                (_, _) => Err(INVALID_OR_OP.to_string()),
+            },
+            Eq => match (expr1_value, expr2_value) {
+                (IdentifierValue::Number(num1), IdentifierValue::Number(num2)) => Ok(
+                    IdentifierValue::Boolean(Some(num1.unwrap().eq(&num2.unwrap()))),
+                ),
+                (IdentifierValue::String(str1), IdentifierValue::String(str2)) => Ok(
+                    IdentifierValue::Boolean(Some(str1.unwrap().trim().eq(str2.unwrap().trim()))),
+                ),
+                (IdentifierValue::Boolean(bool1), IdentifierValue::Boolean(bool2)) => Ok(
+                    IdentifierValue::Boolean(Some(!bool1.unwrap().bitxor(bool2.unwrap()))),
+                ),
+                (_, _) => Err(INVALID_EQ_OP.to_string()),
+            },
+            Ne => match (expr1_value, expr2_value) {
+                (IdentifierValue::Number(num1), IdentifierValue::Number(num2)) => Ok(
+                    IdentifierValue::Boolean(Some(num1.unwrap().ne(&num2.unwrap()))),
+                ),
+                (IdentifierValue::String(str1), IdentifierValue::String(str2)) => Ok(
+                    IdentifierValue::Boolean(Some(str1.unwrap().trim().ne(str2.unwrap().trim()))),
+                ),
+                (IdentifierValue::Boolean(bool1), IdentifierValue::Boolean(bool2)) => Ok(
+                    IdentifierValue::Boolean(Some(bool1.unwrap().bitxor(bool2.unwrap()))),
+                ),
+                (_, _) => Err(INVALID_EQ_OP.to_string()),
+            },
+            Lt => match (expr1_value, expr2_value) {
+                (IdentifierValue::Number(num1), IdentifierValue::Number(num2)) => Ok(
+                    IdentifierValue::Boolean(Some(num1.unwrap().lt(&num2.unwrap()))),
+                ),
+                (IdentifierValue::String(str1), IdentifierValue::String(str2)) => Ok(
+                    IdentifierValue::Boolean(Some(str1.unwrap().trim().lt(str2.unwrap().trim()))),
+                ),
+                (_, _) => Err(INVALID_EQ_OP.to_string()),
+            },
+            Le => match (expr1_value, expr2_value) {
+                (IdentifierValue::Number(num1), IdentifierValue::Number(num2)) => Ok(
+                    IdentifierValue::Boolean(Some(num1.unwrap().le(&num2.unwrap()))),
+                ),
+                (IdentifierValue::String(str1), IdentifierValue::String(str2)) => Ok(
+                    IdentifierValue::Boolean(Some(str1.unwrap().trim().le(str2.unwrap().trim()))),
+                ),
+                (_, _) => Err(INVALID_EQ_OP.to_string()),
+            },
+            Gt => match (expr1_value, expr2_value) {
+                (IdentifierValue::Number(num1), IdentifierValue::Number(num2)) => Ok(
+                    IdentifierValue::Boolean(Some(num1.unwrap().gt(&num2.unwrap()))),
+                ),
+                (IdentifierValue::String(str1), IdentifierValue::String(str2)) => Ok(
+                    IdentifierValue::Boolean(Some(str1.unwrap().trim().gt(str2.unwrap().trim()))),
+                ),
+                (_, _) => Err(INVALID_EQ_OP.to_string()),
+            },
+            Ge => match (expr1_value, expr2_value) {
+                (IdentifierValue::Number(num1), IdentifierValue::Number(num2)) => Ok(
+                    IdentifierValue::Boolean(Some(num1.unwrap().ge(&num2.unwrap()))),
+                ),
+                (IdentifierValue::String(str1), IdentifierValue::String(str2)) => Ok(
+                    IdentifierValue::Boolean(Some(str1.unwrap().trim().ge(str2.unwrap().trim()))),
+                ),
+                (_, _) => Err(INVALID_EQ_OP.to_string()),
+            },
         }
     }
 
