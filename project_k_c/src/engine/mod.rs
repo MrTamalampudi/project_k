@@ -22,6 +22,7 @@ use crate::{
 
 mod custom;
 mod element;
+mod errors;
 mod expression;
 mod navigation;
 mod timeouts;
