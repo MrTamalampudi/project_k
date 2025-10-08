@@ -1,6 +1,6 @@
 use std::time::{Duration, SystemTime};
 
-use thirtyfour::{By, WebDriver};
+use thirtyfour::By;
 
 use crate::{
     ast::{
@@ -8,27 +8,22 @@ use crate::{
         teststep::{GetMethod, Teststep},
     },
     class::{Method, TimeoutsEngine, TIMEOUTS},
-    engine::EngineResult,
+    engine::{Engine, EngineResult},
 };
 
-pub struct Timeouts<'a> {
-    pub driver: &'a WebDriver,
-}
-
-impl<'a> Timeouts<'a> {
-    pub async fn new(driver: &WebDriver, body: &Teststep) -> EngineResult<()> {
-        let timeouts = Timeouts { driver };
-        if let Method::TIMEOUTS(method) = body.get_method() {
+impl<'a> Engine<'a> {
+    pub async fn timeouts(&mut self, teststep: &Teststep) -> EngineResult<()> {
+        if let Method::TIMEOUTS(method) = teststep.get_method() {
             match method {
-                TIMEOUTS::WAIT => timeouts.WAIT(body).await?,
+                TIMEOUTS::WAIT => self.WAIT(teststep).await?,
             }
         }
         Ok(())
     }
 }
 
-impl<'a> TimeoutsEngine for Timeouts<'a> {
-    async fn WAIT(&self, _step: &Teststep) -> Result<(), thirtyfour::prelude::WebDriverError> {
+impl<'a> TimeoutsEngine for Engine<'a> {
+    async fn WAIT(&mut self, _step: &Teststep) -> Result<(), thirtyfour::prelude::WebDriverError> {
         if let Teststep::Action(step) = _step {
             let secs_arg = step.arguments.get(SECS_ARGKEY);
             if let Some(Args::Number(secs)) = secs_arg {
