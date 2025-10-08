@@ -1,78 +1,40 @@
-use thirtyfour::WebDriver;
-
 use crate::{
     ast::{
         identifier_value::IdentifierValue,
-        testcase::TestCase,
-        testcase_body::{GetMethod, TestcaseBody},
+        teststep::{GetMethod, Teststep},
         var_decl::VarRHS,
     },
-    class::{CustomEngine, ElementEngine, Method, WebDriverEngine, CUSTOM, ELEMENT, WEB_DRIVER},
-    engine::{element::Element, webdriver::WebDriver_, EngineResult},
+    class::{CustomEngine, ElementEngine, Method, WebDriverEngine, ELEMENT, WEB_DRIVER},
+    engine::{Engine, EngineResult},
 };
 
-pub struct Custom<'a> {
-    pub driver: &'a WebDriver,
-}
-
-impl<'a> Custom<'a> {
-    pub async fn new(
-        driver: &WebDriver,
-        body: &TestcaseBody,
-        testcase: &mut TestCase,
-    ) -> EngineResult<()> {
-        let custom = Custom { driver };
-        if let Method::CUSTOM(method) = body.get_method() {
-            match method {
-                CUSTOM::VAR_DECLARATION => custom.VAR_DECLARATION(body, testcase).await?,
-            };
-        }
-        Ok(())
-    }
-}
-
-impl<'a> CustomEngine for Custom<'a> {
-    async fn VAR_DECLARATION(
-        &self,
-        _body: &TestcaseBody,
-        _testcase: &mut TestCase,
-    ) -> EngineResult<()> {
-        if let TestcaseBody::VAR_DECL(step) = _body {
+impl<'a> CustomEngine for Engine<'a> {
+    async fn VAR_DECLARATION(&mut self, _body: &Teststep) -> EngineResult<()> {
+        if let Teststep::VarDecl(step) = _body {
             match &step.rhs {
                 VarRHS::Getter(getter) => {
                     match getter.get_method() {
                         Method::ELEMENT(ELEMENT::GET_ATTRIBUTE) => {
-                            let element = Element {
-                                driver: &self.driver,
-                            };
-                            let attribute_value = element
-                                .GET_ATTRIBUTE(&TestcaseBody::GETTER(getter.clone()))
+                            let attribute_value = self
+                                .GET_ATTRIBUTE(&Teststep::Getter(getter.clone()))
                                 .await?;
-                            _testcase.insert_variable_value(
+                            self.testcase.insert_variable_value(
                                 step.name.clone(),
                                 IdentifierValue::String(attribute_value),
                             );
                         }
                         Method::WEB_DRIVER(WEB_DRIVER::GET_CURRENT_URL) => {
-                            let web_driver = WebDriver_ {
-                                driver: &self.driver,
-                            };
-                            let url = web_driver
-                                .GET_CURRENT_URL(&TestcaseBody::GETTER(getter.clone()))
+                            let url = self
+                                .GET_CURRENT_URL(&Teststep::Getter(getter.clone()))
                                 .await?;
-                            _testcase.insert_variable_value(
+                            self.testcase.insert_variable_value(
                                 step.name.clone(),
                                 IdentifierValue::String(url),
                             );
                         }
                         Method::WEB_DRIVER(WEB_DRIVER::GET_TITLE) => {
-                            let web_driver = WebDriver_ {
-                                driver: &self.driver,
-                            };
-                            let title = web_driver
-                                .GET_TITLE(&TestcaseBody::GETTER(getter.clone()))
-                                .await?;
-                            _testcase.insert_variable_value(
+                            let title = self.GET_TITLE(&Teststep::Getter(getter.clone())).await?;
+                            self.testcase.insert_variable_value(
                                 step.name.clone(),
                                 IdentifierValue::String(title),
                             );
@@ -82,14 +44,15 @@ impl<'a> CustomEngine for Custom<'a> {
                         }
                     };
                 }
-                VarRHS::String(_) => {
-                    todo!();
-                }
-                VarRHS::Var(_) => {
-                    todo!();
+                VarRHS::Expression(expr) => {
+                    let _ = self.eval(expr);
                 }
             }
         }
+        Ok(())
+    }
+
+    async fn ASSERT(&mut self, _step: &Teststep) -> EngineResult<()> {
         Ok(())
     }
 }

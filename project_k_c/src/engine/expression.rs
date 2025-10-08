@@ -14,12 +14,8 @@ use crate::{
     },
 };
 
-pub struct Expression<'a> {
-    engine: &'a Engine<'a>,
-}
-
-impl<'a> Expression<'a> {
-    fn eval(&self, expr: &Expr) -> ExpressionEvalResult {
+impl<'a> Engine<'a> {
+    pub fn eval(&self, expr: &Expr) -> ExpressionEvalResult {
         match &expr.kind {
             ExpKind::Binary(op, expr1, expr2) => self.binary_eval(op, expr1, expr2),
             ExpKind::Unary(op, expr) => self.unary_eval(op, expr),
@@ -34,7 +30,7 @@ impl<'a> Expression<'a> {
                 Literal::Boolean(bool) => Ok(IdentifierValue::Boolean(Some(bool))),
                 Literal::String(string) => Ok(IdentifierValue::String(Some(string))),
                 Literal::Ident(ident, _) => {
-                    Ok(self.engine.testcase.variables.get(&ident).unwrap().clone())
+                    Ok(self.testcase.variables.get(&ident).unwrap().clone())
                 }
             };
         } else {
