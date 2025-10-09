@@ -8,11 +8,14 @@ use std::sync::Arc;
 
 use super::Parser;
 use crate::ast::testcase::TestCase;
-use crate::class::{CustomAction, LiteralExpressionAction, NavigationAction, TimeoutsAction};
+use crate::class::{
+    BinaryExpressionAction, CustomAction, LiteralExpressionAction, NavigationAction, TimeoutsAction,
+};
 use crate::class::{ElementAction, WebDriverAction};
 use crate::engine::execute;
 use crate::error_handler::{parse_error_to_error_info, ErrorInfo};
 use crate::keywords::TokenType;
+use crate::parser::actions::binary_expr::BinaryExpression;
 use crate::parser::actions::custom::Custom;
 use crate::parser::actions::driver::Driver;
 use crate::parser::actions::element::Element;
@@ -175,23 +178,81 @@ pub fn parser_slr(parser: &mut Parser) {
         | LogicalExpression
         ;
 
-        LogicalExpression -> Expression and Expression
-        | Expression or Expression;
-
-        ComparisionExpression -> Expression equality Expression
-        | Expression not_equal Expression
-        | Expression greater_than Expression
-        | Expression lesser_than Expression
-        | Expression greater_than_equal Expression
-        | Expression lesser_than_equal Expression
+        LogicalExpression ->
+        Expression and Expression
+        {action:|ast,token_stack,tl_stack,errors| {
+            BinaryExpression::AND(ast, token_stack, tl_stack, errors);
+        }}
+        |
+        Expression or Expression
+        {action:|ast,token_stack,tl_stack,errors| {
+            BinaryExpression::OR(ast, token_stack, tl_stack, errors);
+        }}
         ;
 
-        ArthimaticExpression -> Expression plus Expression
-        | Expression minus Expression
-        | Expression Expression // special case where 1-1 here we need to number + number
-        | Expression multiply Expression
-        | Expression forward_slash Expression
-        | Expression modulus Expression;
+        ComparisionExpression ->
+        Expression equality Expression
+        {action:|ast,token_stack,tl_stack,errors| {
+            BinaryExpression::EQ(ast, token_stack, tl_stack, errors);
+        }}
+        |
+        Expression not_equal Expression
+        {action:|ast,token_stack,tl_stack,errors| {
+            BinaryExpression::NE(ast, token_stack, tl_stack, errors);
+        }}
+        |
+        Expression greater_than Expression
+        {action:|ast,token_stack,tl_stack,errors| {
+            BinaryExpression::GT(ast, token_stack, tl_stack, errors);
+        }}
+        |
+        Expression lesser_than Expression
+        {action:|ast,token_stack,tl_stack,errors| {
+            BinaryExpression::LT(ast, token_stack, tl_stack, errors);
+        }}
+        |
+        Expression greater_than_equal Expression
+        {action:|ast,token_stack,tl_stack,errors| {
+            BinaryExpression::GE(ast, token_stack, tl_stack, errors);
+        }}
+        |
+        Expression lesser_than_equal Expression
+        {action:|ast,token_stack,tl_stack,errors| {
+            BinaryExpression::LE(ast, token_stack, tl_stack, errors);
+        }}
+        ;
+
+        ArthimaticExpression ->
+        Expression plus Expression
+        {action:|ast,token_stack,tl_stack,errors| {
+            BinaryExpression::ADD(ast, token_stack, tl_stack, errors);
+        }}
+        |
+        Expression minus Expression
+        {action:|ast,token_stack,tl_stack,errors| {
+            BinaryExpression::SUB(ast, token_stack, tl_stack, errors);
+        }}
+        |
+        Expression Expression // special case where 1-1 here we need to number + number
+        {action:|ast,token_stack,tl_stack,errors| {
+            BinaryExpression::SPL_SUB(ast, token_stack, tl_stack, errors);
+        }}
+        |
+        Expression multiply Expression
+        {action:|ast,token_stack,tl_stack,errors| {
+            BinaryExpression::MUL(ast, token_stack, tl_stack, errors);
+        }}
+        |
+        Expression forward_slash Expression
+        {action:|ast,token_stack,tl_stack,errors| {
+            BinaryExpression::DIV(ast, token_stack, tl_stack, errors);
+        }}
+        |
+        Expression modulus Expression
+        {action:|ast,token_stack,tl_stack,errors| {
+            BinaryExpression::REM(ast, token_stack, tl_stack, errors);
+        }}
+        ;
 
         //helpers
         ATTRIBUTE -> indent | string;
