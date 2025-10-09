@@ -1,41 +1,34 @@
-use log::info;
-use thirtyfour::WebDriver;
-
 use crate::ast::arguments::{Args, URL_ARGKEY};
 use crate::ast::teststep::GetMethod;
 use crate::ast::teststep::Teststep;
 use crate::class::{Method, WebDriverEngine, WEB_DRIVER};
-use crate::engine::EngineResult;
+use crate::engine::{Engine, EngineResult};
+use log::info;
 
-pub struct WebDriver_<'a> {
-    pub driver: &'a WebDriver,
-}
-
-impl<'a> WebDriver_<'a> {
-    pub async fn new(driver: &WebDriver, body: &Teststep) -> EngineResult<()> {
-        let webdriver = WebDriver_ { driver };
-        if let Method::WEB_DRIVER(method) = &body.get_method() {
+impl<'a> Engine<'a> {
+    pub async fn webdriver(&mut self, teststep: &Teststep) -> EngineResult<()> {
+        if let Method::WEB_DRIVER(method) = &teststep.get_method() {
             match method {
                 WEB_DRIVER::CLOSE => {
-                    let _ = webdriver.CLOSE(body).await?;
+                    let _ = self.CLOSE(teststep).await?;
                 }
                 WEB_DRIVER::NAVIGATE => {
-                    let _ = webdriver.NAVIGATE(body).await?;
+                    let _ = self.NAVIGATE(teststep).await?;
                 }
                 WEB_DRIVER::FIND_ELEMENT => {
-                    let _ = webdriver.FIND_ELEMENT(body).await?;
+                    let _ = self.FIND_ELEMENT(teststep).await?;
                 }
                 WEB_DRIVER::GET_CURRENT_URL => {
-                    let _ = webdriver.GET_CURRENT_URL(body).await?;
+                    let _ = self.GET_CURRENT_URL(teststep).await?;
                 }
                 WEB_DRIVER::GET_PAGE_SOURCE => {
-                    let _ = webdriver.GET_PAGE_SOURCE(body).await?;
+                    let _ = self.GET_PAGE_SOURCE(teststep).await?;
                 }
                 WEB_DRIVER::GET_TITLE => {
-                    let _ = webdriver.GET_TITLE(body).await?;
+                    let _ = self.GET_TITLE(teststep).await?;
                 }
                 WEB_DRIVER::GET_WINDOW_HANDLE => {
-                    let _ = webdriver.GET_WINDOW_HANDLE(body).await?;
+                    let _ = self.GET_WINDOW_HANDLE(teststep).await?;
                 }
             };
         }
@@ -43,8 +36,8 @@ impl<'a> WebDriver_<'a> {
     }
 }
 
-impl<'a> WebDriverEngine for WebDriver_<'a> {
-    async fn NAVIGATE(&self, _body: &Teststep) -> EngineResult<()> {
+impl<'a> WebDriverEngine for Engine<'a> {
+    async fn NAVIGATE(&mut self, _body: &Teststep) -> EngineResult<()> {
         if let Teststep::Action(step) = _body {
             let url = step.arguments.get(URL_ARGKEY).unwrap();
             if let Args::String(url) = url {
@@ -54,26 +47,26 @@ impl<'a> WebDriverEngine for WebDriver_<'a> {
         }
         Ok(())
     }
-    async fn CLOSE(&self, _body: &Teststep) -> EngineResult<()> {
+    async fn CLOSE(&mut self, _body: &Teststep) -> EngineResult<()> {
         self.driver.close_window().await?;
         info!("closed browser");
         Ok(())
     }
-    async fn FIND_ELEMENT(&self, _body: &Teststep) -> EngineResult<()> {
+    async fn FIND_ELEMENT(&mut self, _body: &Teststep) -> EngineResult<()> {
         Ok(())
     }
-    async fn GET_CURRENT_URL(&self, _body: &Teststep) -> EngineResult<Option<String>> {
+    async fn GET_CURRENT_URL(&mut self, _body: &Teststep) -> EngineResult<Option<String>> {
         let url = self.driver.current_url().await?;
         Ok(Some(url.to_string()))
     }
-    async fn GET_PAGE_SOURCE(&self, _body: &Teststep) -> EngineResult<()> {
+    async fn GET_PAGE_SOURCE(&mut self, _body: &Teststep) -> EngineResult<()> {
         Ok(())
     }
-    async fn GET_TITLE(&self, _body: &Teststep) -> EngineResult<Option<String>> {
+    async fn GET_TITLE(&mut self, _body: &Teststep) -> EngineResult<Option<String>> {
         let title = self.driver.title().await?;
         Ok(Some(title.to_string()))
     }
-    async fn GET_WINDOW_HANDLE(&self, _body: &Teststep) -> EngineResult<()> {
+    async fn GET_WINDOW_HANDLE(&mut self, _body: &Teststep) -> EngineResult<()> {
         Ok(())
     }
 }

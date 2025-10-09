@@ -13,15 +13,13 @@ use webdriver_manager::{chrome::ChromeManager, WebdriverManager};
 
 use crate::{
     ast::{testcase::TestCase, teststep::Teststep},
-    class::Method,
-    engine::{
-        custom::Custom, element::Element, navigation::Navigation, timeouts::Timeouts,
-        webdriver::WebDriver_,
-    },
+    class::{CustomEngine, Method},
 };
 
 mod custom;
 mod element;
+mod errors;
+mod expression;
 mod navigation;
 mod timeouts;
 mod webdriver;
@@ -70,25 +68,21 @@ impl<'a> Engine<'a> {
     async fn start(&mut self) -> EngineResult<()> {
         while let Some(step_ref_cell) = self.testcase.test_step.take() {
             let teststep = step_ref_cell.borrow();
-            let testcase_body = teststep.deref();
+            let teststep = teststep.deref();
 
-            self.testcase.test_step = match testcase_body {
+            self.testcase.test_step = match teststep {
                 Teststep::Action(step) => {
                     match step.method {
-                        Method::WEB_DRIVER(_) => {
-                            WebDriver_::new(&self.driver, testcase_body).await?
-                        }
-                        Method::ELEMENT(_) => Element::new(&self.driver, testcase_body).await?,
-                        Method::NAVIGATION(_) => {
-                            Navigation::new(&self.driver, testcase_body).await?
-                        }
-                        Method::TIMEOUTS(_) => Timeouts::new(&self.driver, testcase_body).await?,
+                        Method::WEB_DRIVER(_) => self.webdriver(teststep).await?,
+                        Method::ELEMENT(_) => self.element(teststep).await?,
+                        Method::NAVIGATION(_) => self.navigation(teststep).await?,
+                        Method::TIMEOUTS(_) => self.timeouts(teststep).await?,
                         _ => {}
                     }
                     step.next.clone()
                 }
                 Teststep::VarDecl(step) => {
-                    Custom::new(&self.driver, testcase_body, &mut self.testcase).await?;
+                    self.VAR_DECLARATION(teststep).await?;
                     step.next.clone()
                 }
                 _ => None,

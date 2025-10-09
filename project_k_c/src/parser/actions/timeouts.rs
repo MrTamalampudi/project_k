@@ -12,7 +12,7 @@ use crate::parser::translator_stack::TranslatorStack;
 use crate::token::Token;
 use manodae::error::ParseError;
 
-pub struct Timeouts {}
+pub struct Timeouts;
 
 impl TimeoutsAction for Timeouts {
     //action: wait 'x'

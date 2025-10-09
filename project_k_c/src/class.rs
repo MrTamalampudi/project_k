@@ -67,17 +67,17 @@ macro_rules! class_macro {
                 $(
                     ifdef! {
                         [$($($($engine_returns)?)?)?,$($($($($engine_arg_ident),*)?)?)?]
-                        {fn $method(&self,_step:&Teststep,$($($($($engine_arg_ident:$engine_arg_type),*)?)?)?) -> impl Future<Output = Result<($($($($engine_returns)?)?)?),WebDriverError>>;}
+                        {fn $method(&mut self,_step:&Teststep,$($($($($engine_arg_ident:$engine_arg_type),*)?)?)?) -> impl Future<Output = Result<($($($($engine_returns)?)?)?),WebDriverError>>;}
                         else
                         { ifdef! {
                             [$($($($engine_returns)?)?)?]
-                            {fn $method(&self,_step:&Teststep) -> impl Future<Output = (Result<$($($($engine_returns)?)?)?,WebDriverError>)>;}
+                            {fn $method(&mut self,_step:&Teststep) -> impl Future<Output = (Result<$($($($engine_returns)?)?)?,WebDriverError>)>;}
                             else
                             { ifdef! {
                                 [$($($($($engine_arg_ident),*)?)?)?]
-                                {fn $method(&self,_step:&Teststep,$($($($($engine_arg_ident:$engine_arg_type),*)?)?)?) -> impl Future<Output = (Result<(),WebDriverError>)>;}
+                                {fn $method(&mut self,_step:&Teststep,$($($($($engine_arg_ident:$engine_arg_type),*)?)?)?) -> impl Future<Output = (Result<(),WebDriverError>)>;}
                                 else
-                                {fn $method(&self,_step:&Teststep) -> impl Future<Output = (Result<(),WebDriverError>)>;}
+                                {fn $method(&mut self,_step:&Teststep) -> impl Future<Output = (Result<(),WebDriverError>)>;}
                                 }
                             }}
                         }
@@ -233,11 +233,7 @@ class_macro!(
         action:CustomAction,
         engine:CustomEngine,
         CUSTOM {
-            VAR_DECLARATION {
-                engine: {
-                    args: [_testcase : &mut TestCase]
-                }
-            },
+            VAR_DECLARATION,
             ASSERT
         }
     },
@@ -268,6 +264,26 @@ class_macro!(
         engine:UnaryExpressionEngine,
         UNARYEXPRESSION  {
             NEGATION
+        }
+    },
+    {
+        action:BinaryExpressionAction,
+        engine:BinaryExpressionEngine,
+        BINARYEXPRESSION {
+            ADD,
+            SUB,
+            SPL_SUB,
+            MUL,
+            DIV,
+            REM,
+            AND,
+            OR,
+            EQ,
+            LT,
+            LE,
+            NE,
+            GE,
+            GT
         }
     },
     {
