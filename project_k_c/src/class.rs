@@ -267,6 +267,26 @@ class_macro!(
         }
     },
     {
+        action:BinaryExpressionAction,
+        engine:BinaryExpressionEngine,
+        BINARYEXPRESSION {
+            ADD,
+            SUB,
+            SPL_SUB,
+            MUL,
+            DIV,
+            REM,
+            AND,
+            OR,
+            EQ,
+            LT,
+            LE,
+            NE,
+            GE,
+            GT
+        }
+    },
+    {
         action:HelpersAction,
         engine:HelpersEngine,
         HELPERS {
