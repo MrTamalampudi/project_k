@@ -263,7 +263,8 @@ class_macro!(
         action:UnaryExpressionAction,
         engine:UnaryExpressionEngine,
         UNARYEXPRESSION  {
-            NEGATION
+            NEGATION,
+            GROUPED
         }
     },
     {

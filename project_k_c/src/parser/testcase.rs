@@ -9,7 +9,8 @@ use std::sync::Arc;
 use super::Parser;
 use crate::ast::testcase::TestCase;
 use crate::class::{
-    BinaryExpressionAction, CustomAction, LiteralExpressionAction, NavigationAction, TimeoutsAction,
+    BinaryExpressionAction, CustomAction, LiteralExpressionAction, NavigationAction,
+    TimeoutsAction, UnaryExpressionAction,
 };
 use crate::class::{ElementAction, WebDriverAction};
 use crate::engine::execute;
@@ -22,6 +23,7 @@ use crate::parser::actions::element::Element;
 use crate::parser::actions::literal_expression::LiteralExpression;
 use crate::parser::actions::navigation::Navigation;
 use crate::parser::actions::timeouts::Timeouts;
+use crate::parser::actions::unary_expr::UnaryExpression;
 use crate::parser::translator_stack::TranslatorStack;
 use crate::program::Program;
 use crate::token::Token;
@@ -169,9 +171,19 @@ pub fn parser_slr(parser: &mut Parser) {
 
         UnaryExpression -> NegationExpression;
 
-        NegationExpression -> negation GroupedExpression;
+        NegationExpression ->
+        negation GroupedExpression
+        {action:|ast,token_stack,tl_stack,errors| {
+            UnaryExpression::NEGATION(ast, token_stack, tl_stack, errors);
+        }}
+        ;
 
-        GroupedExpression -> left_paran Expression right_paran;
+        GroupedExpression ->
+        left_paran Expression right_paran
+        {action:|ast,token_stack,tl_stack,errors| {
+            UnaryExpression::GROUPED(ast, token_stack, tl_stack, errors);
+        }}
+        ;
 
         BinaryExpression -> ComparisionExpression
         | ArthimaticExpression

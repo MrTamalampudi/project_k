@@ -1,6 +1,6 @@
 use crate::ast::identifier_value::IdentifierValue;
 
-#[derive(Clone, PartialEq, Debug)]
+#[derive(Clone, PartialEq, Debug, Copy)]
 pub enum Primitives {
     Number,
     String,
