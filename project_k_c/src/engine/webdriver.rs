@@ -1,9 +1,11 @@
 use crate::ast::arguments::{Args, URL_ARGKEY};
+use crate::ast::identifier_value::IdentifierValue;
 use crate::ast::teststep::GetMethod;
 use crate::ast::teststep::Teststep;
 use crate::class::{Method, WebDriverEngine, WEB_DRIVER};
 use crate::engine::{Engine, EngineResult};
 use log::info;
+use thirtyfour::error::WebDriverError;
 
 impl<'a> Engine<'a> {
     pub async fn webdriver(&mut self, teststep: &Teststep) -> EngineResult<()> {
@@ -38,11 +40,20 @@ impl<'a> Engine<'a> {
 
 impl<'a> WebDriverEngine for Engine<'a> {
     async fn NAVIGATE(&mut self, _body: &Teststep) -> EngineResult<()> {
+        info!("Navigated to ");
         if let Teststep::Action(step) = _body {
             let url = step.arguments.get(URL_ARGKEY).unwrap();
-            if let Args::String(url) = url {
-                self.driver.goto(url).await?;
-                info!("Navigated to {url}");
+            if let Args::Expr(url) = url {
+                let url = self.eval(url).await;
+                match url {
+                    Ok(url_) => {
+                        if let IdentifierValue::String(uu) = url_ {
+                            let _ = self.driver.goto(uu.unwrap()).await;
+                        }
+                    }
+                    Err(_) => return Err(WebDriverError::FatalError("navigate error".to_string())),
+                };
+                info!("Navigated to ");
             };
         }
         Ok(())

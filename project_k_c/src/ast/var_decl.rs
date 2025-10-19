@@ -15,14 +15,14 @@ use crate::{
 pub struct VarDecl {
     pub name: String,
     pub type_: Primitives,
-    pub rhs: VarRHS,
+    pub rhs: Expr,
     pub method: Method,
     pub next: Option<Rc<RefCell<Teststep>>>,
     pub span: Span,
 }
 
 impl VarDecl {
-    pub fn new(name: String, type_: Primitives, rhs: VarRHS, span: Span) -> VarDecl {
+    pub fn new(name: String, type_: Primitives, rhs: Expr, span: Span) -> VarDecl {
         VarDecl {
             name,
             type_,
@@ -30,21 +30,6 @@ impl VarDecl {
             method: Method::CUSTOM(CUSTOM::VAR_DECLARATION),
             next: None,
             span,
-        }
-    }
-}
-
-#[derive(Debug, Clone, PartialEq)]
-pub enum VarRHS {
-    Getter(Getter),
-    Expression(Expr),
-}
-
-impl VarRHS {
-    pub fn get_type(&self) -> Primitives {
-        match self {
-            VarRHS::Getter(getter) => getter.returns.clone(),
-            VarRHS::Expression(expr) => expr.primitive.clone(),
         }
     }
 }
@@ -67,14 +52,5 @@ impl Next for VarDecl {
 impl SpanTrait for VarDecl {
     fn get_span(&self) -> Span {
         self.span.clone()
-    }
-}
-
-impl SpanTrait for VarRHS {
-    fn get_span(&self) -> Span {
-        match self {
-            VarRHS::Expression(expr) => expr.span.clone(),
-            VarRHS::Getter(getter) => getter.span.clone(),
-        }
     }
 }

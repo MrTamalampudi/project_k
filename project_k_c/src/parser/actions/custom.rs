@@ -3,21 +3,18 @@ use std::collections::HashMap;
 use crate::ast::action::Action;
 use crate::ast::arguments::Args;
 use crate::ast::arguments::EXPR_ARGKEY;
-use crate::ast::expression::ExpKind;
-use crate::ast::expression::Literal;
-use crate::ast::primitives::Primitives;
 use crate::ast::testcase::TestCase;
 use crate::ast::teststep::Teststep;
 use crate::ast::var_decl::VarDecl;
-use crate::ast::var_decl::VarRHS;
 use crate::class::CustomAction;
 use crate::class::CUSTOM;
 use crate::keywords::TokenType;
 use crate::location::Span;
 use crate::location::SpanTrait;
 use crate::parser::errors::EXPECT_BOOL_EXPR;
-use crate::parser::errors::EXPECT_EXPR_OR_GETTER;
 use crate::parser::errors::MISMATCHED_TYPES;
+use crate::parser::errorss::ActionError;
+use crate::parser::translator_stack::TLVec;
 use crate::parser::translator_stack::TranslatorStack;
 use crate::token::Token;
 use manodae::error::ParseError;
@@ -25,7 +22,7 @@ use manodae::error::ParseError;
 pub struct Custom {}
 
 impl CustomAction for Custom {
-    //var = var_rhs
+    //var ident = var_rhs
     //fetch var_rhs from tl_stack last element;
     fn VAR_DECLARATION(
         _testcase: &mut TestCase,
@@ -33,30 +30,24 @@ impl CustomAction for Custom {
         _tl_stack: &mut Vec<TranslatorStack>,
         _errors: &mut Vec<ParseError<Token>>,
     ) {
-        _token_stack.pop(); //pops assign token
+        _token_stack.pop(); //pop "assign" token
         let identifier_token = _token_stack.pop().unwrap();
         let identifier = match identifier_token.get_token_type() {
-            TokenType::STRING(ident) => ident,
+            TokenType::IDENTIFIER(ident) => ident,
             _ => return,
         };
-        let var_rhs_tl = _tl_stack.pop().unwrap();
-        let var_rhs = match var_rhs_tl {
-            TranslatorStack::Expression(expr) => VarRHS::Expression(expr),
-            TranslatorStack::Getter(getter) => VarRHS::Getter(getter),
-            _ => {
-                let mut i_token = identifier_token.clone();
-                i_token.span = var_rhs_tl.get_span();
-                _errors.push(ParseError {
-                    token: i_token,
-                    message: EXPECT_EXPR_OR_GETTER.to_string(),
-                    production_end: false,
-                });
+        _token_stack.pop(); // pop "var" token
+
+        let var_rhs = match _tl_stack.pop_expr() {
+            Ok(expr) => expr,
+            Err((error, span)) => {
+                _errors.push_error(&identifier_token, &span, error);
                 return;
             }
         };
 
         let span = identifier_token.span.to(&var_rhs.get_span());
-        let var_decl = VarDecl::new(identifier.clone(), var_rhs.get_type(), var_rhs, span);
+        let var_decl = VarDecl::new(identifier.clone(), var_rhs.primitive, var_rhs, span);
 
         if let Some(variable) = _testcase.variables.get(&identifier) {
             if variable.to_primitive().ne(&var_decl.type_) {
@@ -82,6 +73,7 @@ impl CustomAction for Custom {
         _token_stack.clear();
     }
 
+    //assert expr
     fn ASSERT(
         _testcase: &mut TestCase,
         _token_stack: &mut Vec<Token>,
@@ -89,58 +81,27 @@ impl CustomAction for Custom {
         _errors: &mut Vec<ParseError<Token>>,
     ) {
         let assert_token = _token_stack.pop().unwrap();
-        let tl_expr = _tl_stack.pop().unwrap();
-        let expression = match &tl_expr {
-            TranslatorStack::Expression(expr) => expr.clone(),
-            _ => {
-                let mut at_token = assert_token.clone();
-                at_token.span = tl_expr.get_span();
-                _errors.push(ParseError {
-                    token: at_token,
-                    message: EXPECT_BOOL_EXPR.to_string(),
-                    production_end: false,
-                });
+        let expr = match _tl_stack.pop_expr() {
+            Ok(expr) => expr,
+            Err((error, span)) => {
+                _errors.push_error(&assert_token, &span, error);
                 return;
             }
         };
 
-        let is_boolean_expr = match &expression.kind {
-            ExpKind::Binary(op, _, _) => op.is_bool_op(),
-            ExpKind::Unary(_, _) => true,
-            ExpKind::Lit(lit) => match lit {
-                Literal::Boolean(_) => true,
-                Literal::Ident(_, primitive) => {
-                    if let Primitives::Boolean = primitive {
-                        true
-                    } else {
-                        false
-                    }
-                }
-                _ => false,
-            },
-        };
-
-        if !is_boolean_expr {
-            let mut at_token = assert_token.clone();
-            at_token.span = tl_expr.get_span();
-            _errors.push(ParseError {
-                token: at_token,
-                message: EXPECT_BOOL_EXPR.to_string(),
-                production_end: false,
-            });
+        if !expr.boolean() {
+            _errors.push_error(&assert_token, &expr.span, EXPECT_BOOL_EXPR.to_string());
             return;
-        } else {
-            let teststep = Action::new(
-                Span {
-                    start: assert_token.get_start_location(),
-                    end: expression.span.end,
-                },
-                crate::class::Class::CUSTOM,
-                crate::class::Method::CUSTOM(CUSTOM::ASSERT),
-                HashMap::from([(EXPR_ARGKEY, Args::Expr(expression))]),
-            );
-            _testcase.insert_teststep(Teststep::Action(teststep));
-            _token_stack.clear();
         }
+        let teststep = Action::new(
+            Span {
+                start: assert_token.get_start_location(),
+                end: expr.span.end,
+            },
+            crate::class::Class::CUSTOM,
+            crate::class::Method::CUSTOM(CUSTOM::ASSERT),
+            HashMap::from([(EXPR_ARGKEY, Args::Expr(expr))]),
+        );
+        _testcase.insert_teststep(Teststep::Action(teststep));
     }
 }

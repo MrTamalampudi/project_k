@@ -1,5 +1,5 @@
 use crate::{
-    ast::{action::Action, expression::Expr, getter::Getter, var_decl::VarDecl},
+    ast::{action::Action, expression::Expr, var_decl::VarDecl},
     location::{Span, SpanTrait},
     parser::errors::EXPECT_EXPR,
 };
@@ -7,7 +7,6 @@ use crate::{
 #[derive(Debug, Clone, PartialEq)]
 pub enum TranslatorStack {
     TestStep(Action),
-    Getter(Getter),
     VarDecl(VarDecl),
     Expression(Expr),
 }
@@ -27,7 +26,6 @@ impl SpanTrait for TranslatorStack {
         use TranslatorStack::*;
         match self {
             TestStep(teststep) => teststep.get_span(),
-            Getter(getter) => getter.get_span(),
             Expression(expr) => expr.get_span(),
             VarDecl(var) => var.get_span(),
         }
@@ -36,11 +34,15 @@ impl SpanTrait for TranslatorStack {
 
 pub trait TLVec {
     fn pop_expr(&mut self) -> Result<Expr, (String, Span)>;
+    fn push_expr(&mut self, expr: Expr);
 }
 
 impl TLVec for Vec<TranslatorStack> {
     fn pop_expr(&mut self) -> Result<Expr, (String, Span)> {
         let tl = self.pop().unwrap();
         tl.get_expression()
+    }
+    fn push_expr(&mut self, expr: Expr) {
+        self.push(TranslatorStack::Expression(expr));
     }
 }

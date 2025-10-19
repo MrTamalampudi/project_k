@@ -66,21 +66,16 @@ fn source_code_to_tokens(source_code: String, ctx: &mut CompilationContext) -> V
 
 pub fn source_code_to_lexer(source_code: String, ctx: &mut CompilationContext) -> Lexer {
     let tokens = source_code_to_tokens(source_code, ctx);
-    //println!("tokens {:#?}", tokens);
     Lexer::from_tokens(tokens)
 }
 
 pub fn compile_for_errors(ctx: &mut CompilationContext) {
     let source_code = read_file_to_string(&ctx.path);
     let mut lexer = source_code_to_lexer(source_code, ctx);
-    //parser_slr(lexer.tokens.clone());
-    //println!("{:#?}", lexer.tokens);
     Parser::new(&mut lexer, ctx).parse();
 }
 
 pub fn compile(ctx: &mut CompilationContext) {
     compile_for_errors(ctx);
-    //println!("{:#?}", ctx.program);
-    //println!("{:#?}", ctx.errors);
     //execute(ctx.program.clone());
 }

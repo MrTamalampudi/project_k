@@ -1,50 +1,57 @@
 use std::collections::HashMap;
 
 use crate::ast::action::Action;
-use crate::ast::arguments::{Args, SECS_ARGKEY};
+use crate::ast::arguments::{Args, EXPR_ARGKEY};
+use crate::ast::expression::{ExpKind, Literal};
+use crate::ast::primitives::Primitives;
 use crate::ast::testcase::TestCase;
 use crate::ast::teststep::Teststep;
 use crate::class::{Method, TimeoutsAction, TIMEOUTS};
-use crate::keywords::TokenType;
-use crate::location::Span;
-use crate::parser::errors::NEGATIVE_TIME;
-use crate::parser::translator_stack::TranslatorStack;
+use crate::parser::errors::{EXPECT_NUMBER_EXPR, NEGATIVE_TIME};
+use crate::parser::errorss::ActionError;
+use crate::parser::translator_stack::{TLVec, TranslatorStack};
 use crate::token::Token;
 use manodae::error::ParseError;
 
 pub struct Timeouts;
 
 impl TimeoutsAction for Timeouts {
-    //action: wait 'x'
+    //action: wait expression
     fn WAIT(
         _testcase: &mut TestCase,
         _token_stack: &mut Vec<Token>,
         _tl_stack: &mut Vec<TranslatorStack>,
         _errors: &mut Vec<ParseError<Token>>,
     ) {
-        let secs_token = _token_stack.get(1).unwrap();
-        if let TokenType::NUMBER(secs) = secs_token.get_token_type() {
-            if secs < 0 {
-                _errors.push(ParseError {
-                    token: secs_token.clone(),
-                    message: String::from(NEGATIVE_TIME),
-                    production_end: false,
-                });
+        let secs_token = _token_stack.pop().unwrap();
+        let expr = match _tl_stack.pop_expr() {
+            Ok(expr) => expr,
+            Err((error, span)) => {
+                _errors.push_error(&secs_token, &span, error);
                 return;
-            } else {
-                let span = Span {
-                    start: _token_stack.first().unwrap().get_start_location(),
-                    end: _token_stack.last().unwrap().get_end_location(),
-                };
-                let teststep = Action::new(
-                    span,
-                    crate::class::Class::TIMEOUTS,
-                    Method::TIMEOUTS(TIMEOUTS::WAIT),
-                    HashMap::from([(SECS_ARGKEY, Args::Number(secs))]),
-                );
-                _testcase.insert_teststep(Teststep::Action(teststep));
+            }
+        };
+
+        if Primitives::Number != expr.primitive {
+            _errors.push_error(&secs_token, &expr.span, EXPECT_NUMBER_EXPR.to_string());
+            return;
+        }
+
+        if let ExpKind::Lit(Literal::Number(secs)) = expr.kind {
+            if secs < 0 {
+                _errors.push_error(&secs_token, &expr.span, NEGATIVE_TIME.to_string());
+                return;
             }
         }
-        _token_stack.clear();
+
+        let span = secs_token.span.to(&expr.span);
+        let action = Action::new(
+            span,
+            crate::class::Class::TIMEOUTS,
+            Method::TIMEOUTS(TIMEOUTS::WAIT),
+            HashMap::from([(EXPR_ARGKEY, Args::Expr(expr))]),
+        );
+
+        _testcase.insert_teststep(Teststep::Action(action));
     }
 }

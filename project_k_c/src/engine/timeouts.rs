@@ -1,10 +1,11 @@
 use std::time::{Duration, SystemTime};
 
-use thirtyfour::By;
+use thirtyfour::{error::WebDriverError, By};
 
 use crate::{
     ast::{
-        arguments::{Args, SECS_ARGKEY},
+        arguments::{Args, EXPR_ARGKEY, SECS_ARGKEY},
+        identifier_value::IdentifierValue,
         teststep::{GetMethod, Teststep},
     },
     class::{Method, TimeoutsEngine, TIMEOUTS},
@@ -25,12 +26,22 @@ impl<'a> Engine<'a> {
 impl<'a> TimeoutsEngine for Engine<'a> {
     async fn WAIT(&mut self, _step: &Teststep) -> Result<(), thirtyfour::prelude::WebDriverError> {
         if let Teststep::Action(step) = _step {
-            let secs_arg = step.arguments.get(SECS_ARGKEY);
-            if let Some(Args::Number(secs)) = secs_arg {
-                let current_time = SystemTime::now();
-                let duration = Duration::from_secs(*secs as u64);
-                while current_time.elapsed().unwrap() < duration {
-                    let _ = self.driver.find(By::XPath("this_is_dummy_tula")).await;
+            let secs_arg = step.arguments.get(EXPR_ARGKEY);
+            if let Some(Args::Expr(secs_expr)) = secs_arg {
+                let sec = self.eval(secs_expr).await;
+                match sec {
+                    Ok(IdentifierValue::Number(value)) => {
+                        let current_time = SystemTime::now();
+                        let duration = Duration::from_secs(value.unwrap() as u64);
+                        while current_time.elapsed().unwrap() < duration {
+                            let _ = self.driver.find(By::XPath("this_is_dummy_tula")).await;
+                        }
+                    }
+                    Ok(_) | Err(_) => {
+                        return Err(WebDriverError::FatalError(
+                            "Error while parsing time".to_string(),
+                        ))
+                    }
                 }
             }
         }

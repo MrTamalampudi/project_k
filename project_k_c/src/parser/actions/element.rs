@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use crate::ast::action::Action;
 use crate::ast::arguments::{Args, ATTRIBUTE_ARGKEY, LOCATOR_ARGKEY};
-use crate::ast::expression::{ExpKind, Literal};
+use crate::ast::expression::{ExpKind, Expr, Literal};
 use crate::ast::getter::Getter;
 use crate::ast::primitives::Primitives;
 use crate::ast::testcase::TestCase;
@@ -10,11 +10,11 @@ use crate::ast::teststep::Teststep;
 use crate::class::ELEMENT;
 use crate::class::{Class, ElementAction, Method};
 use crate::get_input_from_token_stack;
-use crate::location::{Span, SpanTrait};
-use crate::parser::errors::{EXPECT_EXPR, EXPECT_STRING_EXPR};
+use crate::location::Span;
+use crate::parser::errors::EXPECT_STRING_EXPR;
 use crate::parser::errorss::ActionError;
 use crate::parser::locator::LocatorStrategy;
-use crate::parser::translator_stack::TranslatorStack;
+use crate::parser::translator_stack::{TLVec, TranslatorStack};
 use crate::token::Token;
 use crate::TokenType;
 use manodae::error::ParseError;
@@ -78,29 +78,25 @@ impl ElementAction for Element {
         _tl_stack: &mut Vec<TranslatorStack>,
         _errors: &mut Vec<ParseError<Token>>,
     ) {
-        let locator_tl = _tl_stack.pop().unwrap();
-        let attribute_tl = _tl_stack.pop().unwrap();
-        let _element_token = _token_stack.pop().unwrap();
-        let _from_token = _token_stack.pop().unwrap();
-        let _attribute_token = _token_stack.pop().unwrap();
+        _token_stack.pop().unwrap(); // pop "element" token
+        _token_stack.pop().unwrap(); // pop "from" token
+        _token_stack.pop().unwrap(); // pop "attribute" token
         let get_token = _token_stack.pop().unwrap();
 
-        let locator_expr = if let TranslatorStack::Expression(locator_expr) = &locator_tl {
-            locator_expr
-        } else {
-            _errors.push_error(&get_token, &locator_tl.get_span(), EXPECT_EXPR.to_string());
-            return;
+        let locator_expr = match _tl_stack.pop_expr() {
+            Ok(expr) => expr,
+            Err((error, span)) => {
+                _errors.push_error(&get_token, &span, error);
+                return;
+            }
         };
 
-        let attribute_expr = if let TranslatorStack::Expression(attribute_expr) = attribute_tl {
-            attribute_expr
-        } else {
-            _errors.push_error(
-                &get_token,
-                &attribute_tl.get_span(),
-                EXPECT_EXPR.to_string(),
-            );
-            return;
+        let attribute_expr = match _tl_stack.pop_expr() {
+            Ok(expr) => expr,
+            Err((error, span)) => {
+                _errors.push_error(&get_token, &span, error);
+                return;
+            }
         };
 
         if Primitives::String != attribute_expr.primitive {
@@ -144,6 +140,12 @@ impl ElementAction for Element {
             returns: Primitives::String,
         };
 
-        _tl_stack.push(TranslatorStack::Getter(getter));
+        let expr = Expr {
+            span,
+            kind: ExpKind::Getter(getter),
+            primitive: Primitives::String,
+        };
+
+        _tl_stack.push_expr(expr);
     }
 }

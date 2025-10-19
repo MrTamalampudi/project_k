@@ -1,7 +1,7 @@
 #![allow(non_camel_case_types, unused)]
 
 use crate::{
-    ast::primitives::Primitives,
+    ast::{getter::Getter, primitives::Primitives},
     location::{Span, SpanTrait},
 };
 
@@ -18,6 +18,12 @@ pub struct Expr {
     pub kind: ExpKind,
     pub span: Span,
     pub primitive: Primitives,
+}
+
+impl Expr {
+    pub fn boolean(&self) -> bool {
+        self.primitive == Primitives::Boolean
+    }
 }
 
 impl SpanTrait for Expr {
@@ -85,4 +91,5 @@ pub enum ExpKind {
     Binary(BinOpKind, Box<Expr>, Box<Expr>),
     Unary(UnOp, Box<Expr>),
     Lit(Literal),
+    Getter(Getter),
 }

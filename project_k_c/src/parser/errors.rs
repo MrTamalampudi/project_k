@@ -14,6 +14,7 @@ pub const _INVALID_TOKEN: &'static str = "Invalid token. Please check syntax";
 pub const EXPECT_BOOL_EXPR: &'static str = "Expected bool expression";
 pub const EXPECT_EXPR: &'static str = "Expected expression";
 pub const EXPECT_STRING_EXPR: &'static str = "Expected string expression";
+pub const EXPECT_NUMBER_EXPR: &'static str = "Expected number expression";
 pub const _INVALID_NEGATION_EXPR_USE: &'static str =
     "Use Negation operator only on boolean operations";
 pub const ASSERT_SUPPORTS_ONLY_BOOL: &'static str =

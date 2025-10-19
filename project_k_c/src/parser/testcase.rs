@@ -3,6 +3,7 @@ use manodae::grammar;
 use manodae::grammar::Grammar;
 use manodae::parser::LR1_Parser;
 use manodae::production::Production;
+use manodae::render_table::render;
 use manodae::symbol::Symbol;
 use std::sync::Arc;
 
@@ -10,7 +11,7 @@ use super::Parser;
 use crate::ast::testcase::TestCase;
 use crate::class::{
     BinaryExpressionAction, CustomAction, LiteralExpressionAction, NavigationAction,
-    TimeoutsAction, UnaryExpressionAction,
+    TimeoutsAction, UnaryExpressionAction, ELEMENT,
 };
 use crate::class::{ElementAction, WebDriverAction};
 use crate::engine::execute;
@@ -68,102 +69,94 @@ pub fn parser_slr(parser: &mut Parser) {
 
         Testcase -> [TokenType::TESTCASE];
 
-        Teststeps -> Teststep
-        {error:"Teststeps body_"}
-        | Teststep Teststeps
-        {error:"Teststeps body_ 2"};
+        Teststeps ->Teststep | Teststep Teststeps;
 
-        Teststep -> navigate Expression
-        {error:"Expected syntax ' navigate \"url\" '"}
+        Teststep -> Navigate Expression
         {action:|ast,token_stack,tl_stack,errors| {
-            Driver::NAVIGATE(ast,token_stack,tl_stack,errors);
+            Driver::NAVIGATE(ast, token_stack, tl_stack, errors);
         }}
         |
-        click string
+        Click Expression
         {error:"Please check teststeps syntax"}
         {action:|ast,token_stack,tl_stack,errors| {
+            println!("checccccccccccccccccccccccccccccccck");
             Element::CLICK(ast,token_stack,tl_stack,errors);
         }}
         |
-        back
+        Back
         {error:"Please check teststeps syntax"}
         {action:|ast,token_stack,tl_stack,errors| {
             Navigation::BACK(ast,token_stack,tl_stack,errors);
         }}
         |
-        forward
+        Forward
         {action:|ast,token_stack,tl_stack,errors| {
             Navigation::FORWARD(ast,token_stack,tl_stack,errors);
         }}
         |
-        refresh
+        Refresh
         {action:|ast,token_stack,tl_stack,errors| {
             Navigation::REFRESH(ast,token_stack,tl_stack,errors);
         }}
         |
-        wait number
+        Wait Expression
         {action:|ast,token_stack,tl_stack,errors| {
             Timeouts::WAIT(ast,token_stack,tl_stack,errors);
         }}
         |
-        VAR_DECLARATION
-        |
-        assert Expression
-        ;
-
-        VAR_DECLARATION -> ident assign VAR_RHS
+        Ident Assign Expression
         {action:|ast,token_stack,tl_stack,errors| {
-                Custom::VAR_DECLARATION(ast,token_stack,tl_stack,errors);
+            Custom::VAR_DECLARATION(ast,token_stack,tl_stack,errors);
         }}
+        |
+        Assert Expression
         ;
 
-        VAR_RHS -> Expression | GETTER;
-
-        GETTER -> get attribute IDENT_OR_STRING from element IDENT_OR_STRING
+        Getter ->
+        Get Attribute Expression From Element Expression
         {action:|ast,token_stack,tl_stack,errors| {
                 Element::GET_ATTRIBUTE(ast,token_stack,tl_stack,errors);
         }}
         |
-        get current url
+        Get Current Url
         {action:|ast,token_stack,tl_stack,errors| {
                 Driver::GET_CURRENT_URL(ast,token_stack,tl_stack,errors);
         }}
         |
-        get title
+        Get Title
         {action:|ast,token_stack,tl_stack,errors| {
                 Driver::GET_TITLE(ast,token_stack,tl_stack,errors);
         }}
         ;
 
-        IDENT_OR_STRING -> ident | string;
-
         Expression  -> LiteralExpression
         | BinaryExpression
         | UnaryExpression
+        | Getter
         ;
 
         LiteralExpression ->
-        number
+        Number
         {action:|ast,token_stack,tl_stack,errors| {
             LiteralExpression::NUMBER(ast, token_stack, tl_stack, errors);
         }}
         |
-        string
+        String
         {action:|ast,token_stack,tl_stack,errors| {
             LiteralExpression::STRING(ast, token_stack, tl_stack, errors);
         }}
         |
-        ident
+        Ident
         {action:|ast,token_stack,tl_stack,errors| {
             LiteralExpression::IDENT(ast, token_stack, tl_stack, errors);
         }}
         |
-        true_
+        True
         {action:|ast,token_stack,tl_stack,errors| {
             LiteralExpression::BOOLEAN(ast, token_stack, tl_stack, errors);
         }}
         |
-        false_
+        False
         {action:|ast,token_stack,tl_stack,errors| {
             LiteralExpression::BOOLEAN(ast, token_stack, tl_stack, errors);
         }}
@@ -172,161 +165,167 @@ pub fn parser_slr(parser: &mut Parser) {
         UnaryExpression -> NegationExpression;
 
         NegationExpression ->
-        negation GroupedExpression
+        Negation GroupedExpression
         {action:|ast,token_stack,tl_stack,errors| {
             UnaryExpression::NEGATION(ast, token_stack, tl_stack, errors);
         }}
         ;
 
         GroupedExpression ->
-        left_paran Expression right_paran
+        Left_paran Expression Right_paran
         {action:|ast,token_stack,tl_stack,errors| {
             UnaryExpression::GROUPED(ast, token_stack, tl_stack, errors);
         }}
         ;
 
-        BinaryExpression -> ComparisionExpression
-        | ArthimaticExpression
-        | LogicalExpression
+        BinaryExpression ->
+        ComparisionExpression
+        |
+        ArthimaticExpression
+        |
+        LogicalExpression
         ;
 
         LogicalExpression ->
-        Expression and Expression
+        Expression And Expression
         {action:|ast,token_stack,tl_stack,errors| {
             BinaryExpression::AND(ast, token_stack, tl_stack, errors);
         }}
         |
-        Expression or Expression
+        Expression Or Expression
         {action:|ast,token_stack,tl_stack,errors| {
             BinaryExpression::OR(ast, token_stack, tl_stack, errors);
         }}
         ;
 
         ComparisionExpression ->
-        Expression equality Expression
-        {action:|ast,token_stack,tl_stack,errors| {
-            BinaryExpression::EQ(ast, token_stack, tl_stack, errors);
-        }}
-        |
-        Expression not_equal Expression
-        {action:|ast,token_stack,tl_stack,errors| {
-            BinaryExpression::NE(ast, token_stack, tl_stack, errors);
-        }}
-        |
-        Expression greater_than Expression
-        {action:|ast,token_stack,tl_stack,errors| {
-            BinaryExpression::GT(ast, token_stack, tl_stack, errors);
-        }}
-        |
-        Expression lesser_than Expression
-        {action:|ast,token_stack,tl_stack,errors| {
-            BinaryExpression::LT(ast, token_stack, tl_stack, errors);
-        }}
-        |
-        Expression greater_than_equal Expression
-        {action:|ast,token_stack,tl_stack,errors| {
-            BinaryExpression::GE(ast, token_stack, tl_stack, errors);
-        }}
-        |
-        Expression lesser_than_equal Expression
+        // Expression Equality Expression
+        // {action:|ast,token_stack,tl_stack,errors| {
+        //     BinaryExpression::EQ(ast, token_stack, tl_stack, errors);
+        // }}
+        // |
+        // Expression Not_equal Expression
+        // {action:|ast,token_stack,tl_stack,errors| {
+        //     BinaryExpression::NE(ast, token_stack, tl_stack, errors);
+        // }}
+        // |
+        // Expression Greater_than Expression
+        // {action:|ast,token_stack,tl_stack,errors| {
+        //     BinaryExpression::GT(ast, token_stack, tl_stack, errors);
+        // }}
+        // |
+        // Expression Lesser_than Expression
+        // {action:|ast,token_stack,tl_stack,errors| {
+        //     BinaryExpression::LT(ast, token_stack, tl_stack, errors);
+        // }}
+        // |
+        // Expression Greater_than_equal Expression
+        // {action:|ast,token_stack,tl_stack,errors| {
+        //     BinaryExpression::GE(ast, token_stack, tl_stack, errors);
+        // }}
+        // |
+        Expression Lesser_than_equal Expression
         {action:|ast,token_stack,tl_stack,errors| {
             BinaryExpression::LE(ast, token_stack, tl_stack, errors);
         }}
         ;
 
         ArthimaticExpression ->
-        Expression plus Expression
+        Expression Plus Expression
         {action:|ast,token_stack,tl_stack,errors| {
             BinaryExpression::ADD(ast, token_stack, tl_stack, errors);
         }}
-        |
-        Expression minus Expression
-        {action:|ast,token_stack,tl_stack,errors| {
-            BinaryExpression::SUB(ast, token_stack, tl_stack, errors);
-        }}
-        |
-        Expression Expression // special case where 1-1 here we need to number + number
-        {action:|ast,token_stack,tl_stack,errors| {
-            BinaryExpression::SPL_SUB(ast, token_stack, tl_stack, errors);
-        }}
-        |
-        Expression multiply Expression
-        {action:|ast,token_stack,tl_stack,errors| {
-            BinaryExpression::MUL(ast, token_stack, tl_stack, errors);
-        }}
-        |
-        Expression forward_slash Expression
-        {action:|ast,token_stack,tl_stack,errors| {
-            BinaryExpression::DIV(ast, token_stack, tl_stack, errors);
-        }}
-        |
-        Expression modulus Expression
-        {action:|ast,token_stack,tl_stack,errors| {
-            BinaryExpression::REM(ast, token_stack, tl_stack, errors);
-        }}
+        // |
+        // Expression Minus Expression
+        // {action:|ast,token_stack,tl_stack,errors| {
+        //     BinaryExpression::SUB(ast, token_stack, tl_stack, errors);
+        // }}
+        // |
+        // Expression Expression // special case where 1-1 here we need to number + number
+        // {action:|ast,token_stack,tl_stack,errors| {
+        //     BinaryExpression::SPL_SUB(ast, token_stack, tl_stack, errors);
+        // }}
+        // |
+        // Expression Multiply Expression
+        // {action:|ast,token_stack,tl_stack,errors| {
+        //     BinaryExpression::MUL(ast, token_stack, tl_stack, errors);
+        // }}
+        // |
+        // Expression Forward_slash Expression
+        // {action:|ast,token_stack,tl_stack,errors| {
+        //     BinaryExpression::DIV(ast, token_stack, tl_stack, errors);
+        // }}
+        // |
+        // Expression Modulus Expression
+        // {action:|ast,token_stack,tl_stack,errors| {
+        //     BinaryExpression::REM(ast, token_stack, tl_stack, errors);
+        // }}
         ;
 
-        //helpers
-        ATTRIBUTE -> indent | string;
-
-
         //Actions
-        navigate            -> [TokenType::NAVIGATE];
-        click               -> [TokenType::CLICK];
-        back                -> [TokenType::BACK];
-        forward             -> [TokenType::FORWARD];
-        refresh             -> [TokenType::REFRESH];
-        get                 -> [TokenType::GET];
-        wait                -> [TokenType::WAIT];
-        assert              -> [TokenType::ASSERT];
+        Navigate            -> [TokenType::NAVIGATE];
+        Click               -> [TokenType::CLICK];
+        Back                -> [TokenType::BACK];
+        Forward             -> [TokenType::FORWARD];
+        Refresh             -> [TokenType::REFRESH];
+        Get                 -> [TokenType::GET];
+        Wait                -> [TokenType::WAIT];
+        Assert              -> [TokenType::ASSERT];
 
         //Nouns
-        attribute           -> [TokenType::ATTRIBUTE];
-        element             -> [TokenType::ELEMENT];
-        url                 -> [TokenType::URL];
-        title               -> [TokenType::TITLE];
+        Attribute           -> [TokenType::ATTRIBUTE];
+        Element             -> [TokenType::ELEMENT];
+        Url                 -> [TokenType::URL];
+        Title               -> [TokenType::TITLE];
+        Var                 -> [TokenType::VAR];
 
         //Prepositions
-        from                -> [TokenType::FROM];
-        to                  -> [TokenType::TO];
+        From                -> [TokenType::FROM];
+        To                  -> [TokenType::TO];
 
         //Adjectives
-        current             -> [TokenType::CURRENT];
+        Current             -> [TokenType::CURRENT];
 
         //Operators
-        assign              -> [TokenType::ASSIGN_OP];
-        negation            -> [TokenType::NEGATION];
-        plus                -> [TokenType::PLUS];
-        minus               -> [TokenType::MINUS];
-        multiply            -> [TokenType::MULTIPLY];
-        forward_slash       -> [TokenType::FORWARDSLASH];
-        modulus             -> [TokenType::MODULUS];
-        equality            -> [TokenType::EQUALITY];
-        not_equal           -> [TokenType::NOT_EQUAL];
-        greater_than        -> [TokenType::GREATER_THAN];
-        lesser_than         -> [TokenType::LESSER_THAN];
-        greater_than_equal  -> [TokenType::GREATER_THAN_EQUAL_TO];
-        lesser_than_equal   -> [TokenType::LESSER_THAN_EQUAL_TO];
+        Assign              -> [TokenType::ASSIGN_OP];
+        Negation            -> [TokenType::NEGATION];
+        Plus                -> [TokenType::PLUS];
+        Minus               -> [TokenType::MINUS];
+        Multiply            -> [TokenType::MULTIPLY];
+        Forward_slash       -> [TokenType::FORWARDSLASH];
+        Modulus             -> [TokenType::MODULUS];
+        Equality            -> [TokenType::EQUALITY];
+        Not_equal           -> [TokenType::NOT_EQUAL];
+        Greater_than        -> [TokenType::GREATER_THAN];
+        Lesser_than         -> [TokenType::LESSER_THAN];
+        Greater_than_equal  -> [TokenType::GREATER_THAN_EQUAL_TO];
+        Lesser_than_equal   -> [TokenType::LESSER_THAN_EQUAL_TO];
 
         //Conjunctions
-        and                 -> [TokenType::AND];
-        or                  -> [TokenType::OR];
+        And                 -> [TokenType::AND];
+        Or                  -> [TokenType::OR];
 
         //chars
-        left_paran          -> [TokenType::LEFT_PARAN];
-        right_paran         -> [TokenType::RIGHT_PARAN];
+        Left_paran          -> [TokenType::LEFT_PARAN];
+        Right_paran         -> [TokenType::RIGHT_PARAN];
 
         //Inputs
-        string              -> [TokenType::STRING(d_string())];
-        ident               -> [TokenType::IDENTIFIER(d_string())];
-        number              -> [TokenType::NUMBER(d_num())];
+        String              -> [TokenType::STRING(d_string())];
+        Ident               -> [TokenType::IDENTIFIER(d_string())];
+        Number              -> [TokenType::NUMBER(d_num())];
 
         //Boolean
-        true_               -> [TokenType::TRUE];
-        false_              -> [TokenType::FALSE];
+        True               -> [TokenType::TRUE];
+        False              -> [TokenType::FALSE];
     );
     let mut lalr_parser = LR1_Parser::new(&grammar);
     lalr_parser.construct_LALR_Table();
+    // lalr_parser
+    //     .action
+    //     .keys()
+    //     .into_iter()
+    //     .for_each(|state| println!("state :{:?}", state.index));
+    // render(&lalr_parser);
     let mut errors: Vec<ParseError<Token>> = Vec::new();
     let mut ast: TestCase = TestCase::new();
     lalr_parser.parse(tt, &mut errors, &mut ast);

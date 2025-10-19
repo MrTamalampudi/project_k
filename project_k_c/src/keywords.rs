@@ -103,6 +103,7 @@ define_tokens!(
     ELEMENT,
     URL,
     TITLE,
+    VAR,
     //prepositions
     FROM,
     TO,

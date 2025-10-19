@@ -31,7 +31,7 @@ impl Location {
     }
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Copy)]
 pub struct Span {
     pub start: Location,
     pub end: Location,

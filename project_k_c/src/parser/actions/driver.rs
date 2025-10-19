@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use crate::ast::action::Action;
 use crate::ast::arguments::{Args, URL_ARGKEY};
-use crate::ast::expression::{ExpKind, Literal};
+use crate::ast::expression::{ExpKind, Expr, Literal};
 use crate::ast::getter::Getter;
 use crate::ast::primitives::Primitives;
 use crate::ast::testcase::TestCase;
@@ -11,7 +11,7 @@ use crate::class::WebDriverAction;
 use crate::class::{Class, Method, WEB_DRIVER};
 use crate::location::SpanTrait;
 use crate::parser::errors::{EXPECT_EXPR, EXPECT_STRING_EXPR, VALID_URL, VALID_URL_SHCEME};
-use crate::parser::translator_stack::TranslatorStack;
+use crate::parser::translator_stack::{TLVec, TranslatorStack};
 use crate::token::Token;
 use manodae::error::ParseError;
 use url::Url;
@@ -115,7 +115,13 @@ impl WebDriverAction for Driver {
             returns: Primitives::String,
         };
 
-        _tl_stack.push(TranslatorStack::Getter(getter));
+        let expr = Expr {
+            span,
+            kind: ExpKind::Getter(getter),
+            primitive: Primitives::String,
+        };
+
+        _tl_stack.push_expr(expr);
     }
 
     fn GET_PAGE_SOURCE(
@@ -135,14 +141,19 @@ impl WebDriverAction for Driver {
         let title_token = _token_stack.pop().unwrap();
         let get_token = _token_stack.pop().unwrap();
         let span = get_token.span.to(&title_token.span);
-        let teststep = Getter {
+        let getter = Getter {
             span,
             method: Method::WEB_DRIVER(WEB_DRIVER::GET_TITLE),
             arguments: HashMap::new(),
             returns: Primitives::String,
         };
+        let expr = Expr {
+            span,
+            kind: ExpKind::Getter(getter),
+            primitive: Primitives::String,
+        };
 
-        _tl_stack.push(TranslatorStack::Getter(teststep));
+        _tl_stack.push_expr(expr);
     }
     fn GET_WINDOW_HANDLE(
         _testcase: &mut TestCase,

@@ -3,8 +3,11 @@ use std::ops::BitXor;
 use crate::{
     ast::{
         expression::{BinOpKind, ExpKind, Expr, Literal, UnOp},
+        getter::Getter,
         identifier_value::IdentifierValue,
+        teststep::Teststep,
     },
+    class::{ElementEngine, Method, WebDriverEngine, ELEMENT, WEB_DRIVER},
     engine::{
         errors::{
             ExpressionEvalResult, EXPECT_LITERAL, INT_OVERFLOW, INVALID_ADD_OP, INVALID_AND_OP,
@@ -15,11 +18,12 @@ use crate::{
 };
 
 impl<'a> Engine<'a> {
-    pub fn eval(&self, expr: &Expr) -> ExpressionEvalResult {
+    pub async fn eval(&mut self, expr: &Expr) -> ExpressionEvalResult {
         match &expr.kind {
-            ExpKind::Binary(op, expr1, expr2) => self.binary_eval(op, expr1, expr2),
-            ExpKind::Unary(op, expr) => self.unary_eval(op, expr),
+            ExpKind::Binary(op, expr1, expr2) => self.binary_eval(op, expr1, expr2).await,
+            ExpKind::Unary(op, expr) => self.unary_eval(op, expr).await,
             ExpKind::Lit(_) => self.literal_eval(expr),
+            ExpKind::Getter(getter) => self.getter_eval(getter).await,
         }
     }
 
@@ -38,10 +42,15 @@ impl<'a> Engine<'a> {
         };
     }
 
-    fn binary_eval(&self, op: &BinOpKind, expr1: &Expr, expr2: &Expr) -> ExpressionEvalResult {
+    async fn binary_eval(
+        &mut self,
+        op: &BinOpKind,
+        expr1: &Expr,
+        expr2: &Expr,
+    ) -> ExpressionEvalResult {
         use crate::ast::expression::BinOpKind::*;
-        let expr1_value = self.eval(expr1)?;
-        let expr2_value = self.eval(expr2)?;
+        let expr1_value = Box::pin(self.eval(expr1)).await?;
+        let expr2_value = Box::pin(self.eval(expr2)).await?;
         match op {
             Add => match (expr1_value, expr2_value) {
                 (IdentifierValue::Number(num1), IdentifierValue::Number(num2)) => {
@@ -166,9 +175,9 @@ impl<'a> Engine<'a> {
         }
     }
 
-    fn unary_eval(&self, op: &UnOp, expr: &Expr) -> ExpressionEvalResult {
+    async fn unary_eval(&mut self, op: &UnOp, expr: &Expr) -> ExpressionEvalResult {
         if &UnOp::Not == op {
-            let value = self.eval(expr)?;
+            let value = Box::pin(self.eval(expr)).await?;
             if let IdentifierValue::Boolean(bool) = value {
                 return Ok(IdentifierValue::Boolean(Some(!bool.unwrap())));
             } else {
@@ -176,6 +185,27 @@ impl<'a> Engine<'a> {
             }
         } else {
             return Err(INVALID_UNARY_OP.to_string());
+        }
+    }
+
+    async fn getter_eval(&mut self, getter: &Getter) -> ExpressionEvalResult {
+        let a = match getter.method {
+            Method::ELEMENT(ELEMENT::GET_ATTRIBUTE) => {
+                self.GET_ATTRIBUTE(&Teststep::Getter(getter.clone())).await
+            }
+            Method::WEB_DRIVER(WEB_DRIVER::GET_CURRENT_URL) => {
+                self.GET_CURRENT_URL(&Teststep::Getter(getter.clone()))
+                    .await
+            }
+            Method::WEB_DRIVER(WEB_DRIVER::GET_TITLE) => {
+                self.GET_TITLE(&Teststep::Getter(getter.clone())).await
+            }
+            _ => return Err("".to_string()),
+        };
+
+        match a {
+            Ok(ok) => Ok(IdentifierValue::String(ok)),
+            Err(_) => Err("".to_string()),
         }
     }
 }
