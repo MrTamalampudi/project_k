@@ -3,8 +3,9 @@ use manodae::grammar;
 use manodae::grammar::Grammar;
 use manodae::parser::LR1_Parser;
 use manodae::production::Production;
-use manodae::render_table::render;
+// use manodae::render_table::render;
 use manodae::symbol::Symbol;
+use std::rc::Rc;
 use std::sync::Arc;
 
 use super::Parser;
@@ -104,7 +105,7 @@ pub fn parser_slr(parser: &mut Parser) {
             Timeouts::WAIT(ast,token_stack,tl_stack,errors);
         }}
         |
-        Ident Assign Expression
+        Var Ident Assign Expression
         {action:|ast,token_stack,tl_stack,errors| {
             Custom::VAR_DECLARATION(ast,token_stack,tl_stack,errors);
         }}
@@ -318,7 +319,7 @@ pub fn parser_slr(parser: &mut Parser) {
         True               -> [TokenType::TRUE];
         False              -> [TokenType::FALSE];
     );
-    let mut lalr_parser = LR1_Parser::new(&grammar);
+    let mut lalr_parser = LR1_Parser::new(grammar);
     lalr_parser.construct_LALR_Table();
     // lalr_parser
     //     .action

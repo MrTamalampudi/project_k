@@ -32,6 +32,7 @@ impl CustomAction for Custom {
     ) {
         _token_stack.pop(); //pop "assign" token
         let identifier_token = _token_stack.pop().unwrap();
+        _token_stack.pop(); //pop "var" token
         let identifier = match identifier_token.get_token_type() {
             TokenType::IDENTIFIER(ident) => ident,
             _ => return,
