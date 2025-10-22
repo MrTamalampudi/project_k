@@ -1,8 +1,10 @@
 use crate::ast::arguments::{Args, ATTRIBUTE_ARGKEY, LOCATOR_ARGKEY};
+use crate::ast::identifier_value::IdentifierValue;
 use crate::ast::teststep::GetMethod;
 use crate::ast::teststep::Teststep;
 use crate::class::{ElementEngine, Method, ELEMENT};
 use crate::engine::{Engine, EngineResult};
+use crate::parser::locator::LocatorStrategy;
 
 impl<'a> Engine<'a> {
     pub async fn element(&mut self, teststep: &Teststep) -> EngineResult<()> {
@@ -50,10 +52,22 @@ impl<'a> ElementEngine for Engine<'a> {
 
     async fn CLICK(&mut self, _body: &Teststep) -> EngineResult<()> {
         if let Teststep::Action(step) = _body {
-            if let Args::Locator(locator) = step.arguments.get(LOCATOR_ARGKEY).unwrap() {
-                let by = locator.to_by();
-                let element = self.driver.find(by).await?;
-                element.click().await?;
+            match step.arguments.get(LOCATOR_ARGKEY).unwrap() {
+                Args::Locator(locator) => {
+                    let by = locator.to_by();
+                    let element = self.driver.find(by).await?;
+                    element.click().await?;
+                }
+                Args::Expr(expr) => {
+                    let value = self.eval(expr).await.ok().unwrap();
+                    if let IdentifierValue::String(string) = value {
+                        let vv = LocatorStrategy::parse(&string.unwrap());
+                        let by = vv.to_by();
+                        let element = self.driver.find(by).await?;
+                        element.click().await?;
+                    }
+                }
+                _ => {}
             }
         }
         Ok(())

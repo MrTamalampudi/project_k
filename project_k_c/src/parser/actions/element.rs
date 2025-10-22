@@ -9,45 +9,42 @@ use crate::ast::testcase::TestCase;
 use crate::ast::teststep::Teststep;
 use crate::class::ELEMENT;
 use crate::class::{Class, ElementAction, Method};
-use crate::get_input_from_token_stack;
-use crate::location::Span;
 use crate::parser::errors::EXPECT_STRING_EXPR;
 use crate::parser::errorss::ActionError;
 use crate::parser::locator::LocatorStrategy;
 use crate::parser::translator_stack::{TLVec, TranslatorStack};
+use crate::pop_expr;
 use crate::token::Token;
-use crate::TokenType;
 use manodae::error::ParseError;
 
 pub struct Element {}
 
 impl ElementAction for Element {
+    // click expr
     fn CLICK(
         _testcase: &mut TestCase,
         _token_stack: &mut Vec<Token>,
         _tl_stack: &mut Vec<TranslatorStack>,
         _errors: &mut Vec<ParseError<Token>>,
     ) {
-        let locator_token = _token_stack.last();
-        let locator = LocatorStrategy::parse(get_input_from_token_stack!(locator_token));
-        let span = Span {
-            start: _token_stack.first().unwrap().get_start_location(),
-            end: _token_stack.last().unwrap().get_end_location(),
+        let click_token = _token_stack.pop().unwrap();
+        let expr = pop_expr!(_tl_stack.pop_expr(), _errors, click_token);
+        let span = click_token.span.to(&expr.span);
+
+        let locator_arg = if let ExpKind::Lit(Literal::String(locator)) = &expr.kind {
+            Args::Locator(LocatorStrategy::parse(locator))
+        } else {
+            Args::Expr(expr.clone())
         };
 
-        let test_step = Action::new(
+        let action = Action::new(
             span,
             Class::ELEMENT,
             Method::ELEMENT(ELEMENT::CLICK),
-            HashMap::from([(LOCATOR_ARGKEY, Args::Locator(locator))]),
+            HashMap::from([(LOCATOR_ARGKEY, locator_arg)]),
         );
 
-        _testcase.insert_teststep(Teststep::Action(test_step));
-
-        // clear token_stack after every use
-        // token stack is particular to production so it should be cleared
-        // before any production using
-        _token_stack.clear();
+        _testcase.insert_teststep(Teststep::Action(action));
     }
     fn CLEAR(
         _testcase: &mut TestCase,
