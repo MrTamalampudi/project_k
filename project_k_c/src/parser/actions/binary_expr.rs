@@ -78,21 +78,6 @@ impl BinaryExpressionAction for BinaryExpression {
     ) {
         BinaryExpression::common(_testcase, _token_stack, _tl_stack, _errors, BinOpKind::Sub);
     }
-    // expr expr
-    // for this production there is no proper token to report errors
-    // so we're getting last token from the stack and adding again to the stack
-    // just to meet the requirements
-    // for any production there be should atleast one token for source file path
-    fn SPL_SUB(
-        _testcase: &mut TestCase,
-        _token_stack: &mut Vec<Token>,
-        _tl_stack: &mut Vec<TranslatorStack>,
-        _errors: &mut Vec<ParseError<Token>>,
-    ) {
-        let token = _token_stack.last().unwrap().clone();
-        _token_stack.push(token);
-        BinaryExpression::common(_testcase, _token_stack, _tl_stack, _errors, BinOpKind::Sub);
-    }
     fn MUL(
         _testcase: &mut TestCase,
         _token_stack: &mut Vec<Token>,

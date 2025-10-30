@@ -273,7 +273,6 @@ class_macro!(
         BINARYEXPRESSION {
             ADD,
             SUB,
-            SPL_SUB,
             MUL,
             DIV,
             REM,
