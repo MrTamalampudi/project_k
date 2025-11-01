@@ -1,5 +1,6 @@
 use manodae::error::ParseError;
 
+use crate::ast::primitives::Primitives;
 use crate::parser::errors::MISMATCHED_TYPES;
 use crate::parser::errorss::ActionError;
 use crate::parser::translator_stack::TLVec;
@@ -49,7 +50,11 @@ impl BinaryExpression {
             return;
         }
 
-        let primitive = expr1.primitive.clone();
+        let primitive = if op.is_bool_op() {
+            Primitives::Boolean
+        } else {
+            expr1.primitive.clone()
+        };
         let kind = ExpKind::Binary(op, Box::new(expr1), Box::new(expr2));
         let expr = Expr {
             kind,
