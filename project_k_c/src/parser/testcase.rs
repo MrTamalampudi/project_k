@@ -4,9 +4,11 @@ use manodae::grammar::Grammar;
 use manodae::parser::LR1_Parser;
 use manodae::production::Production;
 // use manodae::render_table::render;
+use indexmap::{IndexMap, IndexSet};
 use manodae::symbol::Symbol;
 use std::rc::Rc;
 use std::sync::Arc;
+use std::time::Instant;
 
 use super::Parser;
 use crate::ast::testcase::TestCase;
@@ -80,7 +82,6 @@ pub fn parser_slr(parser: &mut Parser) {
         Click Expression
         {error:"Please check teststeps syntax"}
         {action:|ast,token_stack,tl_stack,errors| {
-            println!("checccccccccccccccccccccccccccccccck");
             Element::CLICK(ast,token_stack,tl_stack,errors);
         }}
         |
@@ -105,7 +106,7 @@ pub fn parser_slr(parser: &mut Parser) {
             Timeouts::WAIT(ast,token_stack,tl_stack,errors);
         }}
         |
-        Var Ident Assign Expression
+        Ident Assign Expression
         {action:|ast,token_stack,tl_stack,errors| {
             Custom::VAR_DECLARATION(ast,token_stack,tl_stack,errors);
         }}
@@ -163,7 +164,7 @@ pub fn parser_slr(parser: &mut Parser) {
         }}
         ;
 
-        UnaryExpression -> NegationExpression;
+        UnaryExpression -> NegationExpression | GroupedExpression;
 
         NegationExpression ->
         Negation GroupedExpression
@@ -200,31 +201,31 @@ pub fn parser_slr(parser: &mut Parser) {
         ;
 
         ComparisionExpression ->
-        // Expression Equality Expression
-        // {action:|ast,token_stack,tl_stack,errors| {
-        //     BinaryExpression::EQ(ast, token_stack, tl_stack, errors);
-        // }}
-        // |
-        // Expression Not_equal Expression
-        // {action:|ast,token_stack,tl_stack,errors| {
-        //     BinaryExpression::NE(ast, token_stack, tl_stack, errors);
-        // }}
-        // |
-        // Expression Greater_than Expression
-        // {action:|ast,token_stack,tl_stack,errors| {
-        //     BinaryExpression::GT(ast, token_stack, tl_stack, errors);
-        // }}
-        // |
-        // Expression Lesser_than Expression
-        // {action:|ast,token_stack,tl_stack,errors| {
-        //     BinaryExpression::LT(ast, token_stack, tl_stack, errors);
-        // }}
-        // |
-        // Expression Greater_than_equal Expression
-        // {action:|ast,token_stack,tl_stack,errors| {
-        //     BinaryExpression::GE(ast, token_stack, tl_stack, errors);
-        // }}
-        // |
+        Expression Equality Expression
+        {action:|ast,token_stack,tl_stack,errors| {
+            BinaryExpression::EQ(ast, token_stack, tl_stack, errors);
+        }}
+        |
+        Expression Not_equal Expression
+        {action:|ast,token_stack,tl_stack,errors| {
+            BinaryExpression::NE(ast, token_stack, tl_stack, errors);
+        }}
+        |
+        Expression Greater_than Expression
+        {action:|ast,token_stack,tl_stack,errors| {
+            BinaryExpression::GT(ast, token_stack, tl_stack, errors);
+        }}
+        |
+        Expression Lesser_than Expression
+        {action:|ast,token_stack,tl_stack,errors| {
+            BinaryExpression::LT(ast, token_stack, tl_stack, errors);
+        }}
+        |
+        Expression Greater_than_equal Expression
+        {action:|ast,token_stack,tl_stack,errors| {
+            BinaryExpression::GE(ast, token_stack, tl_stack, errors);
+        }}
+        |
         Expression Lesser_than_equal Expression
         {action:|ast,token_stack,tl_stack,errors| {
             BinaryExpression::LE(ast, token_stack, tl_stack, errors);
@@ -236,31 +237,26 @@ pub fn parser_slr(parser: &mut Parser) {
         {action:|ast,token_stack,tl_stack,errors| {
             BinaryExpression::ADD(ast, token_stack, tl_stack, errors);
         }}
-        // |
-        // Expression Minus Expression
-        // {action:|ast,token_stack,tl_stack,errors| {
-        //     BinaryExpression::SUB(ast, token_stack, tl_stack, errors);
-        // }}
-        // |
-        // Expression Expression // special case where 1-1 here we need to number + number
-        // {action:|ast,token_stack,tl_stack,errors| {
-        //     BinaryExpression::SPL_SUB(ast, token_stack, tl_stack, errors);
-        // }}
-        // |
-        // Expression Multiply Expression
-        // {action:|ast,token_stack,tl_stack,errors| {
-        //     BinaryExpression::MUL(ast, token_stack, tl_stack, errors);
-        // }}
-        // |
-        // Expression Forward_slash Expression
-        // {action:|ast,token_stack,tl_stack,errors| {
-        //     BinaryExpression::DIV(ast, token_stack, tl_stack, errors);
-        // }}
-        // |
-        // Expression Modulus Expression
-        // {action:|ast,token_stack,tl_stack,errors| {
-        //     BinaryExpression::REM(ast, token_stack, tl_stack, errors);
-        // }}
+        |
+        Expression Minus Expression
+        {action:|ast,token_stack,tl_stack,errors| {
+            BinaryExpression::SUB(ast, token_stack, tl_stack, errors);
+        }}
+        |
+        Expression Multiply Expression
+        {action:|ast,token_stack,tl_stack,errors| {
+            BinaryExpression::MUL(ast, token_stack, tl_stack, errors);
+        }}
+        |
+        Expression Forward_slash Expression
+        {action:|ast,token_stack,tl_stack,errors| {
+            BinaryExpression::DIV(ast, token_stack, tl_stack, errors);
+        }}
+        |
+        Expression Modulus Expression
+        {action:|ast,token_stack,tl_stack,errors| {
+            BinaryExpression::REM(ast, token_stack, tl_stack, errors);
+        }}
         ;
 
         //Actions
