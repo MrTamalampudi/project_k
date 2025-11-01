@@ -224,7 +224,7 @@ impl<'a> Tokenizer<'a> {
                     state.next();
                 } //consume second '/' of a comment
                 _ => {
-                    self.consume_operator_token(TokenType::FORWARDSLASH, state, tokens, 1);
+                    self.consume_operator_token(TokenType::FORWARDSLASH, state, tokens, 0);
                     return;
                 }
             }
