@@ -1,5 +1,7 @@
 use std::ops::BitXor;
 
+use thirtyfour::By;
+
 use crate::{
     ast::{
         expression::{BinOpKind, ExpKind, Expr, Literal, UnOp},
@@ -11,10 +13,12 @@ use crate::{
     engine::{
         errors::{
             ExpressionEvalResult, EXPECT_LITERAL, INT_OVERFLOW, INVALID_ADD_OP, INVALID_AND_OP,
-            INVALID_EQ_OP, INVALID_OR_OP, INVALID_SUB_OP, INVALID_UNARY_OP,
+            INVALID_EQ_OP, INVALID_INPUT, INVALID_LOC_EXPR, INVALID_OR_OP, INVALID_SUB_OP,
+            INVALID_UNARY_OP,
         },
         Engine,
     },
+    parser::locator::LocatorStrategy,
 };
 
 impl<'a> Engine<'a> {
@@ -207,5 +211,25 @@ impl<'a> Engine<'a> {
             Ok(ok) => Ok(IdentifierValue::String(ok)),
             Err(_) => Err("".to_string()),
         }
+    }
+
+    pub async fn locator_eval(&mut self, expr: &Expr) -> Result<By, String> {
+        let eval_value = self.eval(expr).await?;
+        if let IdentifierValue::String(locator_string) = eval_value {
+            if let Some(locator_string) = locator_string {
+                return Ok(LocatorStrategy::parse(&locator_string).to_by());
+            }
+        }
+        return Err(INVALID_LOC_EXPR.to_string());
+    }
+
+    pub async fn input_eval(&mut self, expr: &Expr) -> Result<String, String> {
+        let eval_value = self.eval(expr).await?;
+        return match eval_value {
+            IdentifierValue::Boolean(bool) => Ok(bool.unwrap().to_string()),
+            IdentifierValue::Number(num) => Ok(num.unwrap().to_string()),
+            IdentifierValue::String(str) => Ok(str.unwrap()),
+            _ => Err(INVALID_INPUT.to_string()),
+        };
     }
 }

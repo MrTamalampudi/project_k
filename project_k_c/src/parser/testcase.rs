@@ -112,6 +112,11 @@ pub fn parser_slr(parser: &mut Parser) {
         }}
         |
         Assert Expression
+        |
+        Enter Expression In Element Expression
+        {action:|ast,token_stack,tl_stack,errors| {
+            Element::SENDKEYS(ast,token_stack,tl_stack,errors);
+        }}
         ;
 
         Getter ->
@@ -268,6 +273,7 @@ pub fn parser_slr(parser: &mut Parser) {
         Get                 -> [TokenType::GET];
         Wait                -> [TokenType::WAIT];
         Assert              -> [TokenType::ASSERT];
+        Enter               -> [TokenType::ENTER];
 
         //Nouns
         Attribute           -> [TokenType::ATTRIBUTE];
@@ -279,6 +285,7 @@ pub fn parser_slr(parser: &mut Parser) {
         //Prepositions
         From                -> [TokenType::FROM];
         To                  -> [TokenType::TO];
+        In                  -> [TokenType::IN];
 
         //Adjectives
         Current             -> [TokenType::CURRENT];

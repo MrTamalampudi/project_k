@@ -7,6 +7,8 @@ pub const INT_OVERFLOW: &'static str = "Integer Overflowed";
 
 //***** Literal *****
 pub const EXPECT_LITERAL: &'static str = "Expected literal expression";
+pub const INVALID_LOC_EXPR: &'static str = "Invalid locator expression";
+pub const INVALID_INPUT: &'static str = "Invalid input";
 
 //***** Binary *****
 pub const INVALID_UNARY_OP: &'static str = "Invalid unary operation";

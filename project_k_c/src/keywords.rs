@@ -98,6 +98,7 @@ define_tokens!(
     GET,
     WAIT,
     ASSERT,
+    ENTER,
     //nouns
     ATTRIBUTE,
     ELEMENT,
@@ -107,6 +108,7 @@ define_tokens!(
     //prepositions
     FROM,
     TO,
+    IN,
     //adjective
     CURRENT,
     //conjunctions

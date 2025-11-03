@@ -1,8 +1,12 @@
-use crate::ast::arguments::{Args, ATTRIBUTE_ARGKEY, LOCATOR_ARGKEY};
+use thirtyfour::error::WebDriverError;
+use thirtyfour::By;
+
+use crate::ast::arguments::{Args, ATTRIBUTE_ARGKEY, EXPR_ARGKEY, LOCATOR_ARGKEY};
 use crate::ast::identifier_value::IdentifierValue;
 use crate::ast::teststep::GetMethod;
 use crate::ast::teststep::Teststep;
 use crate::class::{ElementEngine, Method, ELEMENT};
+use crate::engine::errors::{INVALID_INPUT, INVALID_LOC_EXPR};
 use crate::engine::{Engine, EngineResult};
 use crate::parser::locator::LocatorStrategy;
 
@@ -31,6 +35,31 @@ impl<'a> ElementEngine for Engine<'a> {
         Ok(())
     }
     async fn SENDKEYS(&mut self, _step: &Teststep) -> EngineResult<()> {
+        if let Teststep::Action(action) = _step {
+            let locator_arg = action.arguments.get(LOCATOR_ARGKEY).unwrap();
+            let input_arg = action.arguments.get(EXPR_ARGKEY).unwrap();
+            let locator = match locator_arg {
+                Args::Locator(loc) => loc.to_by(),
+                Args::Expr(expr) => match self.locator_eval(expr).await {
+                    Ok(loc) => loc,
+                    Err(err) => return Err(WebDriverError::FatalError(err)),
+                },
+                _ => return Err(WebDriverError::FatalError(INVALID_LOC_EXPR.to_string())),
+            };
+            let input = match input_arg {
+                Args::Number(num) => num.to_string(),
+                Args::String(str) => str.to_string(),
+                Args::Expr(expr) => match self.input_eval(expr).await {
+                    Ok(val) => val,
+                    Err(err) => return Err(WebDriverError::FatalError(err)),
+                },
+                _ => return Err(WebDriverError::FatalError(INVALID_INPUT.to_string())),
+            };
+
+            if let Ok(element) = self.driver.find(locator).await {
+                element.send_keys(input).await?
+            }
+        }
         Ok(())
     }
     async fn GET_ATTRIBUTE(&mut self, _body: &Teststep) -> EngineResult<Option<String>> {
