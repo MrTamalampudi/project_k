@@ -4,7 +4,7 @@ use thirtyfour::{error::WebDriverError, By};
 
 use crate::{
     ast::{
-        arguments::{Args, EXPR_ARGKEY, SECS_ARGKEY},
+        arguments::{Args, EXPR_ARGKEY},
         identifier_value::IdentifierValue,
         teststep::{GetMethod, Teststep},
     },

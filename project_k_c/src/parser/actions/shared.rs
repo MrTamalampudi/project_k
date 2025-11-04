@@ -5,7 +5,6 @@ use crate::{
         primitives::Primitives,
     },
     parser::{errors::EXPECT_STRING_EXPR, locator::LocatorStrategy},
-    token::Token,
 };
 
 pub struct Shared;

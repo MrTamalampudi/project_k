@@ -4,9 +4,7 @@ use manodae::grammar::Grammar;
 use manodae::parser::LR1_Parser;
 use manodae::production::Production;
 // use manodae::render_table::render;
-use indexmap::{IndexMap, IndexSet};
 use manodae::symbol::Symbol;
-use std::rc::Rc;
 use std::sync::Arc;
 use std::time::Instant;
 
@@ -14,7 +12,7 @@ use super::Parser;
 use crate::ast::testcase::TestCase;
 use crate::class::{
     BinaryExpressionAction, CustomAction, LiteralExpressionAction, NavigationAction,
-    TimeoutsAction, UnaryExpressionAction, ELEMENT,
+    TimeoutsAction, UnaryExpressionAction,
 };
 use crate::class::{ElementAction, WebDriverAction};
 use crate::engine::execute;

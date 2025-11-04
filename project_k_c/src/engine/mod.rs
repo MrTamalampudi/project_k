@@ -21,6 +21,7 @@ mod element;
 mod errors;
 mod expression;
 mod navigation;
+mod shared;
 mod timeouts;
 mod webdriver;
 

@@ -179,6 +179,7 @@ impl<'a> Engine<'a> {
         }
     }
 
+    #[inline]
     async fn unary_eval(&mut self, op: &UnOp, expr: &Expr) -> ExpressionEvalResult {
         if &UnOp::Not == op {
             let value = Box::pin(self.eval(expr)).await?;
@@ -192,6 +193,7 @@ impl<'a> Engine<'a> {
         }
     }
 
+    #[inline]
     async fn getter_eval(&mut self, getter: &Getter) -> ExpressionEvalResult {
         let a = match getter.method {
             Method::ELEMENT(ELEMENT::GET_ATTRIBUTE) => {
@@ -213,8 +215,9 @@ impl<'a> Engine<'a> {
         }
     }
 
+    #[inline]
     pub async fn locator_eval(&mut self, expr: &Expr) -> Result<By, String> {
-        let eval_value = self.eval(expr).await?;
+        let eval_value = Box::pin(self.eval(expr)).await?;
         if let IdentifierValue::String(locator_string) = eval_value {
             if let Some(locator_string) = locator_string {
                 return Ok(LocatorStrategy::parse(&locator_string).to_by());
@@ -223,11 +226,21 @@ impl<'a> Engine<'a> {
         return Err(INVALID_LOC_EXPR.to_string());
     }
 
+    #[inline]
     pub async fn input_eval(&mut self, expr: &Expr) -> Result<String, String> {
         let eval_value = self.eval(expr).await?;
         return match eval_value {
             IdentifierValue::Boolean(bool) => Ok(bool.unwrap().to_string()),
             IdentifierValue::Number(num) => Ok(num.unwrap().to_string()),
+            IdentifierValue::String(str) => Ok(str.unwrap()),
+            _ => Err(INVALID_INPUT.to_string()),
+        };
+    }
+
+    #[inline]
+    pub async fn attribute_eval(&mut self, expr: &Expr) -> Result<String, String> {
+        let eval_value = Box::pin(self.eval(expr)).await?;
+        return match eval_value {
             IdentifierValue::String(str) => Ok(str.unwrap()),
             _ => Err(INVALID_INPUT.to_string()),
         };
