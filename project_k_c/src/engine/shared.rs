@@ -3,6 +3,7 @@ use thirtyfour::{error::WebDriverError, By};
 use crate::{
     ast::{
         arguments::{Args, ATTRIBUTE_ARGKEY, EXPR_ARGKEY, LOCATOR_ARGKEY},
+        identifier_value::IdentifierValue,
         teststep::Teststep,
     },
     engine::{
@@ -63,5 +64,24 @@ impl<'a> Engine<'a> {
             },
             _ => return Err(WebDriverError::FatalError(INVALID_INPUT.to_string())),
         }
+    }
+
+    pub async fn get_boolean(&mut self, _step: &Teststep) -> EngineResult<bool> {
+        let input_arg = match _step {
+            Teststep::Action(action) => action.arguments.get(EXPR_ARGKEY).unwrap(),
+            Teststep::Getter(getter) => getter.arguments.get(EXPR_ARGKEY).unwrap(),
+            _ => return Err(WebDriverError::FatalError(INVALID_LOC_EXPR.to_string())),
+        };
+        if let Args::Expr(expr) = input_arg {
+            match self.eval(expr).await {
+                Ok(id_val) => match id_val {
+                    IdentifierValue::Boolean(bool) => return Ok(bool.unwrap()),
+                    _ => return Err(WebDriverError::FatalError(INVALID_LOC_EXPR.to_string())),
+                },
+                Err(err) => return Err(WebDriverError::FatalError(err)),
+            }
+        }
+
+        return Err(WebDriverError::FatalError(INVALID_LOC_EXPR.to_string()));
     }
 }

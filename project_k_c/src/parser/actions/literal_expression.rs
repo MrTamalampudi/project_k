@@ -8,7 +8,11 @@ use crate::{
     },
     class::LiteralExpressionAction,
     keywords::TokenType,
-    parser::{errors::VARIABLE_NOT_DEFINED, translator_stack::TranslatorStack},
+    parser::{
+        errors::{EXPECT_BOOL_EXPR, VARIABLE_NOT_DEFINED},
+        errorss::ActionError,
+        translator_stack::TranslatorStack,
+    },
     token::Token,
 };
 
@@ -54,18 +58,24 @@ impl LiteralExpressionAction for LiteralExpression {
         _errors: &mut Vec<ParseError<Token>>,
     ) {
         let boolean_token = _token_stack.pop().unwrap();
-        if let TokenType::STRING(bool) = boolean_token.get_token_type() {
-            if !(bool.as_str() == "true" || bool.as_str() == "false") {
+        let truth_value = match boolean_token.token_type {
+            TokenType::TRUE => true,
+            TokenType::FALSE => false,
+            _ => {
+                _errors.push_error(
+                    &boolean_token,
+                    &boolean_token.span,
+                    EXPECT_BOOL_EXPR.to_string(),
+                );
                 return;
             }
-            let truth_value = matches!(bool.as_str(), "true" | "1");
-            let expr_kind = ExpKind::Lit(LE::Boolean(truth_value));
-            _tl_stack.push(TranslatorStack::Expression(Expr {
-                primitive: Primitives::Boolean,
-                span: boolean_token.span,
-                kind: expr_kind,
-            }));
-        }
+        };
+        let expr_kind = ExpKind::Lit(LE::Boolean(truth_value));
+        _tl_stack.push(TranslatorStack::Expression(Expr {
+            primitive: Primitives::Boolean,
+            span: boolean_token.span,
+            kind: expr_kind,
+        }));
     }
     fn IDENT(
         _testcase: &mut TestCase,

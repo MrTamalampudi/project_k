@@ -78,6 +78,7 @@ impl<'a> Engine<'a> {
                         Method::ELEMENT(_) => self.element(teststep).await?,
                         Method::NAVIGATION(_) => self.navigation(teststep).await?,
                         Method::TIMEOUTS(_) => self.timeouts(teststep).await?,
+                        Method::CUSTOM(_) => self.custom(teststep).await?,
                         _ => {}
                     }
                     step.next.clone()
