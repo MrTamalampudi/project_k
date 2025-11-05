@@ -99,7 +99,6 @@ impl CustomAction for Custom {
                 start: assert_token.get_start_location(),
                 end: expr.span.end,
             },
-            crate::class::Class::CUSTOM,
             crate::class::Method::CUSTOM(CUSTOM::ASSERT),
             HashMap::from([(EXPR_ARGKEY, Args::Expr(expr))]),
         );

@@ -8,7 +8,7 @@ use crate::ast::primitives::Primitives;
 use crate::ast::testcase::TestCase;
 use crate::ast::teststep::Teststep;
 use crate::class::ELEMENT;
-use crate::class::{Class, ElementAction, Method};
+use crate::class::{ElementAction, Method};
 use crate::parser::actions::shared::Shared;
 use crate::parser::errors::EXPECT_STRING_EXPR;
 use crate::parser::errorss::ActionError;
@@ -42,7 +42,6 @@ impl ElementAction for Element {
 
         let action = Action::new(
             span,
-            Class::ELEMENT,
             Method::ELEMENT(ELEMENT::CLICK),
             HashMap::from([(LOCATOR_ARGKEY, locator_arg)]),
         );
@@ -95,7 +94,6 @@ impl ElementAction for Element {
 
         let action = Action::new(
             span,
-            Class::ELEMENT,
             Method::ELEMENT(ELEMENT::SENDKEYS),
             HashMap::from([(LOCATOR_ARGKEY, locator_arg), (EXPR_ARGKEY, text_arg)]),
         );

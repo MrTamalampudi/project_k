@@ -47,7 +47,6 @@ impl TimeoutsAction for Timeouts {
         let span = secs_token.span.to(&expr.span);
         let action = Action::new(
             span,
-            crate::class::Class::TIMEOUTS,
             Method::TIMEOUTS(TIMEOUTS::WAIT),
             HashMap::from([(EXPR_ARGKEY, Args::Expr(expr))]),
         );

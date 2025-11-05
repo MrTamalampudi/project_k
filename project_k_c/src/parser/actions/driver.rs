@@ -8,7 +8,7 @@ use crate::ast::primitives::Primitives;
 use crate::ast::testcase::TestCase;
 use crate::ast::teststep::Teststep;
 use crate::class::WebDriverAction;
-use crate::class::{Class, Method, WEB_DRIVER};
+use crate::class::{Method, WEB_DRIVER};
 use crate::location::SpanTrait;
 use crate::parser::errors::{EXPECT_EXPR, EXPECT_STRING_EXPR, VALID_URL, VALID_URL_SHCEME};
 use crate::parser::translator_stack::{TLVec, TranslatorStack};
@@ -64,12 +64,7 @@ impl WebDriverAction for Driver {
         let span = navigate_token.span.to(&url_expr.span);
         let arguments = HashMap::from([(URL_ARGKEY, Args::Expr(url_expr))]);
 
-        let test_step = Action::new(
-            span,
-            Class::WEB_DRIVER,
-            Method::WEB_DRIVER(WEB_DRIVER::NAVIGATE),
-            arguments,
-        );
+        let test_step = Action::new(span, Method::WEB_DRIVER(WEB_DRIVER::NAVIGATE), arguments);
 
         _testcase.insert_teststep(Teststep::Action(test_step));
     }
@@ -83,7 +78,6 @@ impl WebDriverAction for Driver {
         let close_token = _token_stack.pop().unwrap();
         let teststep = Action::new(
             close_token.span,
-            Class::WEB_DRIVER,
             Method::WEB_DRIVER(WEB_DRIVER::CLOSE),
             HashMap::new(),
         );

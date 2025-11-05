@@ -5,7 +5,7 @@ use crate::{
         arguments::Args,
         teststep::{GetMethod, Next, Teststep},
     },
-    class::{Class, Method},
+    class::Method,
     location::{Span, SpanTrait},
 };
 
@@ -13,22 +13,15 @@ use crate::{
 #[allow(unused)]
 pub struct Action {
     pub span: Span,
-    pub class: Class,
     pub method: Method,
     pub arguments: HashMap<&'static str, Args>,
     pub next: Option<Rc<RefCell<Teststep>>>,
 }
 
 impl Action {
-    pub fn new(
-        span: Span,
-        class: Class,
-        method: Method,
-        arguments: HashMap<&'static str, Args>,
-    ) -> Action {
+    pub fn new(span: Span, method: Method, arguments: HashMap<&'static str, Args>) -> Action {
         Action {
             span,
-            class,
             method,
             arguments,
             next: None,

@@ -45,10 +45,6 @@ macro_rules! class_macro {
             }
         ),+
     ) => {
-        #[derive(Debug, Clone, PartialEq)]
-        pub enum Class {
-            $($class),+
-        }
 
         $(
             #[derive(Debug, Clone, PartialEq)]
