@@ -3,14 +3,13 @@
 use crate::{
     ast::{action::Action, expression::Expr, teststep::GetMethod},
     class::Method,
-    location::Location,
+    location::{Location, Span},
 };
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct IfStmt {
-    pub start: Location,
-    pub end: Location,
-    pub test: Expr,
+    pub span: Span,
+    pub condition: Expr,
     pub consequent: Vec<Action>,
     pub alternate: AlternateStatement,
     pub method: Method,
