@@ -76,12 +76,12 @@ impl WebDriverAction for Driver {
         _errors: &mut Vec<ParseError<Token>>,
     ) -> () {
         let close_token = _token_stack.pop().unwrap();
-        let teststep = Action::new(
+        let action = Action::new(
             close_token.span,
             Method::WEB_DRIVER(WEB_DRIVER::CLOSE),
             HashMap::new(),
         );
-        _tl_stack.push(TranslatorStack::TestStep(teststep));
+        _testcase.insert_teststep(Teststep::Action(action));
     }
 
     fn GET_CURRENT_URL(

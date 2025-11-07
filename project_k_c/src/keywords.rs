@@ -99,6 +99,7 @@ define_tokens!(
     WAIT,
     ASSERT,
     ENTER,
+    CLOSE,
     //nouns
     ATTRIBUTE,
     ELEMENT,

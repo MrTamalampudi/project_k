@@ -76,6 +76,10 @@ pub fn parser_slr(parser: &mut Parser) {
         {action:|ast,token_stack,tl_stack,errors| {
             Driver::NAVIGATE(ast, token_stack, tl_stack, errors);
         }}
+        |Close
+        {action:|ast,token_stack,tl_stack,errors| {
+            Driver::CLOSE(ast, token_stack, tl_stack, errors);
+        }}
         |
         Click Expression
         {error:"Please check teststeps syntax"}
@@ -110,6 +114,9 @@ pub fn parser_slr(parser: &mut Parser) {
         }}
         |
         Assert Expression
+        {action:|ast,token_stack,tl_stack,errors| {
+            Custom::ASSERT(ast,token_stack,tl_stack,errors);
+        }}
         |
         Enter Expression In Element Expression
         {action:|ast,token_stack,tl_stack,errors| {
@@ -272,6 +279,7 @@ pub fn parser_slr(parser: &mut Parser) {
         Wait                -> [TokenType::WAIT];
         Assert              -> [TokenType::ASSERT];
         Enter               -> [TokenType::ENTER];
+        Close               -> [TokenType::CLOSE];
 
         //Nouns
         Attribute           -> [TokenType::ATTRIBUTE];
