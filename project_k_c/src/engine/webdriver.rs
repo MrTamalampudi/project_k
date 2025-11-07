@@ -17,9 +17,6 @@ impl<'a> Engine<'a> {
                 WEB_DRIVER::NAVIGATE => {
                     let _ = self.NAVIGATE(teststep).await?;
                 }
-                WEB_DRIVER::FIND_ELEMENT => {
-                    let _ = self.FIND_ELEMENT(teststep).await?;
-                }
                 WEB_DRIVER::GET_CURRENT_URL => {
                     let _ = self.GET_CURRENT_URL(teststep).await?;
                 }
@@ -63,9 +60,7 @@ impl<'a> WebDriverEngine for Engine<'a> {
         info!("closed browser");
         Ok(())
     }
-    async fn FIND_ELEMENT(&mut self, _body: &Teststep) -> EngineResult<()> {
-        Ok(())
-    }
+
     async fn GET_CURRENT_URL(&mut self, _body: &Teststep) -> EngineResult<Option<String>> {
         let url = self.driver.current_url().await?;
         Ok(Some(url.to_string()))

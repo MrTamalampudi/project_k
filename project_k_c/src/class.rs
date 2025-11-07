@@ -160,7 +160,6 @@ class_macro!(
             GET_PAGE_SOURCE,
             GET_WINDOW_HANDLE,
             CLOSE,
-            FIND_ELEMENT,
             NAVIGATE
         }
     },
@@ -280,13 +279,6 @@ class_macro!(
             NE,
             GE,
             GT
-        }
-    },
-    {
-        action:HelpersAction,
-        engine:HelpersEngine,
-        HELPERS {
-            ATTRIBUTE
         }
     }
 );

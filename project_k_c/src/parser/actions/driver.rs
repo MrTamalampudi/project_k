@@ -84,14 +84,6 @@ impl WebDriverAction for Driver {
         _tl_stack.push(TranslatorStack::TestStep(teststep));
     }
 
-    fn FIND_ELEMENT(
-        _testcase: &mut TestCase,
-        _token_stack: &mut Vec<Token>,
-        _tl_stack: &mut Vec<TranslatorStack>,
-        _errors: &mut Vec<ParseError<Token>>,
-    ) -> () {
-    }
-
     fn GET_CURRENT_URL(
         _testcase: &mut TestCase,
         _token_stack: &mut Vec<Token>,
