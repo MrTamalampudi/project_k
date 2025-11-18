@@ -185,4 +185,12 @@ impl ElementAction for Element {
 
         _tl_stack.push_expr(expr);
     }
+
+    fn IS_DISPLAYED(
+        _testcase: &mut TestCase,
+        _token_stack: &mut Vec<Token>,
+        _tl_stack: &mut Vec<TranslatorStack>,
+        _errors: &mut Vec<ParseError<Token>>,
+    ) {
+    }
 }

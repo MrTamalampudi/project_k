@@ -14,6 +14,9 @@ impl<'a> Engine<'a> {
                 ELEMENT::GET_ATTRIBUTE => {
                     self.GET_ATTRIBUTE(teststep).await?;
                 }
+                ELEMENT::IS_DISPLAYED => {
+                    self.IS_DISPLAYED(teststep).await?;
+                }
             };
         };
         Ok(())
@@ -53,5 +56,8 @@ impl<'a> ElementEngine for Engine<'a> {
             element.click().await?;
         }
         Ok(())
+    }
+    async fn IS_DISPLAYED(&mut self, _step: &Teststep) -> EngineResult<Option<bool>> {
+        Ok(Some(true))
     }
 }

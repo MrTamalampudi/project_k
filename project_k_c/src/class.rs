@@ -118,7 +118,7 @@ class_macro!(
                 engine:{
                     returns: Option<String>
                 }
-            }
+            },
             // GET_ACCESSBILE_NAME,
             // GET_ARIA_ROLE,
             // GET_CSS_VALUE,
@@ -127,7 +127,11 @@ class_macro!(
             // GET_SIZE,
             // GET_TAG_NAME,
             // GET_TEXT,
-            // IS_DISPLAYED,
+            IS_DISPLAYED {
+                engine:{
+                    returns: Option<bool>
+                }
+            }
             // IS_ENABLED,
             // IS_SELECTED
         }
