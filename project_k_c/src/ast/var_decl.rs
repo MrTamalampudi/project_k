@@ -3,7 +3,6 @@ use std::{cell::RefCell, rc::Rc};
 use crate::{
     ast::{
         expression::Expr,
-        getter::Getter,
         primitives::Primitives,
         teststep::{GetMethod, Next, Teststep},
     },

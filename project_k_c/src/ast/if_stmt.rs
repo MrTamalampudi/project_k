@@ -10,8 +10,8 @@ use crate::{
 pub struct IfStmt {
     pub span: Span,
     pub condition: Expr,
-    pub consequent: Vec<Action>,
-    pub alternate: AlternateStatement,
+    pub body: Vec<Action>,
+    pub or_else: AlternateStatement,
     pub method: Method,
 }
 

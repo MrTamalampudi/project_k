@@ -1,6 +1,5 @@
 use std::{
     net::{Ipv4Addr, SocketAddrV4, TcpListener},
-    ops::Deref,
     panic,
     path::PathBuf,
     process::Command,
@@ -67,27 +66,21 @@ impl<'a> Engine<'a> {
     }
 
     async fn start(&mut self) -> EngineResult<()> {
-        while let Some(step_ref_cell) = self.testcase.test_step.take() {
-            let teststep = step_ref_cell.borrow();
-            let teststep = teststep.deref();
-
-            self.testcase.test_step = match teststep {
-                Teststep::Action(step) => {
-                    match step.method {
-                        Method::WEB_DRIVER(_) => self.webdriver(teststep).await?,
-                        Method::ELEMENT(_) => self.element(teststep).await?,
-                        Method::NAVIGATION(_) => self.navigation(teststep).await?,
-                        Method::TIMEOUTS(_) => self.timeouts(teststep).await?,
-                        Method::CUSTOM(_) => self.custom(teststep).await?,
-                        _ => {}
-                    }
-                    step.next.clone()
+        let teststeps = self.testcase.body.clone();
+        for teststep in teststeps.iter() {
+            match teststep {
+                Teststep::Action(step) => match step.method {
+                    Method::WEB_DRIVER(_) => self.webdriver(&teststep).await?,
+                    Method::ELEMENT(_) => self.element(&teststep).await?,
+                    Method::NAVIGATION(_) => self.navigation(&teststep).await?,
+                    Method::TIMEOUTS(_) => self.timeouts(&teststep).await?,
+                    Method::CUSTOM(_) => self.custom(&teststep).await?,
+                    _ => {}
+                },
+                Teststep::VarDecl(_) => {
+                    self.VAR_DECLARATION(&teststep).await?;
                 }
-                Teststep::VarDecl(step) => {
-                    self.VAR_DECLARATION(teststep).await?;
-                    step.next.clone()
-                }
-                _ => None,
+                _ => {}
             };
         }
         Ok(())
