@@ -6,8 +6,8 @@ use crate::{
         teststep::{GetMethod, Next, Teststep},
     },
     class::Method,
-    location::{Span, SpanTrait},
 };
+use span::{Span, SpanTrait};
 
 #[derive(Debug, Clone, PartialEq)]
 #[allow(unused)]

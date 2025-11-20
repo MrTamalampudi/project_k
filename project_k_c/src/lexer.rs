@@ -1,7 +1,7 @@
 use crate::keywords::TokenType;
-use crate::location::Location;
 use crate::token::Token;
 use crate::CompilationContext;
+use span::Location;
 use std::iter::Peekable;
 use std::str::Chars;
 use std::{fmt, path::PathBuf};

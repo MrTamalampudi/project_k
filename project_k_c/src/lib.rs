@@ -17,7 +17,6 @@ pub mod enums;
 pub mod error_handler;
 pub mod keywords;
 pub mod lexer;
-pub mod location;
 pub mod parser;
 pub mod program;
 pub mod token;

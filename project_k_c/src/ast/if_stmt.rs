@@ -3,8 +3,8 @@
 use crate::{
     ast::{action::Action, expression::Expr, teststep::GetMethod},
     class::Method,
-    location::{Location, Span},
 };
+use span::{Location, Span};
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct IfStmt {

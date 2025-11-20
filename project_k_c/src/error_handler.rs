@@ -1,9 +1,7 @@
 use manodae::error::ParseError;
 
-use crate::{
-    location::{Location, Span},
-    token::Token,
-};
+use crate::token::Token;
+use span::{Location, Span};
 
 #[derive(Debug, Clone)]
 pub struct ErrorInfo {

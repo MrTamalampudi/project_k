@@ -1,6 +1,7 @@
 use manodae::error::ParseError;
 
-use crate::{location::Span, token::Token};
+use crate::token::Token;
+use span::Span;
 
 pub trait ActionError {
     fn push_error(&mut self, token: &Token, span: &Span, message: String);

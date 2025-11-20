@@ -3,8 +3,8 @@ use std::collections::HashMap;
 use crate::{
     ast::{arguments::Args, primitives::Primitives, teststep::GetMethod},
     class::Method,
-    location::{Span, SpanTrait},
 };
+use span::{Span, SpanTrait};
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Getter {

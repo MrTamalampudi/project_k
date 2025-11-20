@@ -1,8 +1,9 @@
 use crate::{
     ast::{action::Action, expression::Expr, var_decl::VarDecl},
-    location::{Span, SpanTrait},
     parser::errors::EXPECT_EXPR,
 };
+
+use span::{Span, SpanTrait};
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum TranslatorStack {

@@ -1,7 +1,5 @@
-use crate::{
-    keywords::TokenType,
-    location::{Location, Span},
-};
+use crate::keywords::TokenType;
+use span::{Location, Span};
 
 #[derive(Debug, Clone, PartialEq)]
 #[allow(unused)]

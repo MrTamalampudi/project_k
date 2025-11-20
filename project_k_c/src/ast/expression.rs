@@ -1,9 +1,7 @@
 #![allow(non_camel_case_types, unused)]
 
-use crate::{
-    ast::{getter::Getter, primitives::Primitives},
-    location::{Span, SpanTrait},
-};
+use crate::ast::{getter::Getter, primitives::Primitives};
+use span::{Span, SpanTrait};
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum Literal {

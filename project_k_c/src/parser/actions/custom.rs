@@ -9,8 +9,6 @@ use crate::ast::var_decl::VarDecl;
 use crate::class::CustomAction;
 use crate::class::CUSTOM;
 use crate::keywords::TokenType;
-use crate::location::Span;
-use crate::location::SpanTrait;
 use crate::parser::errors::EXPECT_BOOL_EXPR;
 use crate::parser::errors::MISMATCHED_TYPES;
 use crate::parser::errorss::ActionError;
@@ -18,6 +16,8 @@ use crate::parser::translator_stack::TLVec;
 use crate::parser::translator_stack::TranslatorStack;
 use crate::token::Token;
 use manodae::error::ParseError;
+use span::Span;
+use span::SpanTrait;
 
 pub struct Custom {}
 

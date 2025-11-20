@@ -6,10 +6,10 @@ use crate::ast::teststep::Teststep;
 use crate::class::Method;
 use crate::class::NavigationAction;
 use crate::class::NAVIGATION;
-use crate::location::Span;
 use crate::parser::translator_stack::TranslatorStack;
 use crate::token::Token;
 use manodae::error::ParseError;
+use span::Span;
 
 pub struct Navigation {}
 

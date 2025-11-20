@@ -7,8 +7,8 @@ use crate::{
         teststep::{GetMethod, Next, Teststep},
     },
     class::{Method, CUSTOM},
-    location::{Span, SpanTrait},
 };
+use span::{Span, SpanTrait};
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct VarDecl {

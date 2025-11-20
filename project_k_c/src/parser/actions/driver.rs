@@ -9,11 +9,11 @@ use crate::ast::testcase::TestCase;
 use crate::ast::teststep::Teststep;
 use crate::class::WebDriverAction;
 use crate::class::{Method, WEB_DRIVER};
-use crate::location::SpanTrait;
 use crate::parser::errors::{EXPECT_EXPR, EXPECT_STRING_EXPR, VALID_URL, VALID_URL_SHCEME};
 use crate::parser::translator_stack::{TLVec, TranslatorStack};
 use crate::token::Token;
 use manodae::error::ParseError;
+use span::SpanTrait;
 use url::Url;
 
 pub struct Driver {}
