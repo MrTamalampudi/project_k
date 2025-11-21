@@ -3,9 +3,10 @@ use crate::{
     parser::errors::EXPECT_EXPR,
 };
 
-use span::{Span, SpanTrait};
+use span::{Span, SpanData};
+use span_macro::Span;
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Span)]
 pub enum TranslatorStack {
     TestStep(Action),
     VarDecl(VarDecl),
@@ -18,17 +19,6 @@ impl TranslatorStack {
             Ok(expr.clone())
         } else {
             Err((EXPECT_EXPR.to_string(), self.get_span()))
-        }
-    }
-}
-
-impl SpanTrait for TranslatorStack {
-    fn get_span(&self) -> Span {
-        use TranslatorStack::*;
-        match self {
-            TestStep(teststep) => teststep.get_span(),
-            Expression(expr) => expr.get_span(),
-            VarDecl(var) => var.get_span(),
         }
     }
 }

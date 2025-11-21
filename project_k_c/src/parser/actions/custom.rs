@@ -17,7 +17,7 @@ use crate::parser::translator_stack::TranslatorStack;
 use crate::token::Token;
 use manodae::error::ParseError;
 use span::Span;
-use span::SpanTrait;
+use span::SpanData;
 
 pub struct Custom {}
 

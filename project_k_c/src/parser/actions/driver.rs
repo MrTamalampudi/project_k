@@ -13,7 +13,7 @@ use crate::parser::errors::{EXPECT_EXPR, EXPECT_STRING_EXPR, VALID_URL, VALID_UR
 use crate::parser::translator_stack::{TLVec, TranslatorStack};
 use crate::token::Token;
 use manodae::error::ParseError;
-use span::SpanTrait;
+use span::SpanData;
 use url::Url;
 
 pub struct Driver {}

@@ -1,9 +1,16 @@
 use std::{cell::RefCell, rc::Rc};
 
+use span::Span;
+
 use crate::{
     ast::{action::Action, getter::Getter, if_stmt::IfStmt, var_decl::VarDecl},
     class::Method,
 };
+
+pub struct Body {
+    pub span: Span,
+    pub teststeps: Vec<Teststep>,
+}
 
 #[derive(Debug, Clone, PartialEq)]
 #[allow(non_camel_case_types)]

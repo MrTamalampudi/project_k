@@ -7,9 +7,10 @@ use crate::{
     },
     class::Method,
 };
-use span::{Span, SpanTrait};
+use span::{Span, SpanData};
+use span_macro::Span;
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Span)]
 #[allow(unused)]
 pub struct Action {
     pub span: Span,
@@ -41,11 +42,5 @@ impl Next for Action {
     }
     fn get_next(&self) -> Option<Rc<RefCell<Teststep>>> {
         self.next.clone()
-    }
-}
-
-impl SpanTrait for Action {
-    fn get_span(&self) -> Span {
-        self.span.clone()
     }
 }

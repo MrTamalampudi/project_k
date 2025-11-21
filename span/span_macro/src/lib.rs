@@ -9,7 +9,7 @@ const UNION: &'static str = "Union Data type is not supported";
 type MacroResult = Result<proc_macro2::TokenStream, &'static str>;
 
 #[proc_macro_derive(Span)]
-pub fn span_trait_derive(input: TokenStream) -> TokenStream {
+pub fn span_data_trait_derive(input: TokenStream) -> TokenStream {
     let d_input = parse_macro_input!(input as DeriveInput);
     let name = d_input.ident;
     let impl_ = match d_input.data {
@@ -33,7 +33,7 @@ fn span_trait_derive_struct(name: &Ident, input: &DataStruct) -> MacroResult {
         return Err(NO_SPAN_FIELD);
     };
     Ok(quote! {
-        impl SpanTrait for #name{
+        impl SpanData for #name{
             fn get_span(&self) -> Span {
                 self.span.clone()
             }
@@ -50,7 +50,7 @@ fn span_trait_derive_enum(name: &Ident, _enum: &DataEnum) -> MacroResult {
     }
 
     Ok(quote! {
-        impl SpanTrait for #name{
+        impl SpanData for #name{
             fn get_span(&self) -> Span {
                 match self {
                     #match_arms

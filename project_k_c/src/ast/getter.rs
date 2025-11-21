@@ -4,9 +4,10 @@ use crate::{
     ast::{arguments::Args, primitives::Primitives, teststep::GetMethod},
     class::Method,
 };
-use span::{Span, SpanTrait};
+use span::{Span, SpanData};
+use span_macro::Span;
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Span)]
 pub struct Getter {
     pub span: Span,
     pub method: Method,
@@ -17,11 +18,5 @@ pub struct Getter {
 impl GetMethod for Getter {
     fn get_method(&self) -> Method {
         self.method.clone()
-    }
-}
-
-impl SpanTrait for Getter {
-    fn get_span(&self) -> Span {
-        self.span.clone()
     }
 }

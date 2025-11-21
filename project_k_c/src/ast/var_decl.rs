@@ -8,9 +8,10 @@ use crate::{
     },
     class::{Method, CUSTOM},
 };
-use span::{Span, SpanTrait};
+use span::{Span, SpanData};
+use span_macro::Span;
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Span)]
 pub struct VarDecl {
     pub name: String,
     pub type_: Primitives,
@@ -45,11 +46,5 @@ impl Next for VarDecl {
     }
     fn get_next(&self) -> Option<Rc<RefCell<Teststep>>> {
         self.next.clone()
-    }
-}
-
-impl SpanTrait for VarDecl {
-    fn get_span(&self) -> Span {
-        self.span.clone()
     }
 }

@@ -1,7 +1,8 @@
 #![allow(non_camel_case_types, unused)]
 
 use crate::ast::{getter::Getter, primitives::Primitives};
-use span::{Span, SpanTrait};
+use span::{Span, SpanData};
+use span_macro::Span;
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum Literal {
@@ -11,7 +12,7 @@ pub enum Literal {
     Boolean(bool),
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Span)]
 pub struct Expr {
     pub kind: ExpKind,
     pub span: Span,
@@ -21,12 +22,6 @@ pub struct Expr {
 impl Expr {
     pub fn boolean(&self) -> bool {
         self.primitive == Primitives::Boolean
-    }
-}
-
-impl SpanTrait for Expr {
-    fn get_span(&self) -> Span {
-        self.span.clone()
     }
 }
 
