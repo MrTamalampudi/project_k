@@ -8,6 +8,7 @@ const UNION: &'static str = "Union Data type is not supported";
 
 type MacroResult = Result<proc_macro2::TokenStream, &'static str>;
 
+///Derive macro generating an impl of trait SpanData
 #[proc_macro_derive(Span)]
 pub fn span_data_trait_derive(input: TokenStream) -> TokenStream {
     let d_input = parse_macro_input!(input as DeriveInput);
