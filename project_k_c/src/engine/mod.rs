@@ -66,8 +66,8 @@ impl<'a> Engine<'a> {
     }
 
     async fn start(&mut self) -> EngineResult<()> {
-        let teststeps = self.testcase.body.clone();
-        for teststep in teststeps.iter() {
+        let body = self.testcase.body.clone();
+        for teststep in body.teststeps.iter() {
             match teststep {
                 Teststep::Action(step) => match step.method {
                     Method::WEB_DRIVER(_) => self.webdriver(&teststep).await?,

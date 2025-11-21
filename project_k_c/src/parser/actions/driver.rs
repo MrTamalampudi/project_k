@@ -66,7 +66,7 @@ impl WebDriverAction for Driver {
 
         let test_step = Action::new(span, Method::WEB_DRIVER(WEB_DRIVER::NAVIGATE), arguments);
 
-        _testcase.insert_teststep(Teststep::Action(test_step));
+        _tl_stack.push_step(Teststep::Action(test_step));
     }
 
     fn CLOSE(
@@ -81,7 +81,7 @@ impl WebDriverAction for Driver {
             Method::WEB_DRIVER(WEB_DRIVER::CLOSE),
             HashMap::new(),
         );
-        _testcase.insert_teststep(Teststep::Action(action));
+        _tl_stack.push_step(Teststep::Action(action));
     }
 
     fn GET_CURRENT_URL(

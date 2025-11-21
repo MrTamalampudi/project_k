@@ -46,7 +46,7 @@ impl ElementAction for Element {
             HashMap::from([(LOCATOR_ARGKEY, locator_arg)]),
         );
 
-        _testcase.insert_teststep(Teststep::Action(action));
+        _tl_stack.push_step(Teststep::Action(action));
     }
     fn CLEAR(
         _testcase: &mut TestCase,
@@ -98,7 +98,7 @@ impl ElementAction for Element {
             HashMap::from([(LOCATOR_ARGKEY, locator_arg), (EXPR_ARGKEY, text_arg)]),
         );
 
-        _testcase.insert_teststep(Teststep::Action(action));
+        _tl_stack.push_step(Teststep::Action(action));
     }
     fn SUBMIT(
         _testcase: &mut TestCase,

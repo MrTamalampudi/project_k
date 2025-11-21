@@ -2,17 +2,21 @@ use std::collections::HashMap;
 
 use crate::{
     ast::{
-        action::Action, identifier_value::IdentifierValue, teststep::Teststep, var_decl::VarDecl,
+        action::Action,
+        identifier_value::IdentifierValue,
+        teststep::{Body, Teststep},
+        var_decl::VarDecl,
     },
     enums::CapabilityValue,
 };
+use span::SpanData;
 
 #[derive(Debug, Clone, PartialEq)]
 #[allow(unused)]
 pub struct TestCase {
     capabilities: HashMap<String, CapabilityValue>,
     pub variables: HashMap<String, IdentifierValue>,
-    pub body: Vec<Teststep>,
+    pub body: Body,
 }
 
 impl TestCase {
@@ -20,7 +24,7 @@ impl TestCase {
         TestCase {
             capabilities: HashMap::new(),
             variables: HashMap::new(),
-            body: vec![],
+            body: Body::new(),
         }
     }
 
@@ -50,8 +54,8 @@ impl TestCase {
         }
     }
 
-    pub fn insert_teststep(&mut self, teststep: Teststep) {
-        self.body.push(teststep);
+    pub fn set_body(&mut self, body: Body) {
+        self.body = body;
     }
 
     pub fn get_teststeps(&self) -> &Vec<Action> {

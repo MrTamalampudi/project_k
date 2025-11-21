@@ -68,10 +68,8 @@ impl CustomAction for Custom {
             }
         }
 
-        _testcase.insert_teststep(Teststep::VarDecl(var_decl.clone()));
+        _tl_stack.push_step(Teststep::VarDecl(var_decl.clone()));
         _testcase.insert_variable(var_decl);
-        _tl_stack.clear();
-        _token_stack.clear();
     }
 
     //assert expr
@@ -102,6 +100,6 @@ impl CustomAction for Custom {
             crate::class::Method::CUSTOM(CUSTOM::ASSERT),
             HashMap::from([(EXPR_ARGKEY, Args::Expr(expr))]),
         );
-        _testcase.insert_teststep(Teststep::Action(teststep));
+        _tl_stack.push_step(Teststep::Action(teststep));
     }
 }

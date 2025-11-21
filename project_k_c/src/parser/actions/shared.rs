@@ -3,6 +3,8 @@ use crate::{
         arguments::Args,
         expression::{ExpKind, Expr, Literal},
         primitives::Primitives,
+        testcase::TestCase,
+        teststep::Body,
     },
     parser::{errors::EXPECT_STRING_EXPR, locator::LocatorStrategy},
 };
@@ -19,5 +21,9 @@ impl Shared {
         } else {
             Ok(Args::Expr(expr.clone()))
         }
+    }
+
+    pub fn set_body(testcase: &mut TestCase, body: Body) {
+        testcase.set_body(body);
     }
 }

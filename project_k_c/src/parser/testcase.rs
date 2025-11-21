@@ -66,9 +66,17 @@ pub fn parser_slr(parser: &mut Parser) {
     let d_string = || "".to_string();
     let d_num = || (1 as isize);
     let grammar: Grammar<TestCase, Token, TranslatorStack> = grammar!(
-        Start -> Testcase Teststeps {error:"Testing"};
+        Start -> Testcase Teststeps {error:"Testing"}
+        {action:|ast,token_stack,tl_stack,errors| {
+            Shared::set_body(ast, tl_stack.get_body());
+        }}
+        ;
 
-        Testcase -> [TokenType::TESTCASE];
+        Testcase -> [TokenType::TESTCASE]
+        {action:|ast,token_stack,tl_stack,errors| {
+            tl_stack.push(TranslatorStack::Body(Body::new()));
+        }}
+        ;
 
         Teststeps ->Teststep | Teststep Teststeps;
 

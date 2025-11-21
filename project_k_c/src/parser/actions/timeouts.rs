@@ -51,6 +51,6 @@ impl TimeoutsAction for Timeouts {
             HashMap::from([(EXPR_ARGKEY, Args::Expr(expr))]),
         );
 
-        _testcase.insert_teststep(Teststep::Action(action));
+        _tl_stack.push_step(Teststep::Action(action));
     }
 }

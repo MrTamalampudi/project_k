@@ -5,7 +5,7 @@ pub mod element;
 pub mod expression;
 pub mod literal_expression;
 pub mod navigation;
-mod shared;
+pub mod shared;
 pub mod timeouts;
 pub mod unary_expr;
 

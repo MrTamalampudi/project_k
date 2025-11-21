@@ -6,6 +6,7 @@ use crate::ast::teststep::Teststep;
 use crate::class::Method;
 use crate::class::NavigationAction;
 use crate::class::NAVIGATION;
+use crate::parser::translator_stack::TLVec;
 use crate::parser::translator_stack::TranslatorStack;
 use crate::token::Token;
 use manodae::error::ParseError;
@@ -26,7 +27,7 @@ impl NavigationAction for Navigation {
         };
         let test_step = Action::new(span, Method::NAVIGATION(NAVIGATION::BACK), HashMap::new());
 
-        _testcase.insert_teststep(Teststep::Action(test_step));
+        _tl_stack.push_step(Teststep::Action(test_step));
 
         //clear token_stack after every use
         _token_stack.clear();
@@ -47,7 +48,7 @@ impl NavigationAction for Navigation {
             HashMap::new(),
         );
 
-        _testcase.insert_teststep(Teststep::Action(test_step));
+        _tl_stack.push_step(Teststep::Action(test_step));
 
         //clear token_stack after every use
         _token_stack.clear();
@@ -68,7 +69,7 @@ impl NavigationAction for Navigation {
             HashMap::new(),
         );
 
-        _testcase.insert_teststep(Teststep::Action(test_step));
+        _tl_stack.push_step(Teststep::Action(test_step));
 
         //clear token_stack after every use
         _token_stack.clear();
