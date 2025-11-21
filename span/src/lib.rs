@@ -52,4 +52,5 @@ impl Span {
 
 pub trait SpanData {
     fn get_span(&self) -> Span;
+    fn set_span(&mut self, span: Span);
 }

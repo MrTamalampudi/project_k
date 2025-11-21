@@ -37,15 +37,22 @@ fn span_trait_derive_struct(name: &Ident, input: &DataStruct) -> MacroResult {
             fn get_span(&self) -> Span {
                 self.span.clone()
             }
+            fn set_span(&mut self,span:Span) {
+                self.span = span;
+            }
         }
     })
 }
 fn span_trait_derive_enum(name: &Ident, _enum: &DataEnum) -> MacroResult {
     let mut match_arms = quote! {};
+    let mut match_set_arms = quote! {};
     for variant in _enum.variants.iter() {
         let v_ident = &variant.ident;
         match_arms.extend(quote! {
             #name::#v_ident(arg) => arg.get_span(),
+        });
+        match_set_arms.extend(quote! {
+            #name::#v_ident(arg) => arg.set_span(span),
         });
     }
 
@@ -54,6 +61,11 @@ fn span_trait_derive_enum(name: &Ident, _enum: &DataEnum) -> MacroResult {
             fn get_span(&self) -> Span {
                 match self {
                     #match_arms
+                }
+            }
+            fn set_span(&mut self,span:Span){
+                match self {
+                    #match_set_arms
                 }
             }
         }
