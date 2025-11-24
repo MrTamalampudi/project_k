@@ -10,23 +10,26 @@ use std::time::Instant;
 
 use super::Parser;
 use crate::ast::testcase::TestCase;
+use crate::ast::teststep::Body;
 use crate::class::{
-    BinaryExpressionAction, CustomAction, LiteralExpressionAction, NavigationAction,
-    TimeoutsAction, UnaryExpressionAction,
+    BinaryExpressionAction, ConditionalStmtAction, CustomAction, LiteralExpressionAction,
+    NavigationAction, TimeoutsAction, UnaryExpressionAction,
 };
 use crate::class::{ElementAction, WebDriverAction};
 use crate::engine::execute;
 use crate::error_handler::{parse_error_to_error_info, ErrorInfo};
 use crate::keywords::TokenType;
 use crate::parser::actions::binary_expr::BinaryExpression;
+use crate::parser::actions::conditional::Conditional;
 use crate::parser::actions::custom::Custom;
 use crate::parser::actions::driver::Driver;
 use crate::parser::actions::element::Element;
 use crate::parser::actions::literal_expression::LiteralExpression;
 use crate::parser::actions::navigation::Navigation;
+use crate::parser::actions::shared::Shared;
 use crate::parser::actions::timeouts::Timeouts;
 use crate::parser::actions::unary_expr::UnaryExpression;
-use crate::parser::translator_stack::TranslatorStack;
+use crate::parser::translator_stack::{TLVec, TranslatorStack};
 use crate::program::Program;
 use crate::token::Token;
 
@@ -131,6 +134,39 @@ pub fn parser_slr(parser: &mut Parser) {
             Element::SENDKEYS(ast,token_stack,tl_stack,errors);
         }}
         ;
+
+        // ***** Conditional statement *****
+        IfStmt -> IfExpr
+        {action:|ast,token_stack,tl_stack,errors| {
+            Conditional::IF(ast,token_stack,tl_stack,errors);
+        }}
+        ;
+
+        ElseIfStmt -> ElseIfExpr
+        {action:|ast,token_stack,tl_stack,errors| {
+            Conditional::IF(ast,token_stack,tl_stack,errors);
+        }}
+        ;
+
+        ElseStmt -> ElseExpr
+        {action:|ast,token_stack,tl_stack,errors| {
+            Conditional::ELSE(ast,token_stack,tl_stack,errors);
+        }}
+        ;
+
+        IfExpr -> If Expression L_CurlyBrace Teststeps R_CurlyBrace
+        | If Expression L_CurlyBrace Teststeps R_CurlyBrace ElseIfExpr
+        | If Expression L_CurlyBrace Teststeps R_CurlyBrace ElseExpr
+        ;
+
+        ElseIfExpr-> Else If Expression L_CurlyBrace Teststeps R_CurlyBrace
+        | Else If Expression L_CurlyBrace Teststeps R_CurlyBrace ElseIfExpr
+        | Else If Expression L_CurlyBrace Teststeps R_CurlyBrace ElseExpr
+        ;
+
+        ElseExpr -> Else L_CurlyBrace Teststeps R_CurlyBrace;
+
+        // *****
 
         Getter ->
         Get Attribute Expression From Element Expression
@@ -322,10 +358,19 @@ pub fn parser_slr(parser: &mut Parser) {
         //Conjunctions
         And                 -> [TokenType::AND];
         Or                  -> [TokenType::OR];
+        If                  -> [TokenType::IF];
+        Else                -> [TokenType::ELSE];
 
         //chars
         Left_paran          -> [TokenType::LEFT_PARAN];
         Right_paran         -> [TokenType::RIGHT_PARAN];
+        L_CurlyBrace        -> [TokenType::L_CURLY_BRACE]
+        // L_CURLY_BRACE means starting of a block
+        // so we are keeping this action to add new body to tl_stack
+        {action:|ast,token_stack,tl_stack,errors| {
+            tl_stack.push(TranslatorStack::Body(Body::new()));
+        }};
+        R_CurlyBrace        -> [TokenType::R_CURLY_BRACE];
 
         //Inputs
         String              -> [TokenType::STRING(d_string())];

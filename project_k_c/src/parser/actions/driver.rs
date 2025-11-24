@@ -16,7 +16,7 @@ use manodae::error::ParseError;
 use span::SpanData;
 use url::Url;
 
-pub struct Driver {}
+pub struct Driver;
 
 impl WebDriverAction for Driver {
     fn NAVIGATE(

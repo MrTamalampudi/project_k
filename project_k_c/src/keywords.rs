@@ -115,6 +115,8 @@ define_tokens!(
     //conjunctions
     AND,
     OR,
+    IF,
+    ELSE,
     //operators
     ASSIGN_OP = '=',
     NEGATION = '!', //from here
@@ -125,6 +127,8 @@ define_tokens!(
     MODULUS = '%',
     LEFT_PARAN = '(',
     RIGHT_PARAN = ')',
+    L_CURLY_BRACE = '{',
+    R_CURLY_BRACE = '}',
     EQUALITY = "==",
     NOT_EQUAL = "!=",
     GREATER_THAN = '>',

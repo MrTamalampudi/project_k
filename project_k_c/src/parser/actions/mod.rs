@@ -1,4 +1,5 @@
 pub mod binary_expr;
+pub mod conditional;
 pub mod custom;
 pub mod driver;
 pub mod element;
