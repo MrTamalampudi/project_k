@@ -290,6 +290,7 @@ class_macro!(
         engine:ConditionalStmtEngine,
         CONDITIONAL_STMT {
             IF,
+            ELSE_IF,
             ELSE
         }
     }

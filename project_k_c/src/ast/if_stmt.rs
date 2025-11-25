@@ -16,7 +16,7 @@ pub struct IfStmt {
     pub span: Span,
     pub condition: Expr,
     pub body: Body,
-    pub or_else: Box<IfStmt>,
+    pub or_else: Box<Option<IfStmt>>,
     pub method: Method,
 }
 

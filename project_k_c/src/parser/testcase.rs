@@ -136,35 +136,27 @@ pub fn parser_slr(parser: &mut Parser) {
         ;
 
         // ***** Conditional statement *****
-        IfStmt -> IfExpr
+        IfStmt -> IfExpr | IfExpr ElseIfExpr | IfExpr ElseExpr ;
+
+        ElseIfStmt -> ElseIfExpr | ElseIfExpr ElseIfStmt | ElseIfExpr ElseExpr;
+
+        IfExpr -> If Expression L_CurlyBrace Teststeps R_CurlyBrace
         {action:|ast,token_stack,tl_stack,errors| {
             Conditional::IF(ast,token_stack,tl_stack,errors);
         }}
         ;
 
-        ElseIfStmt -> ElseIfExpr
+        ElseIfExpr-> Else If Expression L_CurlyBrace Teststeps R_CurlyBrace
         {action:|ast,token_stack,tl_stack,errors| {
-            Conditional::IF(ast,token_stack,tl_stack,errors);
+            Conditional::ELSE_IF(ast,token_stack,tl_stack,errors);
         }}
         ;
 
-        ElseStmt -> ElseExpr
+        ElseExpr -> Else L_CurlyBrace Teststeps R_CurlyBrace
         {action:|ast,token_stack,tl_stack,errors| {
             Conditional::ELSE(ast,token_stack,tl_stack,errors);
         }}
         ;
-
-        IfExpr -> If Expression L_CurlyBrace Teststeps R_CurlyBrace
-        | If Expression L_CurlyBrace Teststeps R_CurlyBrace ElseIfExpr
-        | If Expression L_CurlyBrace Teststeps R_CurlyBrace ElseExpr
-        ;
-
-        ElseIfExpr-> Else If Expression L_CurlyBrace Teststeps R_CurlyBrace
-        | Else If Expression L_CurlyBrace Teststeps R_CurlyBrace ElseIfExpr
-        | Else If Expression L_CurlyBrace Teststeps R_CurlyBrace ElseExpr
-        ;
-
-        ElseExpr -> Else L_CurlyBrace Teststeps R_CurlyBrace;
 
         // *****
 
