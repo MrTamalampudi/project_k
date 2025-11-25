@@ -11,10 +11,14 @@ use thirtyfour::{error::WebDriverError, DesiredCapabilities, WebDriver};
 use webdriver_manager::{chrome::ChromeManager, WebdriverManager};
 
 use crate::{
-    ast::{testcase::TestCase, teststep::Teststep},
+    ast::{
+        testcase::TestCase,
+        teststep::{Body, Teststep},
+    },
     class::{CustomEngine, Method},
 };
 
+mod conditional;
 mod custom;
 mod element;
 mod errors;
@@ -67,6 +71,12 @@ impl<'a> Engine<'a> {
 
     async fn start(&mut self) -> EngineResult<()> {
         let body = self.testcase.body.clone();
+        self.execute_body(body).await?;
+        Ok(())
+    }
+
+    #[inline]
+    async fn execute_body(&mut self, body: Body) -> EngineResult<()> {
         for teststep in body.teststeps.iter() {
             match teststep {
                 Teststep::Action(step) => match step.method {
@@ -77,9 +87,8 @@ impl<'a> Engine<'a> {
                     Method::CUSTOM(_) => self.custom(&teststep).await?,
                     _ => {}
                 },
-                Teststep::VarDecl(_) => {
-                    self.VAR_DECLARATION(&teststep).await?;
-                }
+                Teststep::VarDecl(_) => self.VAR_DECLARATION(&teststep).await?,
+                Teststep::If(_) => self.conditional(&teststep).await?,
                 _ => {}
             };
         }

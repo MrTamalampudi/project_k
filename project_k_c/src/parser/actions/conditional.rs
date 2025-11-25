@@ -1,4 +1,5 @@
 use crate::ast::expression::ExpKind;
+use crate::ast::teststep::Teststep;
 use crate::class::{Method, CONDITIONAL_STMT};
 use crate::parser::errors::EXPECT_BOOL_EXPR;
 use crate::parser::errorss::ActionError;
@@ -49,7 +50,7 @@ impl ConditionalStmtAction for Conditional {
             or_else,
             method: Method::CONDITIONAL_STMT(CONDITIONAL_STMT::IF),
         };
-        _tl_stack.push(TranslatorStack::IfStmt(stmt));
+        _tl_stack.push_step(Teststep::If(stmt));
     }
 
     fn ELSE_IF(
@@ -99,7 +100,7 @@ impl ConditionalStmtAction for Conditional {
         let _else_token = _token_stack.pop().unwrap();
         let body = _tl_stack.pop_body();
         let span = _else_token.span.to(&_r_curly_brace_token.span);
-        let if_stmt = IfStmt {
+        let stmt = IfStmt {
             span,
             condition: Expr {
                 kind: ExpKind::Lit(Literal::Boolean(true)),
@@ -110,6 +111,6 @@ impl ConditionalStmtAction for Conditional {
             or_else: Box::new(None),
             method: Method::CONDITIONAL_STMT(CONDITIONAL_STMT::ELSE),
         };
-        _tl_stack.push(TranslatorStack::IfStmt(if_stmt));
+        _tl_stack.push(TranslatorStack::IfStmt(stmt));
     }
 }

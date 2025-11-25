@@ -70,6 +70,7 @@ impl<'a> Engine<'a> {
         let input_arg = match _step {
             Teststep::Action(action) => action.arguments.get(EXPR_ARGKEY).unwrap(),
             Teststep::Getter(getter) => getter.arguments.get(EXPR_ARGKEY).unwrap(),
+            Teststep::If(stmt) => &Args::Expr(stmt.condition.clone()),
             _ => return Err(WebDriverError::FatalError(INVALID_LOC_EXPR.to_string())),
         };
         if let Args::Expr(expr) = input_arg {

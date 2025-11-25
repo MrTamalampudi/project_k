@@ -133,24 +133,42 @@ pub fn parser_slr(parser: &mut Parser) {
         {action:|ast,token_stack,tl_stack,errors| {
             Element::SENDKEYS(ast,token_stack,tl_stack,errors);
         }}
+        |
+        IfStmt
         ;
 
         // ***** Conditional statement *****
-        IfStmt -> IfExpr | IfExpr ElseIfExpr | IfExpr ElseExpr ;
-
-        ElseIfStmt -> ElseIfExpr | ElseIfExpr ElseIfStmt | ElseIfExpr ElseExpr;
-
-        IfExpr -> If Expression L_CurlyBrace Teststeps R_CurlyBrace
+        IfStmt -> IfExpr
+        {action:|ast,token_stack,tl_stack,errors| {
+            Conditional::IF(ast,token_stack,tl_stack,errors);
+        }}
+        | IfExpr ElseIfStmt
+        {action:|ast,token_stack,tl_stack,errors| {
+            Conditional::IF(ast,token_stack,tl_stack,errors);
+        }}
+        | IfExpr ElseExpr
         {action:|ast,token_stack,tl_stack,errors| {
             Conditional::IF(ast,token_stack,tl_stack,errors);
         }}
         ;
 
-        ElseIfExpr-> Else If Expression L_CurlyBrace Teststeps R_CurlyBrace
+        ElseIfStmt -> ElseIfExpr
+        {action:|ast,token_stack,tl_stack,errors| {
+            Conditional::ELSE_IF(ast,token_stack,tl_stack,errors);
+        }}
+        | ElseIfExpr ElseIfStmt
+        {action:|ast,token_stack,tl_stack,errors| {
+            Conditional::ELSE_IF(ast,token_stack,tl_stack,errors);
+        }}
+        | ElseIfExpr ElseExpr
         {action:|ast,token_stack,tl_stack,errors| {
             Conditional::ELSE_IF(ast,token_stack,tl_stack,errors);
         }}
         ;
+
+        IfExpr -> If Expression L_CurlyBrace Teststeps R_CurlyBrace;
+
+        ElseIfExpr-> Else If Expression L_CurlyBrace Teststeps R_CurlyBrace;
 
         ElseExpr -> Else L_CurlyBrace Teststeps R_CurlyBrace
         {action:|ast,token_stack,tl_stack,errors| {

@@ -1,15 +1,9 @@
 use std::collections::HashMap;
 
 use crate::{
-    ast::{
-        action::Action,
-        identifier_value::IdentifierValue,
-        teststep::{Body, Teststep},
-        var_decl::VarDecl,
-    },
+    ast::{action::Action, identifier_value::IdentifierValue, teststep::Body, var_decl::VarDecl},
     enums::CapabilityValue,
 };
-use span::SpanData;
 
 #[derive(Debug, Clone, PartialEq)]
 #[allow(unused)]
