@@ -1,3 +1,4 @@
+use macros::pop_token;
 use manodae::error::ParseError;
 
 use crate::{
@@ -19,13 +20,13 @@ use crate::{
 pub struct LiteralExpression {}
 
 impl LiteralExpressionAction for LiteralExpression {
+    #[pop_token(string_token)]
     fn STRING(
         _testcase: &mut TestCase,
         _token_stack: &mut Vec<Token>,
         _tl_stack: &mut Vec<TranslatorStack>,
         _errors: &mut Vec<ParseError<Token>>,
     ) {
-        let string_token = _token_stack.pop().unwrap();
         if let TokenType::STRING(string) = string_token.get_token_type() {
             let expr_kind = ExpKind::Lit(LE::String(string));
             _tl_stack.push(TranslatorStack::Expression(Expr {
@@ -35,13 +36,14 @@ impl LiteralExpressionAction for LiteralExpression {
             }));
         }
     }
+
+    #[pop_token(number_token)]
     fn NUMBER(
         _testcase: &mut TestCase,
         _token_stack: &mut Vec<Token>,
         _tl_stack: &mut Vec<TranslatorStack>,
         _errors: &mut Vec<ParseError<Token>>,
     ) {
-        let number_token = _token_stack.pop().unwrap();
         if let TokenType::NUMBER(number) = number_token.get_token_type() {
             let expr_kind = ExpKind::Lit(LE::Number(number));
             _tl_stack.push(TranslatorStack::Expression(Expr {
@@ -51,13 +53,14 @@ impl LiteralExpressionAction for LiteralExpression {
             }));
         }
     }
+
+    #[pop_token(boolean_token)]
     fn BOOLEAN(
         _testcase: &mut TestCase,
         _token_stack: &mut Vec<Token>,
         _tl_stack: &mut Vec<TranslatorStack>,
         _errors: &mut Vec<ParseError<Token>>,
     ) {
-        let boolean_token = _token_stack.pop().unwrap();
         let truth_value = match boolean_token.token_type {
             TokenType::TRUE => true,
             TokenType::FALSE => false,
@@ -77,13 +80,14 @@ impl LiteralExpressionAction for LiteralExpression {
             kind: expr_kind,
         }));
     }
+
+    #[pop_token(ident_token)]
     fn IDENT(
         _testcase: &mut TestCase,
         _token_stack: &mut Vec<Token>,
         _tl_stack: &mut Vec<TranslatorStack>,
         _errors: &mut Vec<ParseError<Token>>,
     ) {
-        let ident_token = _token_stack.pop().unwrap();
         if let TokenType::IDENTIFIER(ident) = ident_token.get_token_type() {
             let variable = _testcase.variables.get(&ident);
             if variable.is_none() {

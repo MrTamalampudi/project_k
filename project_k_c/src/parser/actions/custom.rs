@@ -15,6 +15,7 @@ use crate::parser::errorss::ActionError;
 use crate::parser::translator_stack::TLVec;
 use crate::parser::translator_stack::TranslatorStack;
 use crate::token::Token;
+use macros::pop_token;
 use manodae::error::ParseError;
 use span::Span;
 use span::SpanData;
@@ -24,20 +25,17 @@ pub struct Custom {}
 impl CustomAction for Custom {
     //var ident = var_rhs
     //fetch var_rhs from tl_stack last element;
+    #[pop_token(_assign, identifier_token)]
     fn VAR_DECLARATION(
         _testcase: &mut TestCase,
         _token_stack: &mut Vec<Token>,
         _tl_stack: &mut Vec<TranslatorStack>,
         _errors: &mut Vec<ParseError<Token>>,
     ) {
-        _token_stack.pop(); //pop "assign" token
-        let identifier_token = _token_stack.pop().unwrap();
-        _token_stack.pop(); //pop "var" token
         let identifier = match identifier_token.get_token_type() {
             TokenType::IDENTIFIER(ident) => ident,
             _ => return,
         };
-        _token_stack.pop(); // pop "var" token
 
         let var_rhs = match _tl_stack.pop_expr() {
             Ok(expr) => expr,
@@ -73,13 +71,13 @@ impl CustomAction for Custom {
     }
 
     //assert expr
+    #[pop_token(assert_token)]
     fn ASSERT(
         _testcase: &mut TestCase,
         _token_stack: &mut Vec<Token>,
         _tl_stack: &mut Vec<TranslatorStack>,
         _errors: &mut Vec<ParseError<Token>>,
     ) {
-        let assert_token = _token_stack.pop().unwrap();
         let expr = match _tl_stack.pop_expr() {
             Ok(expr) => expr,
             Err((error, span)) => {

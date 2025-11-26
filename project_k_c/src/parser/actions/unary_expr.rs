@@ -1,3 +1,4 @@
+use macros::pop_token;
 use manodae::error::ParseError;
 
 use crate::{
@@ -19,24 +20,23 @@ pub struct UnaryExpression;
 
 impl UnaryExpressionAction for UnaryExpression {
     // (expr)
+    #[pop_token(_left_brace, _right_brace)]
     fn GROUPED(
         _testcase: &mut TestCase,
         _token_stack: &mut Vec<Token>,
         _tl_stack: &mut Vec<TranslatorStack>,
         _errors: &mut Vec<ParseError<Token>>,
     ) {
-        _token_stack.pop(); // pop "(" token
-        _token_stack.pop(); // pop ")" token
     }
 
     // !expr
+    #[pop_token(negation_token)]
     fn NEGATION(
         _testcase: &mut TestCase,
         _token_stack: &mut Vec<Token>,
         _tl_stack: &mut Vec<TranslatorStack>,
         _errors: &mut Vec<ParseError<Token>>,
     ) {
-        let negation_token = _token_stack.pop().unwrap(); // pop "!" token
         let expr = match _tl_stack.pop_expr() {
             Ok(expr) => expr,
             Err((error, span)) => {

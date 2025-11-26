@@ -14,21 +14,20 @@ use crate::{
     parser::translator_stack::{TLVec, TranslatorStack},
     token::Token,
 };
+use macros::pop_token;
 use manodae::error::ParseError;
 use span::Span;
 
 pub struct Conditional;
 
 impl ConditionalStmtAction for Conditional {
+    #[pop_token(_r_curly_brace_token, _l_curly_brace_token, _if_token)]
     fn IF(
         _testcase: &mut TestCase,
         _token_stack: &mut Vec<Token>,
         _tl_stack: &mut Vec<TranslatorStack>,
         _errors: &mut Vec<ParseError<Token>>,
     ) {
-        let _r_curly_brace_token = _token_stack.pop().unwrap();
-        let _l_curly_brace_token = _token_stack.pop().unwrap();
-        let _if_token = _token_stack.pop().unwrap();
         let span = _if_token.span.to(&_r_curly_brace_token.span);
         let or_else = Box::new(_tl_stack.pop_else());
         let body = _tl_stack.pop_body();
@@ -53,16 +52,13 @@ impl ConditionalStmtAction for Conditional {
         _tl_stack.push_step(Teststep::If(stmt));
     }
 
+    #[pop_token(_r_curly_brace_token, _l_curly_brace_token, _if_token, _else_token)]
     fn ELSE_IF(
         _testcase: &mut TestCase,
         _token_stack: &mut Vec<Token>,
         _tl_stack: &mut Vec<TranslatorStack>,
         _errors: &mut Vec<ParseError<Token>>,
     ) {
-        let _r_curly_brace_token = _token_stack.pop().unwrap();
-        let _l_curly_brace_token = _token_stack.pop().unwrap();
-        let _if_token = _token_stack.pop().unwrap();
-        let _else_token = _token_stack.pop().unwrap();
         let span = _else_token.span.to(&_r_curly_brace_token.span);
         let or_else = Box::new(_tl_stack.pop_else());
         let body = _tl_stack.pop_body();
@@ -89,15 +85,13 @@ impl ConditionalStmtAction for Conditional {
         _tl_stack.push(TranslatorStack::IfStmt(stmt));
     }
 
+    #[pop_token(_r_curly_brace_token, _l_curly_brace_token, _else_token)]
     fn ELSE(
         _testcase: &mut TestCase,
         _token_stack: &mut Vec<Token>,
         _tl_stack: &mut Vec<TranslatorStack>,
         _errors: &mut Vec<ParseError<Token>>,
     ) {
-        let _r_curly_brace_token = _token_stack.pop().unwrap();
-        let _l_curly_brace_token = _token_stack.pop().unwrap();
-        let _else_token = _token_stack.pop().unwrap();
         let body = _tl_stack.pop_body();
         let span = _else_token.span.to(&_r_curly_brace_token.span);
         let stmt = IfStmt {

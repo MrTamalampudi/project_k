@@ -12,6 +12,7 @@ use crate::class::{Method, WEB_DRIVER};
 use crate::parser::errors::{EXPECT_EXPR, EXPECT_STRING_EXPR, VALID_URL, VALID_URL_SHCEME};
 use crate::parser::translator_stack::{TLVec, TranslatorStack};
 use crate::token::Token;
+use macros::pop_token;
 use manodae::error::ParseError;
 use span::SpanData;
 use url::Url;
@@ -19,13 +20,13 @@ use url::Url;
 pub struct Driver;
 
 impl WebDriverAction for Driver {
+    #[pop_token(navigate_token)]
     fn NAVIGATE(
         _testcase: &mut TestCase,
         _token_stack: &mut Vec<Token>,
         _tl_stack: &mut Vec<TranslatorStack>,
         _errors: &mut Vec<ParseError<Token>>,
     ) -> () {
-        let navigate_token = _token_stack.pop().unwrap();
         let url = _tl_stack.pop().unwrap();
         let url_expr = if let TranslatorStack::Expression(expr) = &url {
             expr.clone()
@@ -69,13 +70,13 @@ impl WebDriverAction for Driver {
         _tl_stack.push_step(Teststep::Action(test_step));
     }
 
+    #[pop_token(close_token)]
     fn CLOSE(
         _testcase: &mut TestCase,
         _token_stack: &mut Vec<Token>,
         _tl_stack: &mut Vec<TranslatorStack>,
         _errors: &mut Vec<ParseError<Token>>,
     ) -> () {
-        let close_token = _token_stack.pop().unwrap();
         let action = Action::new(
             close_token.span,
             Method::WEB_DRIVER(WEB_DRIVER::CLOSE),
@@ -84,15 +85,13 @@ impl WebDriverAction for Driver {
         _tl_stack.push_step(Teststep::Action(action));
     }
 
+    #[pop_token(url_token, _current_token, get_token)]
     fn GET_CURRENT_URL(
         _testcase: &mut TestCase,
         _token_stack: &mut Vec<Token>,
         _tl_stack: &mut Vec<TranslatorStack>,
         _errors: &mut Vec<ParseError<Token>>,
     ) -> () {
-        let url_token = _token_stack.pop().unwrap();
-        let _current_token = _token_stack.pop().unwrap();
-        let get_token = _token_stack.pop().unwrap();
         let span = get_token.span.to(&url_token.span);
         let getter = Getter {
             span,
@@ -118,14 +117,13 @@ impl WebDriverAction for Driver {
     ) -> () {
     }
 
+    #[pop_token(title_token, get_token)]
     fn GET_TITLE(
         _testcase: &mut TestCase,
         _token_stack: &mut Vec<Token>,
         _tl_stack: &mut Vec<TranslatorStack>,
         _errors: &mut Vec<ParseError<Token>>,
     ) -> () {
-        let title_token = _token_stack.pop().unwrap();
-        let get_token = _token_stack.pop().unwrap();
         let span = get_token.span.to(&title_token.span);
         let getter = Getter {
             span,

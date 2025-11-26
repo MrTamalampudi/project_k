@@ -9,39 +9,33 @@ use crate::class::NAVIGATION;
 use crate::parser::translator_stack::TLVec;
 use crate::parser::translator_stack::TranslatorStack;
 use crate::token::Token;
+use macros::pop_token;
 use manodae::error::ParseError;
-use span::Span;
 
 pub struct Navigation {}
 
 impl NavigationAction for Navigation {
+    #[pop_token(back_token)]
     fn BACK(
         _testcase: &mut TestCase,
         _token_stack: &mut Vec<Token>,
         _tl_stack: &mut Vec<TranslatorStack>,
         _errors: &mut Vec<ParseError<Token>>,
     ) {
-        let span = Span {
-            start: _token_stack.first().unwrap().get_start_location(),
-            end: _token_stack.last().unwrap().get_end_location(),
-        };
+        let span = back_token.span;
         let test_step = Action::new(span, Method::NAVIGATION(NAVIGATION::BACK), HashMap::new());
 
         _tl_stack.push_step(Teststep::Action(test_step));
-
-        //clear token_stack after every use
-        _token_stack.clear();
     }
+
+    #[pop_token(forward_token)]
     fn FORWARD(
         _testcase: &mut TestCase,
         _token_stack: &mut Vec<Token>,
         _tl_stack: &mut Vec<TranslatorStack>,
         _errors: &mut Vec<ParseError<Token>>,
     ) {
-        let span = Span {
-            start: _token_stack.first().unwrap().get_start_location(),
-            end: _token_stack.last().unwrap().get_end_location(),
-        };
+        let span = forward_token.span;
         let test_step = Action::new(
             span,
             Method::NAVIGATION(NAVIGATION::FORWARD),
@@ -49,20 +43,16 @@ impl NavigationAction for Navigation {
         );
 
         _tl_stack.push_step(Teststep::Action(test_step));
-
-        //clear token_stack after every use
-        _token_stack.clear();
     }
+
+    #[pop_token(refresh_token)]
     fn REFRESH(
         _testcase: &mut TestCase,
         _token_stack: &mut Vec<Token>,
         _tl_stack: &mut Vec<TranslatorStack>,
         _errors: &mut Vec<ParseError<Token>>,
     ) {
-        let span = Span {
-            start: _token_stack.first().unwrap().get_start_location(),
-            end: _token_stack.last().unwrap().get_end_location(),
-        };
+        let span = refresh_token.span;
         let test_step = Action::new(
             span,
             Method::NAVIGATION(NAVIGATION::REFRESH),
@@ -70,8 +60,5 @@ impl NavigationAction for Navigation {
         );
 
         _tl_stack.push_step(Teststep::Action(test_step));
-
-        //clear token_stack after every use
-        _token_stack.clear();
     }
 }

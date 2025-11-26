@@ -16,19 +16,20 @@ use crate::parser::locator::LocatorStrategy;
 use crate::parser::translator_stack::{TLVec, TranslatorStack};
 use crate::pop_expr;
 use crate::token::Token;
+use macros::pop_token;
 use manodae::error::ParseError;
 
 pub struct Element {}
 
 impl ElementAction for Element {
     // click expr
+    #[pop_token(click_token)]
     fn CLICK(
         _testcase: &mut TestCase,
         _token_stack: &mut Vec<Token>,
         _tl_stack: &mut Vec<TranslatorStack>,
         _errors: &mut Vec<ParseError<Token>>,
     ) {
-        let click_token = _token_stack.pop().unwrap();
         let expr = pop_expr!(_tl_stack.pop_expr(), _errors, click_token);
         let span = click_token.span.to(&expr.span);
 
@@ -57,14 +58,13 @@ impl ElementAction for Element {
     }
 
     //enter expression in expression
+    #[pop_token(_in_token, enter_token)]
     fn SENDKEYS(
         _testcase: &mut TestCase,
         _token_stack: &mut Vec<Token>,
         _tl_stack: &mut Vec<TranslatorStack>,
         _errors: &mut Vec<ParseError<Token>>,
     ) {
-        let _in_token = _token_stack.pop().unwrap();
-        let enter_token = _token_stack.pop().unwrap();
         let locator_expr = pop_expr!(_tl_stack.pop_expr(), _errors, enter_token);
         let text_expr = pop_expr!(_tl_stack.pop_expr(), _errors, enter_token);
         let span = enter_token.span.to(&locator_expr.span);
@@ -109,17 +109,13 @@ impl ElementAction for Element {
     }
 
     //get attribute expression from element expression
+    #[pop_token(_element, _from, _attribute, get_token)]
     fn GET_ATTRIBUTE(
         _testcase: &mut TestCase,
         _token_stack: &mut Vec<Token>,
         _tl_stack: &mut Vec<TranslatorStack>,
         _errors: &mut Vec<ParseError<Token>>,
     ) {
-        _token_stack.pop().unwrap(); // pop "element" token
-        _token_stack.pop().unwrap(); // pop "from" token
-        _token_stack.pop().unwrap(); // pop "attribute" token
-        let get_token = _token_stack.pop().unwrap();
-
         let locator_expr = match _tl_stack.pop_expr() {
             Ok(expr) => expr,
             Err((error, span)) => {

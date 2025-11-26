@@ -1,3 +1,4 @@
+use macros::pop_token;
 use manodae::error::ParseError;
 
 use crate::ast::primitives::Primitives;
@@ -17,6 +18,7 @@ use crate::{
 pub struct BinaryExpression;
 
 impl BinaryExpression {
+    #[pop_token(token)]
     fn common(
         _testcase: &mut TestCase,
         _token_stack: &mut Vec<Token>,
@@ -24,8 +26,6 @@ impl BinaryExpression {
         _errors: &mut Vec<ParseError<Token>>,
         op: BinOpKind,
     ) {
-        let token = _token_stack.pop().unwrap(); //pop 'op' token
-
         let expr2 = match _tl_stack.pop_expr() {
             Ok(expr) => expr,
             Err((error, span)) => {
