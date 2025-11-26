@@ -68,10 +68,11 @@ pub fn parser_slr(parser: &mut Parser) {
         .collect();
     let d_string = || "".to_string();
     let d_num = || (1 as isize);
+    let time = Instant::now();
     let grammar: Grammar<TestCase, Token, TranslatorStack> = grammar!(
         Start -> Testcase Teststeps {error:"Testing"}
         {action:|ast,token_stack,tl_stack,errors| {
-            Shared::set_body(ast, tl_stack.get_body());
+            Shared::set_body(ast, tl_stack.pop_body());
         }}
         ;
 
