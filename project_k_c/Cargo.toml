@@ -14,4 +14,4 @@ webdriver-manager = { path = "../../webdriver-manager" }
 log = "0.4.27"
 indexmap = "2.11.0"
 span = {path = "../span"}
-span_macro = {path = "../span/span_macro"}
+macros = {path = "../macros"}

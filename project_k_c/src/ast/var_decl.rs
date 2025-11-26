@@ -8,8 +8,8 @@ use crate::{
     },
     class::{Method, CUSTOM},
 };
+use macros::Span;
 use span::{Span, SpanData};
-use span_macro::Span;
 
 #[derive(Debug, Clone, PartialEq, Span)]
 pub struct VarDecl {

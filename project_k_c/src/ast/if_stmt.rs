@@ -8,8 +8,8 @@ use crate::{
     },
     class::Method,
 };
+use macros::Span;
 use span::{Location, Span, SpanData};
-use span_macro::Span;
 
 #[derive(Debug, Clone, PartialEq, Span)]
 pub struct IfStmt {

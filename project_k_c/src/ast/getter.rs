@@ -4,8 +4,8 @@ use crate::{
     ast::{arguments::Args, primitives::Primitives, teststep::GetMethod},
     class::Method,
 };
+use macros::Span;
 use span::{Span, SpanData};
-use span_macro::Span;
 
 #[derive(Debug, Clone, PartialEq, Span)]
 pub struct Getter {

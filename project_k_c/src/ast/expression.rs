@@ -1,8 +1,8 @@
 #![allow(non_camel_case_types, unused)]
 
 use crate::ast::{getter::Getter, primitives::Primitives};
+use macros::Span;
 use span::{Span, SpanData};
-use span_macro::Span;
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum Literal {

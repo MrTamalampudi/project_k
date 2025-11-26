@@ -1,9 +1,9 @@
 use std::{cell::RefCell, rc::Rc};
 
+use macros::Span;
 use span::Location;
 use span::Span;
 use span::SpanData;
-use span_macro::Span;
 
 use crate::{
     ast::{action::Action, getter::Getter, if_stmt::IfStmt, var_decl::VarDecl},

@@ -10,8 +10,8 @@ use crate::{
     parser::errors::EXPECT_EXPR,
 };
 
+use macros::Span;
 use span::{Span, SpanData};
-use span_macro::Span;
 
 #[derive(Debug, Clone, PartialEq, Span)]
 pub enum TranslatorStack {

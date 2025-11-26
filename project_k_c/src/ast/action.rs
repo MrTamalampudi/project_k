@@ -7,8 +7,8 @@ use crate::{
     },
     class::Method,
 };
+use macros::Span;
 use span::{Span, SpanData};
-use span_macro::Span;
 
 #[derive(Debug, Clone, PartialEq, Span)]
 #[allow(unused)]
