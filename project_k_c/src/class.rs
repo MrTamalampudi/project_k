@@ -284,5 +284,14 @@ class_macro!(
             GE,
             GT
         }
+    },
+    {
+        action:ConditionalStmtAction,
+        engine:ConditionalStmtEngine,
+        CONDITIONAL_STMT {
+            IF,
+            ELSE_IF,
+            ELSE
+        }
     }
 );

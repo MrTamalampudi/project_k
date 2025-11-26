@@ -48,6 +48,10 @@ impl Span {
             end: span.end,
         }
     }
+
+    pub fn dummy() -> Span {
+        Span::new(Location::dummy(), Location::dummy())
+    }
 }
 
 ///Getter and Setter beahaviour for Span

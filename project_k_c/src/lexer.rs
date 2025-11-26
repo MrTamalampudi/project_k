@@ -16,6 +16,8 @@ const ASSIGN: char = '=';
 const NEGATION: char = '!';
 const LEFT_PARAN: char = '(';
 const RIGHT_PARAN: char = ')';
+const L_CURLY_BRACE: char = '{';
+const R_CURLY_BRACE: char = '}';
 const UNDERLINE: char = '_';
 const PLUS: char = '+';
 const HYPHEN: char = '-';
@@ -120,6 +122,12 @@ impl<'a> Tokenizer<'a> {
                 &MODULUS => self.consume_operator_token(TokenType::MODULUS, state, tokens, 1),
                 &DOUBLE_QUOTE => self.consume_string_token(state, tokens),
                 &FORWARDSLASH => self.consume_comments_or_division_op(state, tokens),
+                &L_CURLY_BRACE => {
+                    self.consume_operator_token(TokenType::L_CURLY_BRACE, state, tokens, 1)
+                }
+                &R_CURLY_BRACE => {
+                    self.consume_operator_token(TokenType::R_CURLY_BRACE, state, tokens, 1)
+                }
                 &HASH_TAG => {
                     state.next(); // consume '#' token
                     self.consume_identifier(state, tokens);

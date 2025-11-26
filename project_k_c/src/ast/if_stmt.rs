@@ -1,7 +1,11 @@
 #![allow(non_camel_case_types, unused)]
 
 use crate::{
-    ast::{action::Action, expression::Expr, teststep::GetMethod},
+    ast::{
+        action::Action,
+        expression::Expr,
+        teststep::{Body, GetMethod},
+    },
     class::Method,
 };
 use span::{Location, Span, SpanData};
@@ -11,15 +15,9 @@ use span_macro::Span;
 pub struct IfStmt {
     pub span: Span,
     pub condition: Expr,
-    pub body: Vec<Action>,
-    pub or_else: AlternateStatement,
+    pub body: Body,
+    pub or_else: Box<Option<IfStmt>>,
     pub method: Method,
-}
-
-#[derive(Debug, Clone, PartialEq)]
-pub enum AlternateStatement {
-    IF(Box<IfStmt>),
-    ELSE(Vec<Action>),
 }
 
 impl GetMethod for IfStmt {

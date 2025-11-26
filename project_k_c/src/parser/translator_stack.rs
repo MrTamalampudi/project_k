@@ -2,9 +2,11 @@ use crate::{
     ast::{
         action::Action,
         expression::Expr,
+        if_stmt::IfStmt,
         teststep::{Body, Teststep},
         var_decl::VarDecl,
     },
+    class::{Method, CONDITIONAL_STMT},
     parser::errors::EXPECT_EXPR,
 };
 
@@ -17,6 +19,7 @@ pub enum TranslatorStack {
     TestStep(Action),
     VarDecl(VarDecl),
     Expression(Expr),
+    IfStmt(IfStmt),
 }
 
 impl TranslatorStack {
@@ -33,7 +36,8 @@ pub trait TLVec {
     fn pop_expr(&mut self) -> Result<Expr, (String, Span)>;
     fn push_expr(&mut self, expr: Expr);
     fn push_step(&mut self, teststep: Teststep);
-    fn get_body(&mut self) -> Body;
+    fn pop_body(&mut self) -> Body;
+    fn pop_else(&mut self) -> Option<IfStmt>;
 }
 
 impl TLVec for Vec<TranslatorStack> {
@@ -49,11 +53,26 @@ impl TLVec for Vec<TranslatorStack> {
             body.insert_teststep(teststep);
         };
     }
-    fn get_body(&mut self) -> Body {
+    fn pop_body(&mut self) -> Body {
         match self.pop() {
             Some(TranslatorStack::Body(body)) => body,
             Some(_) => panic!("error"),
             None => panic!("error"),
+        }
+    }
+    fn pop_else(&mut self) -> Option<IfStmt> {
+        if !matches!(
+            self.last(),
+            Some(TranslatorStack::IfStmt(stmt))
+            if stmt.method != Method::CONDITIONAL_STMT(CONDITIONAL_STMT::IF)
+        ) {
+            return None;
+        }
+
+        if let TranslatorStack::IfStmt(stmt) = self.pop().unwrap() {
+            return Some(stmt);
+        } else {
+            return None;
         }
     }
 }
