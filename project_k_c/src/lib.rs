@@ -20,6 +20,7 @@ pub mod lexer;
 pub mod parser;
 pub mod program;
 pub mod token;
+//pub use crate::parser::grammar::lalr_generate;
 
 #[derive(Debug, Clone)]
 pub struct CompilationContext {

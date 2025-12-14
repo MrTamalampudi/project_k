@@ -1,11 +1,5 @@
-use manodae::error::ParseError;
-use manodae::grammar;
-use manodae::grammar::Grammar;
-use manodae::parser::LR1_Parser;
-use manodae::production::Production;
-// use manodae::render_table::render;
-use manodae::symbol::Symbol;
-use std::sync::Arc;
+use std::path::PathBuf;
+use std::rc::Rc;
 use std::time::Instant;
 
 use super::Parser;
@@ -32,6 +26,9 @@ use crate::parser::actions::unary_expr::UnaryExpression;
 use crate::parser::translator_stack::{TLVec, TranslatorStack};
 use crate::program::Program;
 use crate::token::Token;
+use manodae::prelude::*;
+
+include!("./parser_generated/parser.rs");
 
 #[macro_export]
 macro_rules! unwrap_or_return {
@@ -392,17 +389,20 @@ pub fn parser_slr(parser: &mut Parser) {
         True               -> [TokenType::TRUE];
         False              -> [TokenType::FALSE];
     );
-    let mut lalr_parser = LR1_Parser::new(grammar);
-    lalr_parser.construct_LALR_Table();
-    // lalr_parser
-    //     .action
-    //     .keys()
-    //     .into_iter()
-    //     .for_each(|state| println!("state :{:?}", state.index));
+    let els = time.elapsed();
+    println!("grammar {:#?}", els);
+    let time = Instant::now();
+    let a = PathBuf::from(file!());
+    Codegen::gen(a, grammar, ["TestCase", "Token", "TranslatorStack"]);
+    let els = time.elapsed();
+    println!("construction {:#?}", els);
     // render(&lalr_parser);
     let mut errors: Vec<ParseError<Token>> = Vec::new();
     let mut ast: TestCase = TestCase::new();
-    lalr_parser.parse(tt, &mut errors, &mut ast);
+    let time = Instant::now();
+    get_parser().parse(tt, &mut errors, &mut ast);
+    let els = time.elapsed();
+    println!("parsing {:#?}", els);
     refine_errors(&mut errors);
     let transformed_errors: Vec<ErrorInfo> = errors
         .iter()
