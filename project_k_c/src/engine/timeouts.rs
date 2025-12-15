@@ -3,13 +3,13 @@ use std::time::{Duration, SystemTime};
 use thirtyfour::{error::WebDriverError, By};
 
 use crate::{
-    ast::{
-        arguments::{Args, EXPR_ARGKEY},
-        identifier_value::IdentifierValue,
-        teststep::{GetMethod, Teststep},
-    },
     e_types,
     engine::{Engine, EngineResult},
+};
+use ast::{
+    arguments::{Args, EXPR_ARGKEY},
+    identifier_value::IdentifierValue,
+    teststep::{GetMethod, Teststep},
 };
 use class::{Method, TimeoutsEngine, TIMEOUTS};
 

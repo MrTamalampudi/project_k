@@ -1,15 +1,13 @@
 use thirtyfour::{error::WebDriverError, By};
 
-use crate::{
-    ast::{
-        arguments::{Args, ATTRIBUTE_ARGKEY, EXPR_ARGKEY, LOCATOR_ARGKEY},
-        identifier_value::IdentifierValue,
-        teststep::Teststep,
-    },
-    engine::{
-        errors::{INVALID_INPUT, INVALID_LOC_EXPR},
-        Engine, EngineResult,
-    },
+use crate::engine::{
+    errors::{INVALID_INPUT, INVALID_LOC_EXPR},
+    Engine, EngineResult,
+};
+use ast::{
+    arguments::{Args, ATTRIBUTE_ARGKEY, EXPR_ARGKEY, LOCATOR_ARGKEY},
+    identifier_value::IdentifierValue,
+    teststep::Teststep,
 };
 
 impl<'a> Engine<'a> {

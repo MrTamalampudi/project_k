@@ -3,8 +3,6 @@ use std::rc::Rc;
 use std::time::Instant;
 
 use super::Parser;
-use crate::ast::testcase::TestCase;
-use crate::ast::teststep::Body;
 use crate::engine::execute;
 use crate::error_handler::{parse_error_to_error_info, ErrorInfo};
 use crate::keywords::TokenType;
@@ -21,6 +19,8 @@ use crate::parser::actions::unary_expr::UnaryExpression;
 use crate::parser::translator_stack::{TLVec, TranslatorStack};
 use crate::program::Program;
 use crate::token::Token;
+use ast::testcase::TestCase;
+use ast::teststep::Body;
 use class::{
     BinaryExpressionAction, ConditionalStmtAction, CustomAction, ElementAction,
     LiteralExpressionAction, NavigationAction, TimeoutsAction, UnaryExpressionAction,
@@ -28,6 +28,7 @@ use class::{
 };
 use manodae::prelude::*;
 
+//generates error if there are no parser generated files
 include!("./parser_generated/parser.rs");
 
 #[macro_export]

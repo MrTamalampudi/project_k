@@ -4,11 +4,6 @@ use manodae::error::ParseError;
 
 use crate::{
     a_types,
-    ast::{
-        expression::{ExpKind, Expr, Literal as LE},
-        primitives::Primitives,
-        testcase::TestCase,
-    },
     keywords::TokenType,
     parser::{
         errors::{EXPECT_BOOL_EXPR, VARIABLE_NOT_DEFINED},
@@ -16,6 +11,11 @@ use crate::{
         translator_stack::TranslatorStack,
     },
     token::Token,
+};
+use ast::{
+    expression::{ExpKind, Expr, Literal as LE},
+    primitives::Primitives,
+    testcase::TestCase,
 };
 
 pub struct LiteralExpression {}

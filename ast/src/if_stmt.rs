@@ -1,6 +1,6 @@
 #![allow(non_camel_case_types, unused)]
 
-use crate::ast::{
+use crate::{
     action::Action,
     expression::Expr,
     teststep::{Body, GetMethod},

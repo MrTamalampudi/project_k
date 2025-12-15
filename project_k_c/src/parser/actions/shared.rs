@@ -1,12 +1,11 @@
-use crate::{
-    ast::{
-        arguments::Args,
-        expression::{ExpKind, Expr, Literal},
-        primitives::Primitives,
-        testcase::TestCase,
-        teststep::Body,
-    },
-    parser::{errors::EXPECT_STRING_EXPR, locator::LocatorStrategy},
+use crate::parser::errors::EXPECT_STRING_EXPR;
+use ast::{
+    arguments::Args,
+    expression::{ExpKind, Expr, Literal},
+    locator::LocatorStrategy,
+    primitives::Primitives,
+    testcase::TestCase,
+    teststep::Body,
 };
 
 pub struct Shared;

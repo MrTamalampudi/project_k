@@ -1,8 +1,8 @@
 use crate::{
-    ast::teststep::{GetMethod, Teststep},
     e_types,
     engine::{Engine, EngineResult},
 };
+use ast::teststep::{GetMethod, Teststep};
 use class::{ConditionalStmtEngine, Method, CONDITIONAL_STMT};
 use thirtyfour::error::WebDriverError;
 

@@ -1,12 +1,12 @@
 use std::collections::HashMap;
 
 use crate::a_types;
-use crate::ast::action::Action;
-use crate::ast::testcase::TestCase;
-use crate::ast::teststep::Teststep;
 use crate::parser::translator_stack::TLVec;
 use crate::parser::translator_stack::TranslatorStack;
 use crate::token::Token;
+use ast::action::Action;
+use ast::testcase::TestCase;
+use ast::teststep::Teststep;
 use class::Method;
 use class::NavigationAction;
 use class::NAVIGATION;

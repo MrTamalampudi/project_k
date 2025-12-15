@@ -1,4 +1,4 @@
-use crate::{ast::expression::Expr, parser::locator::LocatorStrategy};
+use crate::{expression::Expr, locator::LocatorStrategy};
 
 pub const LOCATOR_ARGKEY: &'static str = "locator";
 pub const URL_ARGKEY: &'static str = "url";

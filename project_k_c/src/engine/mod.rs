@@ -10,7 +10,7 @@ use log::{error, info};
 use thirtyfour::{error::WebDriverError, DesiredCapabilities, WebDriver};
 use webdriver_manager::{chrome::ChromeManager, WebdriverManager};
 
-use crate::ast::{
+use ast::{
     testcase::TestCase,
     teststep::{Body, Teststep},
 };

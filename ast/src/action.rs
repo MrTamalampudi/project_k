@@ -1,6 +1,6 @@
 use std::{cell::RefCell, collections::HashMap, rc::Rc};
 
-use crate::ast::{
+use crate::{
     arguments::Args,
     teststep::{GetMethod, Next, Teststep},
 };

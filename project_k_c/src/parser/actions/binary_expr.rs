@@ -3,17 +3,14 @@ use macros::pop_token;
 use manodae::error::ParseError;
 
 use crate::a_types;
-use crate::ast::primitives::Primitives;
 use crate::parser::errors::MISMATCHED_TYPES;
 use crate::parser::errorss::ActionError;
 use crate::parser::translator_stack::TLVec;
-use crate::{
-    ast::{
-        expression::{BinOpKind, ExpKind, Expr},
-        testcase::TestCase,
-    },
-    parser::translator_stack::TranslatorStack,
-    token::Token,
+use crate::{parser::translator_stack::TranslatorStack, token::Token};
+use ast::primitives::Primitives;
+use ast::{
+    expression::{BinOpKind, ExpKind, Expr},
+    testcase::TestCase,
 };
 
 pub struct BinaryExpression;

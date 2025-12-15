@@ -2,22 +2,20 @@ use std::ops::BitXor;
 
 use thirtyfour::By;
 
-use crate::{
-    ast::{
-        expression::{BinOpKind, ExpKind, Expr, Literal, UnOp},
-        getter::Getter,
-        identifier_value::IdentifierValue,
-        teststep::Teststep,
+use crate::engine::{
+    errors::{
+        ExpressionEvalResult, EXPECT_LITERAL, INT_OVERFLOW, INVALID_ADD_OP, INVALID_AND_OP,
+        INVALID_EQ_OP, INVALID_INPUT, INVALID_LOC_EXPR, INVALID_OR_OP, INVALID_SUB_OP,
+        INVALID_UNARY_OP,
     },
-    engine::{
-        errors::{
-            ExpressionEvalResult, EXPECT_LITERAL, INT_OVERFLOW, INVALID_ADD_OP, INVALID_AND_OP,
-            INVALID_EQ_OP, INVALID_INPUT, INVALID_LOC_EXPR, INVALID_OR_OP, INVALID_SUB_OP,
-            INVALID_UNARY_OP,
-        },
-        Engine,
-    },
-    parser::locator::LocatorStrategy,
+    Engine,
+};
+use ast::{
+    expression::{BinOpKind, ExpKind, Expr, Literal, UnOp},
+    getter::Getter,
+    identifier_value::IdentifierValue,
+    locator::LocatorStrategy,
+    teststep::Teststep,
 };
 use class::{ElementEngine, Method, WebDriverEngine, ELEMENT, WEB_DRIVER};
 
@@ -52,7 +50,7 @@ impl<'a> Engine<'a> {
         expr1: &Expr,
         expr2: &Expr,
     ) -> ExpressionEvalResult {
-        use crate::ast::expression::BinOpKind::*;
+        use ast::expression::BinOpKind::*;
         let expr1_value = Box::pin(self.eval(expr1)).await?;
         let expr2_value = Box::pin(self.eval(expr2)).await?;
         match op {

@@ -1,11 +1,11 @@
 use std::{cell::RefCell, rc::Rc};
 
-use crate::ast::{
+use crate::{
     expression::Expr,
     primitives::Primitives,
     teststep::{GetMethod, Next, Teststep},
 };
-use class::{Method, CUSTOM};
+use class::{CUSTOM, Method};
 use macros::Span;
 use span::{Span, SpanData};
 

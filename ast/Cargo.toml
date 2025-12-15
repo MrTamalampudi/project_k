@@ -1,0 +1,10 @@
+[package]
+name = "ast"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+class = {path = "../class"}
+macros = {path = "../macros"}
+span = {path = "../span"}
+thirtyfour = "0.35.0"

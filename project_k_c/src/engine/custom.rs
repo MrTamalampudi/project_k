@@ -1,12 +1,12 @@
 use thirtyfour::error::WebDriverError;
 
 use crate::{
-    ast::{
-        identifier_value::IdentifierValue,
-        teststep::{GetMethod, Teststep},
-    },
     e_types,
     engine::{Engine, EngineResult},
+};
+use ast::{
+    identifier_value::IdentifierValue,
+    teststep::{GetMethod, Teststep},
 };
 use class::{CustomEngine, Method, CUSTOM};
 

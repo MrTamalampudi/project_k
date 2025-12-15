@@ -1,12 +1,10 @@
-use crate::{
-    ast::{
-        action::Action,
-        expression::Expr,
-        if_stmt::IfStmt,
-        teststep::{Body, Teststep},
-        var_decl::VarDecl,
-    },
-    parser::errors::EXPECT_EXPR,
+use crate::parser::errors::EXPECT_EXPR;
+use ast::{
+    action::Action,
+    expression::Expr,
+    if_stmt::IfStmt,
+    teststep::{Body, Teststep},
+    var_decl::VarDecl,
 };
 
 use class::{Method, CONDITIONAL_STMT};

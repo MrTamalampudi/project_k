@@ -1,6 +1,6 @@
 #![allow(non_camel_case_types, unused)]
 
-use crate::ast::{getter::Getter, primitives::Primitives};
+use crate::{getter::Getter, primitives::Primitives};
 use macros::Span;
 use span::{Span, SpanData};
 

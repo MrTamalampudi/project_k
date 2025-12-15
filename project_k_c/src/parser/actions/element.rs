@@ -1,19 +1,19 @@
 use std::collections::HashMap;
 
-use crate::ast::action::Action;
-use crate::ast::arguments::{Args, ATTRIBUTE_ARGKEY, EXPR_ARGKEY, LOCATOR_ARGKEY};
-use crate::ast::expression::{ExpKind, Expr, Literal};
-use crate::ast::getter::Getter;
-use crate::ast::primitives::Primitives;
-use crate::ast::testcase::TestCase;
-use crate::ast::teststep::Teststep;
 use crate::parser::actions::shared::Shared;
 use crate::parser::errors::EXPECT_STRING_EXPR;
 use crate::parser::errorss::ActionError;
-use crate::parser::locator::LocatorStrategy;
 use crate::parser::translator_stack::{TLVec, TranslatorStack};
 use crate::token::Token;
 use crate::{a_types, pop_expr};
+use ast::action::Action;
+use ast::arguments::{Args, ATTRIBUTE_ARGKEY, EXPR_ARGKEY, LOCATOR_ARGKEY};
+use ast::expression::{ExpKind, Expr, Literal};
+use ast::getter::Getter;
+use ast::locator::LocatorStrategy;
+use ast::primitives::Primitives;
+use ast::testcase::TestCase;
+use ast::teststep::Teststep;
 use class::ELEMENT;
 use class::{ElementAction, Method};
 use macros::pop_token;
@@ -152,7 +152,7 @@ impl ElementAction for Element {
         }
 
         let locator_arg = if let ExpKind::Lit(Literal::String(locator)) = &locator_expr.kind {
-            Args::Locator(LocatorStrategy::parse(locator))
+            Args::Locator(LocatorStrategy::parse(&locator))
         } else {
             Args::Expr(locator_expr.clone())
         };

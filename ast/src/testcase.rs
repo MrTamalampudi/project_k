@@ -1,14 +1,10 @@
 use std::collections::HashMap;
 
-use crate::{
-    ast::{action::Action, identifier_value::IdentifierValue, teststep::Body, var_decl::VarDecl},
-    enums::CapabilityValue,
-};
+use crate::{action::Action, identifier_value::IdentifierValue, teststep::Body, var_decl::VarDecl};
 
 #[derive(Debug, Clone, PartialEq)]
 #[allow(unused)]
 pub struct TestCase {
-    capabilities: HashMap<String, CapabilityValue>,
     pub variables: HashMap<String, IdentifierValue>,
     pub body: Body,
 }
@@ -16,22 +12,9 @@ pub struct TestCase {
 impl TestCase {
     pub fn new() -> TestCase {
         TestCase {
-            capabilities: HashMap::new(),
             variables: HashMap::new(),
             body: Body::new(),
         }
-    }
-
-    pub fn get_capability(&self, capability: &String) -> CapabilityValue {
-        self.capabilities
-            .get(capability)
-            .map_or(CapabilityValue::NONE, |capability_value| {
-                capability_value.clone()
-            })
-    }
-
-    pub fn insert_capability(&mut self, capability: &String, value: &CapabilityValue) {
-        self.capabilities.insert(capability.clone(), value.clone());
     }
 
     pub fn insert_variable(&mut self, var: VarDecl) {

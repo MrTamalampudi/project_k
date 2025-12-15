@@ -1,12 +1,6 @@
 use std::collections::HashMap;
 
 use crate::a_types;
-use crate::ast::action::Action;
-use crate::ast::arguments::Args;
-use crate::ast::arguments::EXPR_ARGKEY;
-use crate::ast::testcase::TestCase;
-use crate::ast::teststep::Teststep;
-use crate::ast::var_decl::VarDecl;
 use crate::keywords::TokenType;
 use crate::parser::errors::EXPECT_BOOL_EXPR;
 use crate::parser::errors::MISMATCHED_TYPES;
@@ -14,6 +8,12 @@ use crate::parser::errorss::ActionError;
 use crate::parser::translator_stack::TLVec;
 use crate::parser::translator_stack::TranslatorStack;
 use crate::token::Token;
+use ast::action::Action;
+use ast::arguments::Args;
+use ast::arguments::EXPR_ARGKEY;
+use ast::testcase::TestCase;
+use ast::teststep::Teststep;
+use ast::var_decl::VarDecl;
 use class::CustomAction;
 use class::Method;
 use class::CUSTOM;

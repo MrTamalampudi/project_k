@@ -1,4 +1,4 @@
-use crate::ast::testcase::TestCase;
+use ast::testcase::TestCase;
 
 #[derive(Debug, Clone)]
 pub struct Program {

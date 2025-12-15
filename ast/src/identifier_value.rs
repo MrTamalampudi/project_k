@@ -1,4 +1,4 @@
-use crate::{ast::primitives::Primitives, parser::locator::LocatorStrategy};
+use crate::{locator::LocatorStrategy, primitives::Primitives};
 use std::mem::discriminant;
 use thirtyfour::WebElement;
 

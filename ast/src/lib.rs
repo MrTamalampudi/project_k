@@ -4,6 +4,7 @@ pub mod expression;
 pub mod getter;
 pub mod identifier_value;
 pub mod if_stmt;
+pub mod locator;
 pub mod primitives;
 pub mod testcase;
 pub mod teststep;

@@ -1,17 +1,17 @@
 use crate::a_types;
-use crate::ast::expression::ExpKind;
-use crate::ast::teststep::Teststep;
 use crate::parser::errors::EXPECT_BOOL_EXPR;
 use crate::parser::errorss::ActionError;
 use crate::{
-    ast::{
-        expression::{Expr, Literal},
-        if_stmt::IfStmt,
-        primitives::Primitives,
-        testcase::TestCase,
-    },
     parser::translator_stack::{TLVec, TranslatorStack},
     token::Token,
+};
+use ast::expression::ExpKind;
+use ast::teststep::Teststep;
+use ast::{
+    expression::{Expr, Literal},
+    if_stmt::IfStmt,
+    primitives::Primitives,
+    testcase::TestCase,
 };
 use class::{ConditionalStmtAction, Method, CONDITIONAL_STMT};
 use macros::pop_token;

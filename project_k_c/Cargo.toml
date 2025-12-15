@@ -18,3 +18,4 @@ span = {path = "../span"}
 macros = {path = "../macros"}
 proc-macro2 = "1.0"
 quote = "1.0.42"
+ast = {path = "../ast"}

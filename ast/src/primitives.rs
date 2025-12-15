@@ -1,4 +1,4 @@
-use crate::ast::identifier_value::IdentifierValue;
+use crate::identifier_value::IdentifierValue;
 
 #[derive(Clone, PartialEq, Debug, Copy)]
 pub enum Primitives {

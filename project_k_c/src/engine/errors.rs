@@ -1,4 +1,4 @@
-use crate::ast::identifier_value::IdentifierValue;
+use ast::identifier_value::IdentifierValue;
 
 pub type ExpressionEvalResult = Result<IdentifierValue, String>;
 
