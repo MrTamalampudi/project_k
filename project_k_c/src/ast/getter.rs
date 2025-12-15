@@ -1,9 +1,7 @@
 use std::collections::HashMap;
 
-use crate::{
-    ast::{arguments::Args, primitives::Primitives, teststep::GetMethod},
-    class::Method,
-};
+use crate::ast::{arguments::Args, primitives::Primitives, teststep::GetMethod};
+use class::Method;
 use macros::Span;
 use span::{Span, SpanData};
 

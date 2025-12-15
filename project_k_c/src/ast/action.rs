@@ -1,12 +1,10 @@
 use std::{cell::RefCell, collections::HashMap, rc::Rc};
 
-use crate::{
-    ast::{
-        arguments::Args,
-        teststep::{GetMethod, Next, Teststep},
-    },
-    class::Method,
+use crate::ast::{
+    arguments::Args,
+    teststep::{GetMethod, Next, Teststep},
 };
+use class::Method;
 use macros::Span;
 use span::{Span, SpanData};
 

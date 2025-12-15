@@ -1,13 +1,11 @@
 #![allow(non_camel_case_types, unused)]
 
-use crate::{
-    ast::{
-        action::Action,
-        expression::Expr,
-        teststep::{Body, GetMethod},
-    },
-    class::Method,
+use crate::ast::{
+    action::Action,
+    expression::Expr,
+    teststep::{Body, GetMethod},
 };
+use class::Method;
 use macros::Span;
 use span::{Location, Span, SpanData};
 

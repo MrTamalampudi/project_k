@@ -5,10 +5,8 @@ use span::Location;
 use span::Span;
 use span::SpanData;
 
-use crate::{
-    ast::{action::Action, getter::Getter, if_stmt::IfStmt, var_decl::VarDecl},
-    class::Method,
-};
+use crate::ast::{action::Action, getter::Getter, if_stmt::IfStmt, var_decl::VarDecl};
+use class::Method;
 
 #[derive(PartialEq, Clone, Debug, Span)]
 pub struct Body {
