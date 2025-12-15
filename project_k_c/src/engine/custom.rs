@@ -5,9 +5,10 @@ use crate::{
         identifier_value::IdentifierValue,
         teststep::{GetMethod, Teststep},
     },
-    class::{CustomEngine, Method, CUSTOM},
+    e_types,
     engine::{Engine, EngineResult},
 };
+use class::{CustomEngine, Method, CUSTOM};
 
 impl<'a> Engine<'a> {
     pub async fn custom(&mut self, teststep: &Teststep) -> EngineResult<()> {
@@ -22,6 +23,7 @@ impl<'a> Engine<'a> {
 }
 
 impl<'a> CustomEngine for Engine<'a> {
+    e_types!();
     async fn VAR_DECLARATION(&mut self, _body: &Teststep) -> EngineResult<()> {
         if let Teststep::VarDecl(step) = _body {
             let a = self.eval(&step.rhs).await;

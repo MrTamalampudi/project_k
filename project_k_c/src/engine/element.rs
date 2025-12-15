@@ -1,7 +1,9 @@
 use crate::ast::teststep::GetMethod;
 use crate::ast::teststep::Teststep;
-use crate::class::{ElementEngine, Method, ELEMENT};
+use crate::e_types;
 use crate::engine::{Engine, EngineResult};
+use class::{ElementEngine, Method, ELEMENT};
+use thirtyfour::error::WebDriverError;
 
 impl<'a> Engine<'a> {
     pub async fn element(&mut self, teststep: &Teststep) -> EngineResult<()> {
@@ -24,6 +26,7 @@ impl<'a> Engine<'a> {
 }
 
 impl<'a> ElementEngine for Engine<'a> {
+    e_types!();
     async fn CLEAR(&mut self, _step: &Teststep) -> EngineResult<()> {
         Ok(())
     }

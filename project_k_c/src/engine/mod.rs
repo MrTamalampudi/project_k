@@ -10,13 +10,11 @@ use log::{error, info};
 use thirtyfour::{error::WebDriverError, DesiredCapabilities, WebDriver};
 use webdriver_manager::{chrome::ChromeManager, WebdriverManager};
 
-use crate::{
-    ast::{
-        testcase::TestCase,
-        teststep::{Body, Teststep},
-    },
-    class::{CustomEngine, Method},
+use crate::ast::{
+    testcase::TestCase,
+    teststep::{Body, Teststep},
 };
+use class::{CustomEngine, Method};
 
 mod conditional;
 mod custom;
@@ -30,6 +28,14 @@ mod webdriver;
 
 type Port = u16;
 type EngineResult<T> = Result<T, WebDriverError>;
+
+#[macro_export]
+macro_rules! e_types {
+    () => {
+        type Error = WebDriverError;
+        type Step = Teststep;
+    };
+}
 
 #[tokio::main]
 pub async fn execute(testcase: &mut TestCase) {

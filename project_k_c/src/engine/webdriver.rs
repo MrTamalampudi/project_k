@@ -2,8 +2,9 @@ use crate::ast::arguments::{Args, URL_ARGKEY};
 use crate::ast::identifier_value::IdentifierValue;
 use crate::ast::teststep::GetMethod;
 use crate::ast::teststep::Teststep;
-use crate::class::{Method, WebDriverEngine, WEB_DRIVER};
+use crate::e_types;
 use crate::engine::{Engine, EngineResult};
+use class::{Method, WebDriverEngine, WEB_DRIVER};
 use log::info;
 use thirtyfour::error::WebDriverError;
 
@@ -36,6 +37,7 @@ impl<'a> Engine<'a> {
 }
 
 impl<'a> WebDriverEngine for Engine<'a> {
+    e_types!();
     async fn NAVIGATE(&mut self, _body: &Teststep) -> EngineResult<()> {
         info!("Navigated to ");
         if let Teststep::Action(step) = _body {

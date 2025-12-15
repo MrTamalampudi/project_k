@@ -9,7 +9,6 @@ use crate::{
         identifier_value::IdentifierValue,
         teststep::Teststep,
     },
-    class::{ElementEngine, Method, WebDriverEngine, ELEMENT, WEB_DRIVER},
     engine::{
         errors::{
             ExpressionEvalResult, EXPECT_LITERAL, INT_OVERFLOW, INVALID_ADD_OP, INVALID_AND_OP,
@@ -20,6 +19,7 @@ use crate::{
     },
     parser::locator::LocatorStrategy,
 };
+use class::{ElementEngine, Method, WebDriverEngine, ELEMENT, WEB_DRIVER};
 
 impl<'a> Engine<'a> {
     pub async fn eval(&mut self, expr: &Expr) -> ExpressionEvalResult {

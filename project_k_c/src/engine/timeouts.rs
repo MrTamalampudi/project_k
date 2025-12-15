@@ -8,9 +8,10 @@ use crate::{
         identifier_value::IdentifierValue,
         teststep::{GetMethod, Teststep},
     },
-    class::{Method, TimeoutsEngine, TIMEOUTS},
+    e_types,
     engine::{Engine, EngineResult},
 };
+use class::{Method, TimeoutsEngine, TIMEOUTS};
 
 impl<'a> Engine<'a> {
     pub async fn timeouts(&mut self, teststep: &Teststep) -> EngineResult<()> {
@@ -24,6 +25,7 @@ impl<'a> Engine<'a> {
 }
 
 impl<'a> TimeoutsEngine for Engine<'a> {
+    e_types!();
     async fn WAIT(&mut self, _step: &Teststep) -> Result<(), thirtyfour::prelude::WebDriverError> {
         if let Teststep::Action(step) = _step {
             let secs_arg = step.arguments.get(EXPR_ARGKEY);

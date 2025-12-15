@@ -1,8 +1,10 @@
 use crate::{
     ast::teststep::{GetMethod, Teststep},
-    class::{ConditionalStmtEngine, Method, CONDITIONAL_STMT},
+    e_types,
     engine::{Engine, EngineResult},
 };
+use class::{ConditionalStmtEngine, Method, CONDITIONAL_STMT};
+use thirtyfour::error::WebDriverError;
 
 impl<'a> Engine<'a> {
     pub async fn conditional(&mut self, teststep: &Teststep) -> EngineResult<()> {
@@ -18,6 +20,7 @@ impl<'a> Engine<'a> {
 }
 
 impl<'a> ConditionalStmtEngine for Engine<'a> {
+    e_types!();
     async fn IF(&mut self, _step: &Teststep) -> EngineResult<()> {
         if let Teststep::If(stmt) = _step.clone() {
             let condition = self.get_boolean(_step).await?;
