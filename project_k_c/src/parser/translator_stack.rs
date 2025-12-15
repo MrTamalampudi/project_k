@@ -6,10 +6,10 @@ use crate::{
         teststep::{Body, Teststep},
         var_decl::VarDecl,
     },
-    class::{Method, CONDITIONAL_STMT},
     parser::errors::EXPECT_EXPR,
 };
 
+use class::{Method, CONDITIONAL_STMT};
 use macros::Span;
 use span::{Span, SpanData};
 

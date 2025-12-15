@@ -1,3 +1,4 @@
+use class::UnaryExpressionAction;
 use macros::pop_token;
 use manodae::error::ParseError;
 
@@ -7,18 +8,19 @@ use crate::{
         primitives::Primitives,
         testcase::TestCase,
     },
-    class::UnaryExpressionAction,
     parser::{
         errors::_INVALID_NEGATION_EXPR_USE,
         errorss::ActionError,
         translator_stack::{TLVec, TranslatorStack},
     },
     token::Token,
+    types,
 };
 
 pub struct UnaryExpression;
 
 impl UnaryExpressionAction for UnaryExpression {
+    types!();
     // (expr)
     #[pop_token(_left_brace, _right_brace)]
     fn GROUPED(

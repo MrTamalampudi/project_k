@@ -3,18 +3,20 @@ use std::collections::HashMap;
 use crate::ast::action::Action;
 use crate::ast::testcase::TestCase;
 use crate::ast::teststep::Teststep;
-use crate::class::Method;
-use crate::class::NavigationAction;
-use crate::class::NAVIGATION;
 use crate::parser::translator_stack::TLVec;
 use crate::parser::translator_stack::TranslatorStack;
 use crate::token::Token;
+use crate::types;
+use class::Method;
+use class::NavigationAction;
+use class::NAVIGATION;
 use macros::pop_token;
 use manodae::error::ParseError;
 
 pub struct Navigation {}
 
 impl NavigationAction for Navigation {
+    types!();
     #[pop_token(back_token)]
     fn BACK(
         _testcase: &mut TestCase,

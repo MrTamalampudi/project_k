@@ -7,21 +7,22 @@ use crate::ast::getter::Getter;
 use crate::ast::primitives::Primitives;
 use crate::ast::testcase::TestCase;
 use crate::ast::teststep::Teststep;
-use crate::class::ELEMENT;
-use crate::class::{ElementAction, Method};
 use crate::parser::actions::shared::Shared;
 use crate::parser::errors::EXPECT_STRING_EXPR;
 use crate::parser::errorss::ActionError;
 use crate::parser::locator::LocatorStrategy;
 use crate::parser::translator_stack::{TLVec, TranslatorStack};
-use crate::pop_expr;
 use crate::token::Token;
+use crate::{pop_expr, types};
+use class::ELEMENT;
+use class::{ElementAction, Method};
 use macros::pop_token;
 use manodae::error::ParseError;
 
 pub struct Element {}
 
 impl ElementAction for Element {
+    types!();
     // click expr
     #[pop_token(click_token)]
     fn CLICK(

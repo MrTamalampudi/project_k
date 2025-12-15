@@ -7,11 +7,12 @@ use crate::ast::getter::Getter;
 use crate::ast::primitives::Primitives;
 use crate::ast::testcase::TestCase;
 use crate::ast::teststep::Teststep;
-use crate::class::WebDriverAction;
-use crate::class::{Method, WEB_DRIVER};
 use crate::parser::errors::{EXPECT_EXPR, EXPECT_STRING_EXPR, VALID_URL, VALID_URL_SHCEME};
 use crate::parser::translator_stack::{TLVec, TranslatorStack};
 use crate::token::Token;
+use crate::types;
+use class::WebDriverAction;
+use class::{Method, WEB_DRIVER};
 use macros::pop_token;
 use manodae::error::ParseError;
 use span::SpanData;
@@ -20,6 +21,7 @@ use url::Url;
 pub struct Driver;
 
 impl WebDriverAction for Driver {
+    types!();
     #[pop_token(navigate_token)]
     fn NAVIGATE(
         _testcase: &mut TestCase,

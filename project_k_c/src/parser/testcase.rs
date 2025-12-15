@@ -5,11 +5,6 @@ use std::time::Instant;
 use super::Parser;
 use crate::ast::testcase::TestCase;
 use crate::ast::teststep::Body;
-use crate::class::{
-    BinaryExpressionAction, ConditionalStmtAction, CustomAction, LiteralExpressionAction,
-    NavigationAction, TimeoutsAction, UnaryExpressionAction,
-};
-use crate::class::{ElementAction, WebDriverAction};
 use crate::engine::execute;
 use crate::error_handler::{parse_error_to_error_info, ErrorInfo};
 use crate::keywords::TokenType;
@@ -26,6 +21,11 @@ use crate::parser::actions::unary_expr::UnaryExpression;
 use crate::parser::translator_stack::{TLVec, TranslatorStack};
 use crate::program::Program;
 use crate::token::Token;
+use class::{
+    BinaryExpressionAction, ConditionalStmtAction, CustomAction, ElementAction,
+    LiteralExpressionAction, NavigationAction, TimeoutsAction, UnaryExpressionAction,
+    WebDriverAction,
+};
 use manodae::prelude::*;
 
 include!("./parser_generated/parser.rs");

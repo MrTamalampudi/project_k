@@ -22,3 +22,13 @@ macro_rules! pop_expr {
         }
     }};
 }
+
+#[macro_export]
+macro_rules! types {
+    () => {
+        type AST = TestCase;
+        type Token = Token;
+        type TranslatorStack = TranslatorStack;
+        type Error<Token> = ParseError<Token>;
+    };
+}

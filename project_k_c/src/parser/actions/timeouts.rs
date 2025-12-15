@@ -6,17 +6,19 @@ use crate::ast::expression::{ExpKind, Literal};
 use crate::ast::primitives::Primitives;
 use crate::ast::testcase::TestCase;
 use crate::ast::teststep::Teststep;
-use crate::class::{Method, TimeoutsAction, TIMEOUTS};
 use crate::parser::errors::{EXPECT_NUMBER_EXPR, NEGATIVE_TIME};
 use crate::parser::errorss::ActionError;
 use crate::parser::translator_stack::{TLVec, TranslatorStack};
 use crate::token::Token;
+use crate::types;
+use class::{Method, TimeoutsAction, TIMEOUTS};
 use macros::pop_token;
 use manodae::error::ParseError;
 
 pub struct Timeouts;
 
 impl TimeoutsAction for Timeouts {
+    types!();
     //action: wait expression
     #[pop_token(wait_token)]
     fn WAIT(

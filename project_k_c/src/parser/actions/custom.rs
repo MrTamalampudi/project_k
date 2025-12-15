@@ -6,8 +6,6 @@ use crate::ast::arguments::EXPR_ARGKEY;
 use crate::ast::testcase::TestCase;
 use crate::ast::teststep::Teststep;
 use crate::ast::var_decl::VarDecl;
-use crate::class::CustomAction;
-use crate::class::CUSTOM;
 use crate::keywords::TokenType;
 use crate::parser::errors::EXPECT_BOOL_EXPR;
 use crate::parser::errors::MISMATCHED_TYPES;
@@ -15,6 +13,10 @@ use crate::parser::errorss::ActionError;
 use crate::parser::translator_stack::TLVec;
 use crate::parser::translator_stack::TranslatorStack;
 use crate::token::Token;
+use crate::types;
+use class::CustomAction;
+use class::Method;
+use class::CUSTOM;
 use macros::pop_token;
 use manodae::error::ParseError;
 use span::Span;
@@ -23,6 +25,7 @@ use span::SpanData;
 pub struct Custom {}
 
 impl CustomAction for Custom {
+    types!();
     //var ident = var_rhs
     //fetch var_rhs from tl_stack last element;
     #[pop_token(_assign, identifier_token)]
@@ -95,7 +98,7 @@ impl CustomAction for Custom {
                 start: assert_token.get_start_location(),
                 end: expr.span.end,
             },
-            crate::class::Method::CUSTOM(CUSTOM::ASSERT),
+            Method::CUSTOM(CUSTOM::ASSERT),
             HashMap::from([(EXPR_ARGKEY, Args::Expr(expr))]),
         );
         _tl_stack.push_step(Teststep::Action(teststep));
