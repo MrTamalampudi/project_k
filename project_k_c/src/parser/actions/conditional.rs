@@ -1,8 +1,8 @@
+use crate::a_types;
 use crate::ast::expression::ExpKind;
 use crate::ast::teststep::Teststep;
 use crate::parser::errors::EXPECT_BOOL_EXPR;
 use crate::parser::errorss::ActionError;
-use crate::types;
 use crate::{
     ast::{
         expression::{Expr, Literal},
@@ -21,7 +21,7 @@ use span::Span;
 pub struct Conditional;
 
 impl ConditionalStmtAction for Conditional {
-    types!();
+    a_types!();
     #[pop_token(_r_curly_brace_token, _l_curly_brace_token, _if_token)]
     fn IF(
         _testcase: &mut TestCase,

@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 
+use crate::a_types;
 use crate::ast::action::Action;
 use crate::ast::arguments::Args;
 use crate::ast::arguments::EXPR_ARGKEY;
@@ -13,7 +14,6 @@ use crate::parser::errorss::ActionError;
 use crate::parser::translator_stack::TLVec;
 use crate::parser::translator_stack::TranslatorStack;
 use crate::token::Token;
-use crate::types;
 use class::CustomAction;
 use class::Method;
 use class::CUSTOM;
@@ -25,7 +25,7 @@ use span::SpanData;
 pub struct Custom {}
 
 impl CustomAction for Custom {
-    types!();
+    a_types!();
     //var ident = var_rhs
     //fetch var_rhs from tl_stack last element;
     #[pop_token(_assign, identifier_token)]

@@ -3,6 +3,7 @@ use macros::pop_token;
 use manodae::error::ParseError;
 
 use crate::{
+    a_types,
     ast::{
         expression::{ExpKind, Expr, Literal as LE},
         primitives::Primitives,
@@ -15,13 +16,12 @@ use crate::{
         translator_stack::TranslatorStack,
     },
     token::Token,
-    types,
 };
 
 pub struct LiteralExpression {}
 
 impl LiteralExpressionAction for LiteralExpression {
-    types!();
+    a_types!();
     #[pop_token(string_token)]
     fn STRING(
         _testcase: &mut TestCase,

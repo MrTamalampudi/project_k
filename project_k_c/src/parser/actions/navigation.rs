@@ -1,12 +1,12 @@
 use std::collections::HashMap;
 
+use crate::a_types;
 use crate::ast::action::Action;
 use crate::ast::testcase::TestCase;
 use crate::ast::teststep::Teststep;
 use crate::parser::translator_stack::TLVec;
 use crate::parser::translator_stack::TranslatorStack;
 use crate::token::Token;
-use crate::types;
 use class::Method;
 use class::NavigationAction;
 use class::NAVIGATION;
@@ -16,7 +16,7 @@ use manodae::error::ParseError;
 pub struct Navigation {}
 
 impl NavigationAction for Navigation {
-    types!();
+    a_types!();
     #[pop_token(back_token)]
     fn BACK(
         _testcase: &mut TestCase,

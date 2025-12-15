@@ -2,11 +2,11 @@ use class::BinaryExpressionAction;
 use macros::pop_token;
 use manodae::error::ParseError;
 
+use crate::a_types;
 use crate::ast::primitives::Primitives;
 use crate::parser::errors::MISMATCHED_TYPES;
 use crate::parser::errorss::ActionError;
 use crate::parser::translator_stack::TLVec;
-use crate::types;
 use crate::{
     ast::{
         expression::{BinOpKind, ExpKind, Expr},
@@ -67,7 +67,7 @@ impl BinaryExpression {
 }
 
 impl BinaryExpressionAction for BinaryExpression {
-    types!();
+    a_types!();
     //expr + expr
     fn ADD(
         _testcase: &mut TestCase,

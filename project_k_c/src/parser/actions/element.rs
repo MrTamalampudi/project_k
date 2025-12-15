@@ -13,7 +13,7 @@ use crate::parser::errorss::ActionError;
 use crate::parser::locator::LocatorStrategy;
 use crate::parser::translator_stack::{TLVec, TranslatorStack};
 use crate::token::Token;
-use crate::{pop_expr, types};
+use crate::{a_types, pop_expr};
 use class::ELEMENT;
 use class::{ElementAction, Method};
 use macros::pop_token;
@@ -22,7 +22,7 @@ use manodae::error::ParseError;
 pub struct Element {}
 
 impl ElementAction for Element {
-    types!();
+    a_types!();
     // click expr
     #[pop_token(click_token)]
     fn CLICK(

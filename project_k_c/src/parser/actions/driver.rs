@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 
+use crate::a_types;
 use crate::ast::action::Action;
 use crate::ast::arguments::{Args, URL_ARGKEY};
 use crate::ast::expression::{ExpKind, Expr, Literal};
@@ -10,7 +11,6 @@ use crate::ast::teststep::Teststep;
 use crate::parser::errors::{EXPECT_EXPR, EXPECT_STRING_EXPR, VALID_URL, VALID_URL_SHCEME};
 use crate::parser::translator_stack::{TLVec, TranslatorStack};
 use crate::token::Token;
-use crate::types;
 use class::WebDriverAction;
 use class::{Method, WEB_DRIVER};
 use macros::pop_token;
@@ -21,7 +21,7 @@ use url::Url;
 pub struct Driver;
 
 impl WebDriverAction for Driver {
-    types!();
+    a_types!();
     #[pop_token(navigate_token)]
     fn NAVIGATE(
         _testcase: &mut TestCase,

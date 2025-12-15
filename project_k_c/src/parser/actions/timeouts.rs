@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 
+use crate::a_types;
 use crate::ast::action::Action;
 use crate::ast::arguments::{Args, EXPR_ARGKEY};
 use crate::ast::expression::{ExpKind, Literal};
@@ -10,7 +11,6 @@ use crate::parser::errors::{EXPECT_NUMBER_EXPR, NEGATIVE_TIME};
 use crate::parser::errorss::ActionError;
 use crate::parser::translator_stack::{TLVec, TranslatorStack};
 use crate::token::Token;
-use crate::types;
 use class::{Method, TimeoutsAction, TIMEOUTS};
 use macros::pop_token;
 use manodae::error::ParseError;
@@ -18,7 +18,7 @@ use manodae::error::ParseError;
 pub struct Timeouts;
 
 impl TimeoutsAction for Timeouts {
-    types!();
+    a_types!();
     //action: wait expression
     #[pop_token(wait_token)]
     fn WAIT(

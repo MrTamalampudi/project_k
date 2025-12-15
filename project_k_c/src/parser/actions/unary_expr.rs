@@ -3,6 +3,7 @@ use macros::pop_token;
 use manodae::error::ParseError;
 
 use crate::{
+    a_types,
     ast::{
         expression::{ExpKind, Expr, UnOp},
         primitives::Primitives,
@@ -14,13 +15,12 @@ use crate::{
         translator_stack::{TLVec, TranslatorStack},
     },
     token::Token,
-    types,
 };
 
 pub struct UnaryExpression;
 
 impl UnaryExpressionAction for UnaryExpression {
-    types!();
+    a_types!();
     // (expr)
     #[pop_token(_left_brace, _right_brace)]
     fn GROUPED(

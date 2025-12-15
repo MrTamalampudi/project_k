@@ -24,7 +24,7 @@ macro_rules! pop_expr {
 }
 
 #[macro_export]
-macro_rules! types {
+macro_rules! a_types {
     () => {
         type AST = TestCase;
         type Token = Token;
