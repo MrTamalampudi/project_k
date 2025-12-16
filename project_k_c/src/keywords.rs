@@ -1,5 +1,3 @@
-use crate::enums::CapabilityValue;
-use crate::enums::{Browser, Capabilities};
 use std::collections::HashMap;
 
 macro_rules! define_tokens {
@@ -10,10 +8,8 @@ macro_rules! define_tokens {
             NEW_LINE,
             STRING(String),
             IDENTIFIER(String),
-            CAPS(Capabilities),
             NUMBER(isize),
             //capbilities
-            BROWSER(Browser),
             XPATH(String),
             NONE,
             $($keyword),*
@@ -56,8 +52,6 @@ macro_rules! define_tokens {
                     TokenType::XPATH(_)  => String::from("xpath"),
                     TokenType::NUMBER(_) => String::from("number"),
                     TokenType::NONE => "none".to_string(),
-                    TokenType::CAPS(caps) => caps.to_string().clone(),
-                    TokenType::BROWSER(browser) => browser.to_string().clone(),
                     $(TokenType::$keyword =>{
                         if stringify!($keyword) == "EOF"{
                             "EOF".to_string()
@@ -72,16 +66,6 @@ macro_rules! define_tokens {
             }
         }
     };
-}
-
-impl TokenType {
-    pub fn match_capability_value(self) -> CapabilityValue {
-        match self {
-            Self::BROWSER(browser) => CapabilityValue::BROWSER(browser),
-            Self::STRING(string) => CapabilityValue::STRING(string),
-            _ => panic!("Not a valid CapabilityValue"),
-        }
-    }
 }
 
 define_tokens!(
