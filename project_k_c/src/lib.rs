@@ -10,7 +10,6 @@ use token::Token;
 
 use crate::program::Program;
 
-pub mod engine;
 pub mod error_handler;
 pub mod keywords;
 pub mod lexer;

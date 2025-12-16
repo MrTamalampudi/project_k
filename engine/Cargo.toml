@@ -1,0 +1,12 @@
+[package]
+name = "engine"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+tokio = { version = "1", features = ["full"] }
+ast = {path = "../ast"}
+thirtyfour = "0.35.0"
+class = {path = "../class"}
+webdriver-manager = { path = "../../webdriver-manager" }
+log = "0.4.27"

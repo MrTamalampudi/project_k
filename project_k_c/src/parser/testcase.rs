@@ -3,7 +3,6 @@ use std::rc::Rc;
 use std::time::Instant;
 
 use super::Parser;
-use crate::engine::execute;
 use crate::error_handler::{parse_error_to_error_info, ErrorInfo};
 use crate::keywords::TokenType;
 use crate::parser::actions::binary_expr::BinaryExpression;
@@ -26,6 +25,7 @@ use class::{
     LiteralExpressionAction, NavigationAction, TimeoutsAction, UnaryExpressionAction,
     WebDriverAction,
 };
+use engine::execute;
 use manodae::prelude::*;
 
 //generates error if there are no parser generated files
