@@ -5,17 +5,13 @@ edition = "2021"
 
 
 [dependencies]
-thirtyfour = "0.35.0"
-tokio = { version = "1", features = ["full"] }
 unicode-ident = { version = "1.0.18" }
 url = "2.5.4"
 class = {path = "../class"}
 manodae = { path = "../../manodae" }
 log = "0.4.27"
-indexmap = "2.11.0"
 span = {path = "../span"}
 macros = {path = "../macros"}
-proc-macro2 = "1.0"
 quote = "1.0.42"
 ast = {path = "../ast"}
 engine = {path = "../engine"}
