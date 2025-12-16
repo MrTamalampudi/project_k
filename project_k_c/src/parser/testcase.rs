@@ -393,8 +393,14 @@ pub fn parser_slr(parser: &mut Parser) {
     let els = time.elapsed();
     println!("grammar {:#?}", els);
     let time = Instant::now();
-    let a = PathBuf::from(file!());
-    Codegen::gen(a, grammar, ["TestCase", "Token", "TranslatorStack"]);
+    let path = std::env::current_dir()
+        .unwrap()
+        .join("..")
+        .join(file! {})
+        .parent()
+        .unwrap()
+        .to_path_buf();
+    Codegen::gen(path, grammar, ["TestCase", "Token", "TranslatorStack"]);
     let els = time.elapsed();
     println!("construction {:#?}", els);
     // render(&lalr_parser);
