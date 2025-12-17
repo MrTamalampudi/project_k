@@ -1,4 +1,3 @@
-use std::path::PathBuf;
 use std::rc::Rc;
 use std::time::Instant;
 
@@ -57,22 +56,19 @@ macro_rules! get_input_from_token_stack {
 
 #[allow(non_camel_case_types, unused)]
 pub fn parser_slr(parser: &mut Parser) {
-    let tt: Vec<Token> = parser
-        .lexer
-        .tokens
-        .iter()
-        .cloned()
-        .filter(|t| t.get_token_type().ne(&TokenType::NEW_LINE))
-        .collect();
+    let tt: Vec<Token> = parser.lexer.tokens.iter().cloned().collect();
+    println!("tokens {:#?}", tt);
     let d_string = || "".to_string();
     let d_num = || (1 as isize);
     let time = Instant::now();
     let grammar: Grammar<TestCase, Token, TranslatorStack> = grammar!(
-        Start -> Testcase Teststeps {error:"Testing"}
+        Start -> Testcase Newlines Teststeps {error:"Testing"}
         {action:|ast,token_stack,tl_stack,errors| {
             Shared::set_body(ast, tl_stack.pop_body());
         }}
         ;
+
+        Newlines -> Newline | Newline Newlines;
 
         Testcase -> [TokenType::TESTCASE]
         {action:|ast,token_stack,tl_stack,errors| {
@@ -80,7 +76,7 @@ pub fn parser_slr(parser: &mut Parser) {
         }}
         ;
 
-        Teststeps ->Teststep | Teststep Teststeps;
+        Teststeps ->Teststep Newlines | Teststep Newlines Teststeps;
 
         Teststep -> Navigate Expression
         {action:|ast,token_stack,tl_stack,errors| {
@@ -165,11 +161,11 @@ pub fn parser_slr(parser: &mut Parser) {
         }}
         ;
 
-        IfExpr -> If Expression L_CurlyBrace Teststeps R_CurlyBrace;
+        IfExpr -> If Expression L_CurlyBrace Newline Teststeps R_CurlyBrace;
 
-        ElseIfExpr-> Else If Expression L_CurlyBrace Teststeps R_CurlyBrace;
+        ElseIfExpr-> Else If Expression L_CurlyBrace Newline Teststeps R_CurlyBrace;
 
-        ElseExpr -> Else L_CurlyBrace Teststeps R_CurlyBrace
+        ElseExpr -> Else L_CurlyBrace Newline Teststeps R_CurlyBrace
         {action:|ast,token_stack,tl_stack,errors| {
             Conditional::ELSE(ast,token_stack,tl_stack,errors);
         }}
@@ -389,6 +385,8 @@ pub fn parser_slr(parser: &mut Parser) {
         //Boolean
         True               -> [TokenType::TRUE];
         False              -> [TokenType::FALSE];
+
+        Newline            -> [TokenType::NEW_LINE];
     );
     let els = time.elapsed();
     println!("grammar {:#?}", els);
@@ -416,15 +414,15 @@ pub fn parser_slr(parser: &mut Parser) {
         .map(|e| parse_error_to_error_info(e.clone()))
         .collect();
     parser.ctx.errors.errors.extend(transformed_errors);
-    parser.ctx.program = Program {
+    parser.ctx.ast = Program {
         testcase: ast.clone(),
     };
     if parser.ctx.errors.errors.is_empty() {
-        execute(&mut parser.ctx.program.testcase);
+        execute(&mut parser.ctx.ast.testcase);
     } else {
         log::error!("Errors {:#?}", parser.ctx.errors.errors);
     }
-    log::info!("variables {:#?}", parser.ctx.program.testcase.variables);
+    log::info!("variables {:#?}", parser.ctx.ast.testcase.variables);
 }
 
 fn refine_errors(errors: &mut Vec<ParseError<Token>>) {
