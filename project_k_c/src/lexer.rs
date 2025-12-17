@@ -244,6 +244,12 @@ impl<'a> Tokenizer<'a> {
                 break;
             }
         }
+        tokens.push(Token::new(
+            TokenType::NEW_LINE,
+            state.location,
+            state.location,
+            self.get_source_path_as_string(),
+        ));
     }
 
     fn consume_number_or_minus_op(&self, state: &mut State, tokens: &mut Vec<Token>) {
