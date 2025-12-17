@@ -417,11 +417,6 @@ pub fn parser_slr(parser: &mut Parser) {
     parser.ctx.ast = Program {
         testcase: ast.clone(),
     };
-    if parser.ctx.errors.errors.is_empty() {
-        execute(&mut parser.ctx.ast.testcase);
-    } else {
-        log::error!("Errors {:#?}", parser.ctx.errors.errors);
-    }
     log::info!("variables {:#?}", parser.ctx.ast.testcase.variables);
 }
 

@@ -1,3 +1,4 @@
+use engine::execute;
 use project_k::parse;
 use project_k::CompilationContext;
 use std::env;
@@ -26,6 +27,9 @@ fn main() {
 
     let mut ctx = CompilationContext::new(PathBuf::from(source_path.clone()));
     parse(source, &mut ctx);
-    // println!("{:#?}", ctx.errors.errors);
-    // println!("{:#?}", ctx.program);
+    if ctx.errors.errors.is_empty() {
+        execute(&mut ctx.ast.testcase);
+    } else {
+        println!("Errors {:#?}", ctx.errors.errors);
+    }
 }
