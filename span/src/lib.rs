@@ -52,6 +52,17 @@ impl Span {
     pub fn dummy() -> Span {
         Span::new(Location::dummy(), Location::dummy())
     }
+
+    pub fn len(&self) -> usize {
+        if self.start.line == self.end.line {
+            return self.end.column - self.start.column;
+        } else {
+            //this is for lsp
+            //we dont support & not require multiline yet
+            // so returns 0
+            return 0;
+        }
+    }
 }
 
 ///Getter and Setter beahaviour for Span
