@@ -52,3 +52,21 @@ pub fn pop_token(attrs: TokenStream, item: TokenStream) -> TokenStream {
     }
     return quote! {#func}.into();
 }
+
+#[proc_macro_attribute]
+pub fn pop_expr(attrs: TokenStream, item: TokenStream) -> TokenStream {
+    let attributes = parse_macro_input!(attrs as Attributes);
+    let mut func = parse_macro_input!(item as ItemFn);
+    for attr in attributes.identifiers.iter().rev() {
+        let stmt_token_stream = quote! {let #attr = match _tl_stack.pop_expr() {
+            Some(expr) => expr,
+            None => {
+                return;
+            }
+        };}
+        .into();
+        let stmt = parse_macro_input!(stmt_token_stream as Stmt);
+        func.block.stmts.insert(0, stmt);
+    }
+    return quote! {#func}.into();
+}
