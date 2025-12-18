@@ -1,6 +1,6 @@
 use engine::execute;
-use project_k::parse;
-use project_k::CompilationContext;
+use parser::parse;
+use parser::CompilationContext;
 use std::env;
 use std::fs;
 use std::path::PathBuf;
