@@ -1,11 +1,11 @@
 use std::collections::HashMap;
 
+use crate::a_types;
 use crate::parser::actions::shared::Shared;
 use crate::parser::errors::EXPECT_STRING_EXPR;
 use crate::parser::errorss::ActionError;
 use crate::parser::translator_stack::{TLVec, TranslatorStack};
 use crate::token::Token;
-use crate::{a_types, pop_expr};
 use ast::action::Action;
 use ast::arguments::{Args, ATTRIBUTE_ARGKEY, EXPR_ARGKEY, LOCATOR_ARGKEY};
 use ast::expression::{ExpKind, Expr, Literal};
@@ -16,7 +16,7 @@ use ast::testcase::TestCase;
 use ast::teststep::Teststep;
 use class::ELEMENT;
 use class::{ElementAction, Method};
-use macros::pop_token;
+use macros::{pop_expr, pop_token};
 use manodae::error::ParseError;
 
 pub struct Element {}
@@ -25,13 +25,13 @@ impl ElementAction for Element {
     a_types!();
     // click expr
     #[pop_token(click_token)]
+    #[pop_expr(expr)]
     fn CLICK(
         _testcase: &mut TestCase,
         _token_stack: &mut Vec<Token>,
         _tl_stack: &mut Vec<TranslatorStack>,
         _errors: &mut Vec<ParseError<Token>>,
     ) {
-        let expr = pop_expr!(_tl_stack.pop_expr(), _errors, click_token);
         let span = click_token.span.to(&expr.span);
 
         let locator_arg = match Shared::get_locator_arg(&expr) {
@@ -60,14 +60,13 @@ impl ElementAction for Element {
 
     //enter expression in expression
     #[pop_token(_in_token, enter_token)]
+    #[pop_expr(locator_expr, text_expr)]
     fn SENDKEYS(
         _testcase: &mut TestCase,
         _token_stack: &mut Vec<Token>,
         _tl_stack: &mut Vec<TranslatorStack>,
         _errors: &mut Vec<ParseError<Token>>,
     ) {
-        let locator_expr = pop_expr!(_tl_stack.pop_expr(), _errors, enter_token);
-        let text_expr = pop_expr!(_tl_stack.pop_expr(), _errors, enter_token);
         let span = enter_token.span.to(&locator_expr.span);
 
         let locator_arg = match Shared::get_locator_arg(&locator_expr) {
@@ -111,28 +110,13 @@ impl ElementAction for Element {
 
     //get attribute expression from element expression
     #[pop_token(_element, _from, _attribute, get_token)]
+    #[pop_expr(locator_expr, attribute_expr)]
     fn GET_ATTRIBUTE(
         _testcase: &mut TestCase,
         _token_stack: &mut Vec<Token>,
         _tl_stack: &mut Vec<TranslatorStack>,
         _errors: &mut Vec<ParseError<Token>>,
     ) {
-        let locator_expr = match _tl_stack.pop_expr() {
-            Ok(expr) => expr,
-            Err((error, span)) => {
-                _errors.push_error(&get_token, &span, error);
-                return;
-            }
-        };
-
-        let attribute_expr = match _tl_stack.pop_expr() {
-            Ok(expr) => expr,
-            Err((error, span)) => {
-                _errors.push_error(&get_token, &span, error);
-                return;
-            }
-        };
-
         if Primitives::String != attribute_expr.primitive {
             _errors.push_error(
                 &get_token,

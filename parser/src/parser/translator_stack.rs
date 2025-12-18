@@ -21,17 +21,17 @@ pub enum TranslatorStack {
 }
 
 impl TranslatorStack {
-    pub fn get_expression(&self) -> Result<Expr, (String, Span)> {
+    pub fn get_expression(&self) -> Option<Expr> {
         if let TranslatorStack::Expression(expr) = self {
-            Ok(expr.clone())
+            Some(expr.clone())
         } else {
-            Err((EXPECT_EXPR.to_string(), self.get_span()))
+            None
         }
     }
 }
 
 pub trait TLVec {
-    fn pop_expr(&mut self) -> Result<Expr, (String, Span)>;
+    fn pop_expr(&mut self) -> Option<Expr>;
     fn push_expr(&mut self, expr: Expr);
     fn push_step(&mut self, teststep: Teststep);
     fn pop_body(&mut self) -> Body;
@@ -39,7 +39,10 @@ pub trait TLVec {
 }
 
 impl TLVec for Vec<TranslatorStack> {
-    fn pop_expr(&mut self) -> Result<Expr, (String, Span)> {
+    fn pop_expr(&mut self) -> Option<Expr> {
+        let Some(TranslatorStack::Expression(_)) = self.last() else {
+            return None;
+        };
         let tl = self.pop().unwrap();
         tl.get_expression()
     }
@@ -52,10 +55,11 @@ impl TLVec for Vec<TranslatorStack> {
         };
     }
     fn pop_body(&mut self) -> Body {
+        println!("body {:#?}", self.last());
         match self.pop() {
             Some(TranslatorStack::Body(body)) => body,
-            Some(_) => panic!("error"),
-            None => panic!("error"),
+            Some(a) => panic!("some error {a:#?}"),
+            None => panic!("errorddddddd"),
         }
     }
     fn pop_else(&mut self) -> Option<IfStmt> {
@@ -64,10 +68,13 @@ impl TLVec for Vec<TranslatorStack> {
             Some(TranslatorStack::IfStmt(stmt))
             if stmt.method != Method::CONDITIONAL_STMT(CONDITIONAL_STMT::IF)
         ) {
+            println!("{:#?}", line!());
             return None;
         }
+        println!("{:#?}", line!());
 
         if let TranslatorStack::IfStmt(stmt) = self.pop().unwrap() {
+            println!("{:#?}", line!());
             return Some(stmt);
         } else {
             return None;

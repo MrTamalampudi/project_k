@@ -12,7 +12,7 @@ use ast::primitives::Primitives;
 use ast::testcase::TestCase;
 use ast::teststep::Teststep;
 use class::{Method, TimeoutsAction, TIMEOUTS};
-use macros::pop_token;
+use macros::{pop_expr, pop_token};
 use manodae::error::ParseError;
 
 pub struct Timeouts;
@@ -21,20 +21,13 @@ impl TimeoutsAction for Timeouts {
     a_types!();
     //action: wait expression
     #[pop_token(wait_token)]
+    #[pop_expr(expr)]
     fn WAIT(
         _testcase: &mut TestCase,
         _token_stack: &mut Vec<Token>,
         _tl_stack: &mut Vec<TranslatorStack>,
         _errors: &mut Vec<ParseError<Token>>,
     ) {
-        let expr = match _tl_stack.pop_expr() {
-            Ok(expr) => expr,
-            Err((error, span)) => {
-                _errors.push_error(&wait_token, &span, error);
-                return;
-            }
-        };
-
         if Primitives::Number != expr.primitive {
             _errors.push_error(&wait_token, &expr.span, EXPECT_NUMBER_EXPR.to_string());
             return;

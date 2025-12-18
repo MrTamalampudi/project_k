@@ -14,7 +14,7 @@ use ast::{
     testcase::TestCase,
 };
 use class::{ConditionalStmtAction, Method, CONDITIONAL_STMT};
-use macros::pop_token;
+use macros::{pop_body, pop_else, pop_expr, pop_token};
 use manodae::error::ParseError;
 use span::Span;
 
@@ -22,7 +22,11 @@ pub struct Conditional;
 
 impl ConditionalStmtAction for Conditional {
     a_types!();
+
     #[pop_token(_r_curly_brace_token, _l_curly_brace_token, _if_token)]
+    #[pop_expr(cond_expr)]
+    #[pop_body]
+    #[pop_else]
     fn IF(
         _testcase: &mut TestCase,
         _token_stack: &mut Vec<Token>,
@@ -30,15 +34,6 @@ impl ConditionalStmtAction for Conditional {
         _errors: &mut Vec<ParseError<Token>>,
     ) {
         let span = _if_token.span.to(&_r_curly_brace_token.span);
-        let or_else = Box::new(_tl_stack.pop_else());
-        let body = _tl_stack.pop_body();
-        let cond_expr = match _tl_stack.pop_expr() {
-            Ok(expr) => expr,
-            Err((e, span)) => {
-                _errors.push_error(&_if_token, &span, e);
-                return;
-            }
-        };
         if cond_expr.primitive != Primitives::Boolean {
             _errors.push_error(&_if_token, &cond_expr.span, EXPECT_BOOL_EXPR.to_string());
             return;
@@ -54,6 +49,9 @@ impl ConditionalStmtAction for Conditional {
     }
 
     #[pop_token(_r_curly_brace_token, _l_curly_brace_token, _if_token, _else_token)]
+    #[pop_expr(cond_expr)]
+    #[pop_body]
+    #[pop_else]
     fn ELSE_IF(
         _testcase: &mut TestCase,
         _token_stack: &mut Vec<Token>,
@@ -61,16 +59,6 @@ impl ConditionalStmtAction for Conditional {
         _errors: &mut Vec<ParseError<Token>>,
     ) {
         let span = _else_token.span.to(&_r_curly_brace_token.span);
-        let or_else = Box::new(_tl_stack.pop_else());
-        let body = _tl_stack.pop_body();
-        let cond_expr = match _tl_stack.pop_expr() {
-            Ok(expr) => expr,
-            Err((e, span)) => {
-                _errors.push_error(&_else_token, &span, e);
-                return;
-            }
-        };
-
         if cond_expr.primitive != Primitives::Boolean {
             _errors.push_error(&_else_token, &cond_expr.span, EXPECT_BOOL_EXPR.to_string());
             return;
@@ -87,13 +75,13 @@ impl ConditionalStmtAction for Conditional {
     }
 
     #[pop_token(_r_curly_brace_token, _l_curly_brace_token, _else_token)]
+    #[pop_body]
     fn ELSE(
         _testcase: &mut TestCase,
         _token_stack: &mut Vec<Token>,
         _tl_stack: &mut Vec<TranslatorStack>,
         _errors: &mut Vec<ParseError<Token>>,
     ) {
-        let body = _tl_stack.pop_body();
         let span = _else_token.span.to(&_r_curly_brace_token.span);
         let stmt = IfStmt {
             span,

@@ -24,7 +24,7 @@ use class::{
     LiteralExpressionAction, NavigationAction, TimeoutsAction, UnaryExpressionAction,
     WebDriverAction,
 };
-use engine::execute;
+use log::debug;
 use manodae::prelude::*;
 
 //generates error if there are no parser generated files
@@ -57,7 +57,6 @@ macro_rules! get_input_from_token_stack {
 #[allow(non_camel_case_types, unused)]
 pub fn parser_slr(parser: &mut Parser) {
     let tt: Vec<Token> = parser.lexer.tokens.iter().cloned().collect();
-    println!("tokens {:#?}", tt);
     let d_string = || "".to_string();
     let d_num = || (1 as isize);
     let time = Instant::now();
@@ -389,7 +388,7 @@ pub fn parser_slr(parser: &mut Parser) {
         Newline            -> [TokenType::NEW_LINE];
     );
     let els = time.elapsed();
-    println!("grammar {:#?}", els);
+    debug!("grammar macro expansion time {:#?}", els);
     let time = Instant::now();
     let path = std::env::current_dir()
         .unwrap()
@@ -400,14 +399,14 @@ pub fn parser_slr(parser: &mut Parser) {
         .to_path_buf();
     Codegen::gen(path, grammar, ["TestCase", "Token", "TranslatorStack"]);
     let els = time.elapsed();
-    println!("construction {:#?}", els);
+    debug!("codegeneration time {:#?}", els);
     // render(&lalr_parser);
     let mut errors: Vec<ParseError<Token>> = Vec::new();
     let mut ast: TestCase = TestCase::new();
     let time = Instant::now();
     get_parser().parse(tt, &mut errors, &mut ast);
     let els = time.elapsed();
-    println!("parsing {:#?}", els);
+    debug!("parsing time {:#?}", els);
     refine_errors(&mut errors);
     let transformed_errors: Vec<ErrorInfo> = errors
         .iter()

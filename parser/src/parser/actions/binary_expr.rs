@@ -1,5 +1,5 @@
 use class::BinaryExpressionAction;
-use macros::pop_token;
+use macros::{pop_expr, pop_token};
 use manodae::error::ParseError;
 
 use crate::a_types;
@@ -17,6 +17,7 @@ pub struct BinaryExpression;
 
 impl BinaryExpression {
     #[pop_token(token)]
+    #[pop_expr(expr2, expr1)]
     fn common(
         _testcase: &mut TestCase,
         _token_stack: &mut Vec<Token>,
@@ -24,22 +25,6 @@ impl BinaryExpression {
         _errors: &mut Vec<ParseError<Token>>,
         op: BinOpKind,
     ) {
-        let expr2 = match _tl_stack.pop_expr() {
-            Ok(expr) => expr,
-            Err((error, span)) => {
-                _errors.push_error(&token, &span, error);
-                return;
-            }
-        };
-
-        let expr1 = match _tl_stack.pop_expr() {
-            Ok(expr) => expr,
-            Err((error, span)) => {
-                _errors.push_error(&token, &span, error);
-                return;
-            }
-        };
-
         let span = expr1.span.to(&expr2.span);
 
         //typechecking

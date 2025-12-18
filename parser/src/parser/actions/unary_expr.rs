@@ -1,5 +1,5 @@
 use class::UnaryExpressionAction;
-use macros::pop_token;
+use macros::{pop_expr, pop_token};
 use manodae::error::ParseError;
 
 use crate::{
@@ -33,20 +33,13 @@ impl UnaryExpressionAction for UnaryExpression {
 
     // !expr
     #[pop_token(negation_token)]
+    #[pop_expr(expr)]
     fn NEGATION(
         _testcase: &mut TestCase,
         _token_stack: &mut Vec<Token>,
         _tl_stack: &mut Vec<TranslatorStack>,
         _errors: &mut Vec<ParseError<Token>>,
     ) {
-        let expr = match _tl_stack.pop_expr() {
-            Ok(expr) => expr,
-            Err((error, span)) => {
-                _errors.push_error(&negation_token, &span, error);
-                return;
-            }
-        };
-
         if expr.boolean() {
             let expr_ = Expr {
                 primitive: Primitives::Boolean,

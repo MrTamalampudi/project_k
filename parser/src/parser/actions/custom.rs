@@ -17,6 +17,7 @@ use ast::var_decl::VarDecl;
 use class::CustomAction;
 use class::Method;
 use class::CUSTOM;
+use macros::pop_expr;
 use macros::pop_token;
 use manodae::error::ParseError;
 use span::Span;
@@ -41,9 +42,8 @@ impl CustomAction for Custom {
         };
 
         let var_rhs = match _tl_stack.pop_expr() {
-            Ok(expr) => expr,
-            Err((error, span)) => {
-                _errors.push_error(&identifier_token, &span, error);
+            Some(expr) => expr,
+            None => {
                 return;
             }
         };
@@ -75,20 +75,13 @@ impl CustomAction for Custom {
 
     //assert expr
     #[pop_token(assert_token)]
+    #[pop_expr(expr)]
     fn ASSERT(
         _testcase: &mut TestCase,
         _token_stack: &mut Vec<Token>,
         _tl_stack: &mut Vec<TranslatorStack>,
         _errors: &mut Vec<ParseError<Token>>,
     ) {
-        let expr = match _tl_stack.pop_expr() {
-            Ok(expr) => expr,
-            Err((error, span)) => {
-                _errors.push_error(&assert_token, &span, error);
-                return;
-            }
-        };
-
         if !expr.boolean() {
             _errors.push_error(&assert_token, &expr.span, EXPECT_BOOL_EXPR.to_string());
             return;

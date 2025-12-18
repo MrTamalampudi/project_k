@@ -98,6 +98,7 @@ impl LiteralExpressionAction for LiteralExpression {
                     message: String::from(VARIABLE_NOT_DEFINED),
                     production_end: false,
                 });
+                return;
             }
             let variable_type = variable.unwrap().to_primitive();
             let expr_kind = ExpKind::Lit(LE::Ident(ident, variable_type.clone()));
