@@ -55,7 +55,6 @@ impl TLVec for Vec<TranslatorStack> {
         };
     }
     fn pop_body(&mut self) -> Body {
-        println!("body {:#?}", self.last());
         match self.pop() {
             Some(TranslatorStack::Body(body)) => body,
             Some(a) => panic!("some error {a:#?}"),
@@ -68,13 +67,9 @@ impl TLVec for Vec<TranslatorStack> {
             Some(TranslatorStack::IfStmt(stmt))
             if stmt.method != Method::CONDITIONAL_STMT(CONDITIONAL_STMT::IF)
         ) {
-            println!("{:#?}", line!());
             return None;
         }
-        println!("{:#?}", line!());
-
         if let TranslatorStack::IfStmt(stmt) = self.pop().unwrap() {
-            println!("{:#?}", line!());
             return Some(stmt);
         } else {
             return None;
