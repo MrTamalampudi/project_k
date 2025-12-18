@@ -70,3 +70,31 @@ pub fn pop_expr(attrs: TokenStream, item: TokenStream) -> TokenStream {
     }
     return quote! {#func}.into();
 }
+
+///pops else part from translator stack
+/// expands to this action
+/// ```
+/// let or_else = Box::new(_tl_stack.pop_else());
+/// ```
+#[proc_macro_attribute]
+pub fn pop_body(_attrs: TokenStream, item: TokenStream) -> TokenStream {
+    let mut func = parse_macro_input!(item as ItemFn);
+    let stmt_token_stream = quote! {let body = _tl_stack.pop_body();}.into();
+    let stmt = parse_macro_input!(stmt_token_stream as Stmt);
+    func.block.stmts.insert(0, stmt);
+    return quote! {#func}.into();
+}
+
+///pops else part from translator stack
+/// expands to this action
+/// ```
+/// let or_else = Box::new(_tl_stack.pop_else());
+/// ```
+#[proc_macro_attribute]
+pub fn pop_else(_attrs: TokenStream, item: TokenStream) -> TokenStream {
+    let mut func = parse_macro_input!(item as ItemFn);
+    let stmt_token_stream = quote! {let or_else = Box::new(_tl_stack.pop_else());}.into();
+    let stmt = parse_macro_input!(stmt_token_stream as Stmt);
+    func.block.stmts.insert(0, stmt);
+    return quote! {#func}.into();
+}
