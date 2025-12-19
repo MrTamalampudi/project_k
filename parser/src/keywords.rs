@@ -10,7 +10,6 @@ macro_rules! define_tokens {
             IDENTIFIER(String),
             NUMBER(isize),
             //capbilities
-            XPATH(String),
             NONE,
             $($keyword),*
         }
@@ -45,11 +44,31 @@ macro_rules! define_tokens {
                     keyword_map.get(token_string).cloned().unwrap_or(TokenType::IDENTIFIER(token_string.to_string()))
             }
 
+            pub fn len(&self) -> usize {
+                match self {
+                    TokenType::STRING(string) => string.len(),
+                    TokenType::IDENTIFIER(ident) => ident.len(),
+                    TokenType::NUMBER(num) => num.to_string().len(),
+                    TokenType::NONE => 0,
+                    TokenType::NEW_LINE => 1,
+                    $(TokenType::$keyword =>{
+                        let string = if stringify!($keyword) == "EOF"{
+                            "EOF".to_string()
+                        } else if stringify!($($string)?).len() > 0 {
+                            String::from(stringify!($($string)?))
+                        } else {
+                            stringify!($keyword).replace("_"," ").to_lowercase()
+                        };
+                        string.len()
+                    }
+                    ,)*
+                }
+            }
+
             pub fn to_string(&self) -> String {
                 match self {
                     TokenType::STRING(_) => String::from("string"),
                     TokenType::IDENTIFIER(_) => String::from("identifier"),
-                    TokenType::XPATH(_)  => String::from("xpath"),
                     TokenType::NUMBER(_) => String::from("number"),
                     TokenType::NONE => "none".to_string(),
                     $(TokenType::$keyword =>{
@@ -89,7 +108,6 @@ define_tokens!(
     ELEMENT,
     URL,
     TITLE,
-    VAR,
     //prepositions
     FROM,
     TO,

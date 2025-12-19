@@ -334,7 +334,6 @@ pub fn parser_slr(parser: &mut Parser) {
         Element             -> [TokenType::ELEMENT];
         Url                 -> [TokenType::URL];
         Title               -> [TokenType::TITLE];
-        Var                 -> [TokenType::VAR];
 
         //Prepositions
         From                -> [TokenType::FROM];
