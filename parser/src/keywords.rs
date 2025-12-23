@@ -144,5 +144,6 @@ define_tokens!(
     TESTSTEPS,
     CAPABILITIES,
     PREREQUISITE,
-    EOF
+    EOF,
+    ERROR
 );
