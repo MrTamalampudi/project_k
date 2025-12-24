@@ -1,5 +1,4 @@
 use crate::keywords::TokenType;
-use manodae::token_kind::TokenKind;
 use span::{Location, Span};
 
 #[derive(Debug, Clone, PartialEq)]
@@ -47,15 +46,5 @@ impl Token {
         let mut new = self.clone();
         new.span = span.clone();
         new
-    }
-}
-
-impl TokenKind for Token {
-    type TokenKind = TokenType;
-    fn error() -> Self::TokenKind {
-        TokenType::ERROR
-    }
-    fn eof() -> Self::TokenKind {
-        TokenType::EOF
     }
 }
