@@ -7,7 +7,7 @@ use ast::{
     var_decl::VarDecl,
 };
 
-use class::{Method, CONDITIONAL_STMT};
+use class::{Method, CONTROL_FLOW};
 use macros::Span;
 use span::{Span, SpanData};
 
@@ -65,7 +65,7 @@ impl TLVec for Vec<TranslatorStack> {
         if !matches!(
             self.last(),
             Some(TranslatorStack::IfStmt(stmt))
-            if stmt.method != Method::CONDITIONAL_STMT(CONDITIONAL_STMT::IF)
+            if stmt.method != Method::CONTROL_FLOW(CONTROL_FLOW::IF)
         ) {
             return None;
         }

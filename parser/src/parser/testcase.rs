@@ -5,7 +5,7 @@ use super::Parser;
 use crate::error_handler::{parse_error_to_error_info, ErrorInfo};
 use crate::keywords::TokenType;
 use crate::parser::actions::binary_expr::BinaryExpression;
-use crate::parser::actions::conditional::Conditional;
+use crate::parser::actions::control_flow::ControlFlow;
 use crate::parser::actions::custom::Custom;
 use crate::parser::actions::driver::Driver;
 use crate::parser::actions::element::Element;
@@ -20,7 +20,7 @@ use crate::token::Token;
 use ast::testcase::TestCase;
 use ast::teststep::Body;
 use class::{
-    BinaryExpressionAction, ConditionalStmtAction, CustomAction, ElementAction,
+    BinaryExpressionAction, ControlFlowAction, CustomAction, ElementAction,
     LiteralExpressionAction, NavigationAction, TimeoutsAction, UnaryExpressionAction,
     WebDriverAction,
 };
@@ -134,29 +134,29 @@ pub fn parser_slr(parser: &mut Parser) {
         // ***** Conditional statement *****
         IfStmt -> IfExpr
         {action:|ast,token_stack,tl_stack,errors| {
-            Conditional::IF(ast,token_stack,tl_stack,errors);
+            ControlFlow::IF(ast,token_stack,tl_stack,errors);
         }}
         | IfExpr ElseIfStmt
         {action:|ast,token_stack,tl_stack,errors| {
-            Conditional::IF(ast,token_stack,tl_stack,errors);
+            ControlFlow::IF(ast,token_stack,tl_stack,errors);
         }}
         | IfExpr ElseExpr
         {action:|ast,token_stack,tl_stack,errors| {
-            Conditional::IF(ast,token_stack,tl_stack,errors);
+            ControlFlow::IF(ast,token_stack,tl_stack,errors);
         }}
         ;
 
         ElseIfStmt -> ElseIfExpr
         {action:|ast,token_stack,tl_stack,errors| {
-            Conditional::ELSE_IF(ast,token_stack,tl_stack,errors);
+            ControlFlow::ELSE_IF(ast,token_stack,tl_stack,errors);
         }}
         | ElseIfExpr ElseIfStmt
         {action:|ast,token_stack,tl_stack,errors| {
-            Conditional::ELSE_IF(ast,token_stack,tl_stack,errors);
+            ControlFlow::ELSE_IF(ast,token_stack,tl_stack,errors);
         }}
         | ElseIfExpr ElseExpr
         {action:|ast,token_stack,tl_stack,errors| {
-            Conditional::ELSE_IF(ast,token_stack,tl_stack,errors);
+            ControlFlow::ELSE_IF(ast,token_stack,tl_stack,errors);
         }}
         ;
 
@@ -166,7 +166,7 @@ pub fn parser_slr(parser: &mut Parser) {
 
         ElseExpr -> Else L_CurlyBrace Newline Teststeps R_CurlyBrace
         {action:|ast,token_stack,tl_stack,errors| {
-            Conditional::ELSE(ast,token_stack,tl_stack,errors);
+            ControlFlow::ELSE(ast,token_stack,tl_stack,errors);
         }}
         ;
 

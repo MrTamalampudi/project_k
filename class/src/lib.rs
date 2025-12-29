@@ -285,9 +285,9 @@ class_macro!(
         }
     },
     {
-        action:ConditionalStmtAction,
-        engine:ConditionalStmtEngine,
-        CONDITIONAL_STMT {
+        action:ControlFlowAction,
+        engine:ControlFlowEngine,
+        CONTROL_FLOW {
             IF,
             ELSE_IF,
             ELSE

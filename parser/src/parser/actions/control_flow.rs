@@ -13,14 +13,14 @@ use ast::{
     primitives::Primitives,
     testcase::TestCase,
 };
-use class::{ConditionalStmtAction, Method, CONDITIONAL_STMT};
+use class::{ControlFlowAction, Method, CONTROL_FLOW};
 use macros::{pop_body, pop_else, pop_expr, pop_token};
 use manodae::error::ParseError;
 use span::Span;
 
-pub struct Conditional;
+pub struct ControlFlow;
 
-impl ConditionalStmtAction for Conditional {
+impl ControlFlowAction for ControlFlow {
     a_types!();
 
     #[pop_token(_r_curly_brace_token, _l_curly_brace_token, _if_token)]
@@ -43,7 +43,7 @@ impl ConditionalStmtAction for Conditional {
             condition: cond_expr,
             body,
             or_else,
-            method: Method::CONDITIONAL_STMT(CONDITIONAL_STMT::IF),
+            method: Method::CONTROL_FLOW(CONTROL_FLOW::IF),
         };
         _tl_stack.push_step(Teststep::If(stmt));
     }
@@ -69,7 +69,7 @@ impl ConditionalStmtAction for Conditional {
             condition: cond_expr,
             body,
             or_else,
-            method: Method::CONDITIONAL_STMT(CONDITIONAL_STMT::ELSE_IF),
+            method: Method::CONTROL_FLOW(CONTROL_FLOW::ELSE_IF),
         };
         _tl_stack.push(TranslatorStack::IfStmt(stmt));
     }
@@ -92,7 +92,7 @@ impl ConditionalStmtAction for Conditional {
             },
             body,
             or_else: Box::new(None),
-            method: Method::CONDITIONAL_STMT(CONDITIONAL_STMT::ELSE),
+            method: Method::CONTROL_FLOW(CONTROL_FLOW::ELSE),
         };
         _tl_stack.push(TranslatorStack::IfStmt(stmt));
     }

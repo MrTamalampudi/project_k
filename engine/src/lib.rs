@@ -16,7 +16,7 @@ use ast::{
 };
 use class::{CustomEngine, Method};
 
-mod conditional;
+mod control_flow;
 mod custom;
 mod element;
 mod errors;
@@ -94,7 +94,7 @@ impl<'a> Engine<'a> {
                     _ => {}
                 },
                 Teststep::VarDecl(_) => self.VAR_DECLARATION(&teststep).await?,
-                Teststep::If(_) => self.conditional(&teststep).await?,
+                Teststep::If(_) => self.control_flow(&teststep).await?,
                 _ => {}
             };
         }
