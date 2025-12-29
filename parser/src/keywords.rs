@@ -119,6 +119,7 @@ define_tokens!(
     OR,
     IF,
     ELSE,
+    WHILE,
     //operators
     ASSIGN_OP = '=',
     NEGATION = '!', //from here

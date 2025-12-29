@@ -290,7 +290,8 @@ class_macro!(
         CONTROL_FLOW {
             IF,
             ELSE_IF,
-            ELSE
+            ELSE,
+            WHILE
         }
     }
 );

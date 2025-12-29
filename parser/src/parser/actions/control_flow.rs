@@ -96,4 +96,24 @@ impl ControlFlowAction for ControlFlow {
         };
         _tl_stack.push(TranslatorStack::IfStmt(stmt));
     }
+
+    #[pop_token(_r_curly_brace_token, _l_curly_brace_token, _while_token)]
+    #[pop_expr(condition)]
+    #[pop_body]
+    fn WHILE(
+        _testcase: &mut TestCase,
+        _token_stack: &mut Vec<Token>,
+        _tl_stack: &mut Vec<TranslatorStack>,
+        _errors: &mut Vec<ParseError<Token>>,
+    ) {
+        let span = _while_token.span.to(&_r_curly_brace_token.span);
+        let stmt = IfStmt {
+            span,
+            condition,
+            body,
+            or_else: Box::new(None),
+            method: Method::CONTROL_FLOW(CONTROL_FLOW::WHILE),
+        };
+        _tl_stack.push_step(Teststep::If(stmt));
+    }
 }

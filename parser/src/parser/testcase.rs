@@ -128,10 +128,12 @@ pub fn parser_slr(parser: &mut Parser) {
             Element::SENDKEYS(ast,token_stack,tl_stack,errors);
         }}
         |
-        IfStmt
+        ControlFlow
         ;
 
-        // ***** Conditional statement *****
+        ControlFlow -> IfStmt | WhileStmt;
+
+        // ***** Control flow statement *****
         IfStmt -> IfExpr
         {action:|ast,token_stack,tl_stack,errors| {
             ControlFlow::IF(ast,token_stack,tl_stack,errors);
@@ -170,6 +172,11 @@ pub fn parser_slr(parser: &mut Parser) {
         }}
         ;
 
+        WhileStmt -> While Expression L_CurlyBrace Newline Teststeps R_CurlyBrace
+        {action:|ast,token_stack,tl_stack,errors| {
+            ControlFlow::WHILE(ast,token_stack,tl_stack,errors);
+        }}
+        ;
         // *****
 
         Getter ->
@@ -363,6 +370,7 @@ pub fn parser_slr(parser: &mut Parser) {
         Or                  -> [TokenType::OR];
         If                  -> [TokenType::IF];
         Else                -> [TokenType::ELSE];
+        While               -> [TokenType::WHILE];
 
         //chars
         Left_paran          -> [TokenType::LEFT_PARAN];
