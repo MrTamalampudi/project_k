@@ -6,7 +6,6 @@ use thirtyfour::WebElement;
 pub enum IdentifierValue {
     String(Option<String>),
     Number(Option<isize>),
-    Locators(Option<LocatorStrategy>),
     Element(Option<WebElement>),
     Boolean(Option<bool>),
 }
@@ -16,7 +15,6 @@ impl IdentifierValue {
         match self {
             IdentifierValue::String(_) => Primitives::String,
             IdentifierValue::Number(_) => Primitives::Number,
-            IdentifierValue::Locators(_) => Primitives::Locators,
             IdentifierValue::Element(_) => Primitives::Element,
             IdentifierValue::Boolean(_) => Primitives::Boolean,
         }

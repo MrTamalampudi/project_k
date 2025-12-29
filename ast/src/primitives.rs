@@ -4,7 +4,6 @@ use crate::identifier_value::IdentifierValue;
 pub enum Primitives {
     Number,
     String,
-    Locators,
     Element,
     Boolean,
 }
@@ -14,7 +13,6 @@ impl ToString for Primitives {
         match self {
             Primitives::Number => String::from("Number"),
             Primitives::Element => String::from("Element"),
-            Primitives::Locators => String::from("Locators"),
             Primitives::String => String::from("String"),
             Primitives::Boolean => String::from("Boolean"),
         }
@@ -26,7 +24,6 @@ impl Primitives {
         match self {
             Primitives::Number => IdentifierValue::Number(None),
             Primitives::Element => IdentifierValue::Element(None),
-            Primitives::Locators => IdentifierValue::Locators(None),
             Primitives::String => IdentifierValue::String(None),
             Primitives::Boolean => IdentifierValue::Boolean(None),
         }
