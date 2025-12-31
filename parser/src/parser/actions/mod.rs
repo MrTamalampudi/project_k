@@ -3,7 +3,6 @@ pub mod control_flow;
 pub mod custom;
 pub mod driver;
 pub mod element;
-pub mod expression;
 pub mod literal_expression;
 pub mod navigation;
 pub mod shared;

@@ -22,3 +22,6 @@ pub const INVALID_AND_OP: &'static str = "Invalid logical and operation";
 pub const INVALID_OR_OP: &'static str = "Invalid logical or operation";
 pub const INVALID_EQ_OP: &'static str = "Invalid equivalent operation";
 pub const INVALID_CMP_OP: &'static str = "Invalid comparision operation";
+
+//***** Array *****
+pub(crate) const ARRAY_EVAL: &'static str = "Error while evaluating array";

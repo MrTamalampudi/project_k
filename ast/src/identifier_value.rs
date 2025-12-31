@@ -1,4 +1,4 @@
-use crate::{locator::LocatorStrategy, primitives::Primitives};
+use crate::primitives::Primitives;
 use std::mem::discriminant;
 use thirtyfour::WebElement;
 
@@ -8,6 +8,7 @@ pub enum IdentifierValue {
     Number(Option<isize>),
     Element(Option<WebElement>),
     Boolean(Option<bool>),
+    Array(Option<Vec<IdentifierValue>>, Primitives),
 }
 
 impl IdentifierValue {
@@ -17,6 +18,7 @@ impl IdentifierValue {
             IdentifierValue::Number(_) => Primitives::Number,
             IdentifierValue::Element(_) => Primitives::Element,
             IdentifierValue::Boolean(_) => Primitives::Boolean,
+            IdentifierValue::Array(_, primitive) => *primitive,
         }
     }
 

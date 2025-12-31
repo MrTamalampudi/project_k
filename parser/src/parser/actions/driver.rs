@@ -13,7 +13,7 @@ use ast::testcase::TestCase;
 use ast::teststep::Teststep;
 use class::WebDriverAction;
 use class::{Method, WEB_DRIVER};
-use macros::pop_token;
+use macros::{pop_expr, pop_token};
 use manodae::error::ParseError;
 use span::SpanData;
 use url::Url;
@@ -23,23 +23,15 @@ pub struct Driver;
 impl WebDriverAction for Driver {
     a_types!();
     #[pop_token(navigate_token)]
+    #[pop_expr(url_expr)]
     fn NAVIGATE(
         _testcase: &mut TestCase,
         _token_stack: &mut Vec<Token>,
         _tl_stack: &mut Vec<TranslatorStack>,
         _errors: &mut Vec<ParseError<Token>>,
     ) -> () {
-        let url = _tl_stack.pop().unwrap();
-        let url_expr = if let TranslatorStack::Expression(expr) = &url {
-            expr.clone()
-        } else {
-            let nt = navigate_token.make_dummy_token(&url.get_span());
-            _errors.push(ParseError::new(nt, EXPECT_EXPR.to_string()));
-            return;
-        };
-
         if Primitives::String != url_expr.primitive {
-            let nt = navigate_token.make_dummy_token(&url.get_span());
+            let nt = navigate_token.make_dummy_token(&url_expr.get_span());
             _errors.push(ParseError::new(nt, EXPECT_STRING_EXPR.to_string()));
             return;
         }

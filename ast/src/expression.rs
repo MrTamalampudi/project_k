@@ -85,4 +85,5 @@ pub enum ExpKind {
     Unary(UnOp, Box<Expr>),
     Lit(Literal),
     Getter(Getter),
+    Array(Vec<Expr>),
 }

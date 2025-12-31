@@ -1,4 +1,3 @@
-use crate::parser::errors::EXPECT_EXPR;
 use ast::{
     action::Action,
     expression::Expr,
@@ -8,16 +7,15 @@ use ast::{
 };
 
 use class::{Method, CONTROL_FLOW};
-use macros::Span;
-use span::{Span, SpanData};
 
-#[derive(Debug, Clone, PartialEq, Span)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum TranslatorStack {
     Body(Body),
     TestStep(Action),
     VarDecl(VarDecl),
     Expression(Expr),
     IfStmt(IfStmt),
+    ArrayDelim,
 }
 
 impl TranslatorStack {

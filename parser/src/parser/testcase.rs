@@ -199,6 +199,10 @@ pub fn parser_slr(parser: &mut Parser) {
         Expression  -> LiteralExpression
         | BinaryExpression
         | UnaryExpression
+        | ArrayExpression
+        {action:|ast,token_stack,tl_stack,errors| {
+            LiteralExpression::ARRAY(ast, token_stack, tl_stack, errors);
+        }}
         | Getter
         ;
 
@@ -324,6 +328,16 @@ pub fn parser_slr(parser: &mut Parser) {
         }}
         ;
 
+        ArrayExpression -> L_SquareBrace R_SquareBrace
+        | L_SquareBrace ArrayElements R_SquareBrace;
+
+        ArrayElements -> Expression
+        | Expression Comma ArrayElements
+        {action:|ast,token_stack,tl_stack,errors| {
+            //pop comma token
+            token_stack.pop();
+        }};
+
         //Actions
         Navigate            -> [TokenType::NAVIGATE];
         Click               -> [TokenType::CLICK];
@@ -365,6 +379,9 @@ pub fn parser_slr(parser: &mut Parser) {
         Greater_than_equal  -> [TokenType::GREATER_THAN_EQUAL_TO];
         Lesser_than_equal   -> [TokenType::LESSER_THAN_EQUAL_TO];
 
+        //Punctuations
+        Comma               -> [TokenType::COMMA];
+
         //Conjunctions
         And                 -> [TokenType::AND];
         Or                  -> [TokenType::OR];
@@ -382,6 +399,11 @@ pub fn parser_slr(parser: &mut Parser) {
             tl_stack.push(TranslatorStack::Body(Body::new()));
         }};
         R_CurlyBrace        -> [TokenType::R_CURLY_BRACE];
+        L_SquareBrace       -> [TokenType::L_SQUARE_BRACE]
+        {action:|ast,token_stack,tl_stack,errors| {
+            tl_stack.push(TranslatorStack::ArrayDelim);
+        }};
+        R_SquareBrace       -> [TokenType::R_SQUARE_BRACE];
 
         //Inputs
         String              -> [TokenType::STRING(d_string())];

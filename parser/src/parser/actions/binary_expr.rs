@@ -33,6 +33,10 @@ impl BinaryExpression {
             return;
         }
 
+        if matches!(expr1.kind, ExpKind::Array(_)) || matches!(expr2.kind, ExpKind::Array(_)) {
+            return;
+        }
+
         let primitive = if op.is_bool_op() {
             Primitives::Boolean
         } else {

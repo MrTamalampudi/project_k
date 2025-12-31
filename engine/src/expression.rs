@@ -5,9 +5,9 @@ use thirtyfour::By;
 use crate::{
     Engine,
     errors::{
-        EXPECT_LITERAL, ExpressionEvalResult, INT_OVERFLOW, INVALID_ADD_OP, INVALID_AND_OP,
-        INVALID_EQ_OP, INVALID_INPUT, INVALID_LOC_EXPR, INVALID_OR_OP, INVALID_SUB_OP,
-        INVALID_UNARY_OP,
+        ARRAY_EVAL, EXPECT_LITERAL, ExpressionEvalResult, INT_OVERFLOW, INVALID_ADD_OP,
+        INVALID_AND_OP, INVALID_EQ_OP, INVALID_INPUT, INVALID_LOC_EXPR, INVALID_OR_OP,
+        INVALID_SUB_OP, INVALID_UNARY_OP,
     },
 };
 use ast::{
@@ -25,8 +25,24 @@ impl<'a> Engine<'a> {
             ExpKind::Binary(op, expr1, expr2) => self.binary_eval(op, expr1, expr2).await,
             ExpKind::Unary(op, expr) => self.unary_eval(op, expr).await,
             ExpKind::Lit(_) => self.literal_eval(expr),
+            ExpKind::Array(expr_arr) => self.array_eval(expr_arr).await,
             ExpKind::Getter(getter) => self.getter_eval(getter).await,
         }
+    }
+
+    //
+    async fn array_eval(&mut self, expr_arr: &Vec<Expr>) -> ExpressionEvalResult {
+        let mut array = vec![];
+        for expr in expr_arr.iter() {
+            let value = Box::pin(self.eval(expr)).await?;
+            array.push(value);
+        }
+        let primitive = if let Some(value) = array.first() {
+            value.to_primitive()
+        } else {
+            return Err(ARRAY_EVAL.to_string());
+        };
+        return Ok(IdentifierValue::Array(Some(array), primitive));
     }
 
     fn literal_eval(&self, expr: &Expr) -> ExpressionEvalResult {

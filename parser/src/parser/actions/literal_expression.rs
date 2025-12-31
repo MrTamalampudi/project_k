@@ -6,9 +6,9 @@ use crate::{
     a_types,
     keywords::TokenType,
     parser::{
-        errors::{EXPECT_BOOL_EXPR, VARIABLE_NOT_DEFINED},
+        errors::{EMPTY_ARRAY_EXPR, EXPECT_BOOL_EXPR, VARIABLE_NOT_DEFINED},
         errorss::ActionError,
-        translator_stack::TranslatorStack,
+        translator_stack::{TLVec, TranslatorStack},
     },
     token::Token,
 };
@@ -108,5 +108,43 @@ impl LiteralExpressionAction for LiteralExpression {
                 kind: expr_kind,
             }));
         }
+    }
+
+    #[pop_token(r_space_brac, l_space_brac)]
+    fn ARRAY(
+        _testcase: &mut Self::AST,
+        _token_stack: &mut Vec<Self::Token>,
+        _tl_stack: &mut Vec<Self::TranslatorStack>,
+        _errors: &mut Vec<Self::Error<Self::Token>>,
+    ) {
+        let mut expr_arr = vec![];
+        //pop expression from tl_stack till ArrayDelim
+        while Some(&TranslatorStack::ArrayDelim) != _tl_stack.last() {
+            let expr = match _tl_stack.pop_expr() {
+                Some(expr) => expr,
+                None => {
+                    return;
+                }
+            };
+            expr_arr.push(expr);
+        }
+        //remove ArrayDelim
+        _tl_stack.pop();
+        //because we push from backside so we need to reverse
+        // [a,b,c] -> [c,b,a] -> [a,b,c]
+        // ^orginal  ^expr_arr  ^reverse
+        expr_arr.reverse();
+        let span = l_space_brac.span.to(&r_space_brac.span);
+        if expr_arr.is_empty() {
+            _errors.push_error(&l_space_brac, &span, EMPTY_ARRAY_EXPR.to_string());
+            return;
+        }
+        let primitive = expr_arr.first().unwrap().primitive;
+        let kind = ExpKind::Array(expr_arr);
+        _tl_stack.push(TranslatorStack::Expression(Expr {
+            kind,
+            span,
+            primitive,
+        }));
     }
 }

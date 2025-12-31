@@ -132,12 +132,16 @@ define_tokens!(
     RIGHT_PARAN = ')',
     L_CURLY_BRACE = '{',
     R_CURLY_BRACE = '}',
+    L_SQUARE_BRACE = '[',
+    R_SQUARE_BRACE = ']',
     EQUALITY = "==",
     NOT_EQUAL = "!=",
     GREATER_THAN = '>',
     LESSER_THAN = '<',
     GREATER_THAN_EQUAL_TO = ">=",
     LESSER_THAN_EQUAL_TO = "<=",
+    //Punctuation
+    COMMA = ',',
     //boolean
     TRUE,
     FALSE,

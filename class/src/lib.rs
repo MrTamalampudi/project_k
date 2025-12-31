@@ -254,7 +254,8 @@ class_macro!(
             STRING,
             NUMBER,
             IDENT,
-            BOOLEAN
+            BOOLEAN,
+            ARRAY
         }
     },
     {

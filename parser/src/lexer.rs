@@ -18,6 +18,8 @@ const LEFT_PARAN: char = '(';
 const RIGHT_PARAN: char = ')';
 const L_CURLY_BRACE: char = '{';
 const R_CURLY_BRACE: char = '}';
+const L_SQUARE_BRACE: char = '[';
+const R_SQUARE_BRACE: char = ']';
 const UNDERLINE: char = '_';
 const PLUS: char = '+';
 const HYPHEN: char = '-';
@@ -26,6 +28,7 @@ const FORWARDSLASH: char = '/';
 const MODULUS: char = '%';
 const GREATER_THAN: char = '>';
 const LESSER_THAN: char = '<';
+const COMMA: char = ',';
 
 impl fmt::Display for TokenType {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -122,6 +125,13 @@ impl<'a> Tokenizer<'a> {
                 &MODULUS => self.consume_operator_token(TokenType::MODULUS, state, tokens, 1),
                 &DOUBLE_QUOTE => self.consume_string_token(state, tokens),
                 &FORWARDSLASH => self.consume_comments_or_division_op(state, tokens),
+                &COMMA => self.consume_operator_token(TokenType::COMMA, state, tokens, 1),
+                &L_SQUARE_BRACE => {
+                    self.consume_operator_token(TokenType::L_SQUARE_BRACE, state, tokens, 1)
+                }
+                &R_SQUARE_BRACE => {
+                    self.consume_operator_token(TokenType::R_SQUARE_BRACE, state, tokens, 1)
+                }
                 &L_CURLY_BRACE => {
                     self.consume_operator_token(TokenType::L_CURLY_BRACE, state, tokens, 1)
                 }
