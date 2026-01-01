@@ -46,6 +46,7 @@ pub enum Teststep {
     If(IfStmt),
     Getter(Getter),
     VarDecl(VarDecl),
+    For(ForLoop),
 }
 
 pub trait Next {

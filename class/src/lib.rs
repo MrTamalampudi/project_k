@@ -296,7 +296,8 @@ class_macro!(
             IF,
             ELSE_IF,
             ELSE,
-            WHILE
+            WHILE,
+            FOR
         }
     }
 );

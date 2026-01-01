@@ -136,6 +136,8 @@ impl LiteralExpressionAction for LiteralExpression {
         expr_arr.reverse();
         let span = l_space_brac.span.to(&r_space_brac.span);
         if expr_arr.is_empty() {
+            //if it is an empty array it is impossible to determine
+            //its primitive at the time of declaration
             _errors.push_error(&l_space_brac, &span, EMPTY_ARRAY_EXPR.to_string());
             return;
         }

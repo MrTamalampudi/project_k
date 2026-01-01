@@ -58,8 +58,8 @@ impl ElementAction for Element {
     ) {
     }
 
-    //enter expression in expression
-    #[pop_token(_in_token, enter_token)]
+    //enter expression in element expression
+    #[pop_token(_element_token, _in_token, enter_token)]
     #[pop_expr(locator_expr, text_expr)]
     fn SENDKEYS(
         _testcase: &mut TestCase,

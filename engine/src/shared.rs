@@ -2,10 +2,11 @@ use thirtyfour::{By, error::WebDriverError};
 
 use crate::{
     Engine, EngineResult,
-    errors::{INVALID_INPUT, INVALID_LOC_EXPR},
+    errors::{ARRAY_EVAL, INVALID_INPUT, INVALID_LOC_EXPR},
 };
 use ast::{
     arguments::{ATTRIBUTE_ARGKEY, Args, EXPR_ARGKEY, LOCATOR_ARGKEY},
+    expression::{ExpKind, Expr},
     identifier_value::IdentifierValue,
     teststep::Teststep,
 };
@@ -82,5 +83,17 @@ impl<'a> Engine<'a> {
         }
 
         return Err(WebDriverError::FatalError(INVALID_LOC_EXPR.to_string()));
+    }
+
+    #[inline]
+    pub async fn get_array_expr(
+        &mut self,
+        identifier_value: &IdentifierValue,
+    ) -> EngineResult<Vec<IdentifierValue>> {
+        if let IdentifierValue::Array(vec, _) = &identifier_value {
+            return Ok(vec.clone().unwrap());
+        } else {
+            return Err(WebDriverError::FatalError(ARRAY_EVAL.to_string()));
+        }
     }
 }

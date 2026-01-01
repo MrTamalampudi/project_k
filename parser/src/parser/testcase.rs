@@ -131,7 +131,7 @@ pub fn parser_slr(parser: &mut Parser) {
         ControlFlow
         ;
 
-        ControlFlow -> IfStmt | WhileStmt;
+        ControlFlow -> IfStmt | WhileStmt | ForLoop;
 
         // ***** Control flow statement *****
         IfStmt -> IfExpr
@@ -175,8 +175,17 @@ pub fn parser_slr(parser: &mut Parser) {
         WhileStmt -> While Expression L_CurlyBrace Newline Teststeps R_CurlyBrace
         {action:|ast,token_stack,tl_stack,errors| {
             ControlFlow::WHILE(ast,token_stack,tl_stack,errors);
-        }}
-        ;
+        }};
+
+        ForLoop -> For ForLoopHelper L_CurlyBrace Newline Teststeps R_CurlyBrace
+        {action:|ast,token_stack,tl_stack,errors| {
+            ControlFlow::FOR(ast,token_stack,tl_stack,errors);
+        }};
+
+        ForLoopHelper -> Ident In Expression
+        {action:|ast,token_stack,tl_stack,errors| {
+            ControlFlow::HELPER(ast,token_stack,tl_stack,errors);
+        }};
         // *****
 
         Getter ->
@@ -388,6 +397,7 @@ pub fn parser_slr(parser: &mut Parser) {
         If                  -> [TokenType::IF];
         Else                -> [TokenType::ELSE];
         While               -> [TokenType::WHILE];
+        For                 -> [TokenType::FOR];
 
         //chars
         Left_paran          -> [TokenType::LEFT_PARAN];
@@ -398,11 +408,13 @@ pub fn parser_slr(parser: &mut Parser) {
         {action:|ast,token_stack,tl_stack,errors| {
             tl_stack.push(TranslatorStack::Body(Body::new()));
         }};
+
         R_CurlyBrace        -> [TokenType::R_CURLY_BRACE];
         L_SquareBrace       -> [TokenType::L_SQUARE_BRACE]
         {action:|ast,token_stack,tl_stack,errors| {
             tl_stack.push(TranslatorStack::ArrayDelim);
         }};
+
         R_SquareBrace       -> [TokenType::R_SQUARE_BRACE];
 
         //Inputs
@@ -414,7 +426,10 @@ pub fn parser_slr(parser: &mut Parser) {
         True               -> [TokenType::TRUE];
         False              -> [TokenType::FALSE];
 
-        Newline            -> [TokenType::NEW_LINE];
+        Newline            -> [TokenType::NEW_LINE]
+        {action:|ast,token_stack,tl_stack,errors| {
+            token_stack.pop(); //pop newline token
+        }};
     );
     let els = time.elapsed();
     debug!("grammar macro expansion time {:#?}", els);

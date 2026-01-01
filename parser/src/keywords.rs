@@ -120,6 +120,7 @@ define_tokens!(
     IF,
     ELSE,
     WHILE,
+    FOR,
     //operators
     ASSIGN_OP = '=',
     NEGATION = '!', //from here

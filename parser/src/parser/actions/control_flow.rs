@@ -1,11 +1,14 @@
 use crate::a_types;
-use crate::parser::errors::EXPECT_BOOL_EXPR;
+use crate::keywords::TokenType;
+use crate::parser::errors::{EXPECT_ARRAY, EXPECT_BOOL_EXPR, EXPECT_VARIABLE};
 use crate::parser::errorss::ActionError;
 use crate::{
     parser::translator_stack::{TLVec, TranslatorStack},
     token::Token,
 };
 use ast::expression::ExpKind;
+use ast::for_loop::ForLoop;
+use ast::identifier_value::IdentifierValue;
 use ast::teststep::Teststep;
 use ast::{
     expression::{Expr, Literal},
@@ -19,6 +22,34 @@ use manodae::error::ParseError;
 use span::Span;
 
 pub struct ControlFlow;
+
+impl ControlFlow {
+    #[allow(non_snake_case)]
+    #[pop_token(_in, ident)]
+    #[pop_expr(iter)]
+    pub fn HELPER(
+        _testcase: &mut TestCase,
+        _token_stack: &mut Vec<Token>,
+        _tl_stack: &mut Vec<TranslatorStack>,
+        _errors: &mut Vec<ParseError<Token>>,
+    ) {
+        if let ExpKind::Lit(Literal::Ident(name, _)) = &iter.kind {
+            let value = _testcase.variables.get(name);
+            let IdentifierValue::Array(_, _) = value.unwrap() else {
+                _errors.push_error(&ident, &iter.span, EXPECT_ARRAY.to_string());
+                return;
+            };
+        };
+        let primitive = iter.primitive;
+        if let TokenType::IDENTIFIER(ident) = ident.get_token_type() {
+            _testcase
+                .variables
+                .insert(ident, primitive.to_identifier_value());
+        }
+        _token_stack.push(ident);
+        _tl_stack.push_expr(iter);
+    }
+}
 
 impl ControlFlowAction for ControlFlow {
     a_types!();
@@ -115,5 +146,33 @@ impl ControlFlowAction for ControlFlow {
             method: Method::CONTROL_FLOW(CONTROL_FLOW::WHILE),
         };
         _tl_stack.push_step(Teststep::If(stmt));
+    }
+
+    //For Expression In Expression L_CurlyBrace Newline Teststeps R_CurlyBrace
+    #[pop_token(_r_curly_brace_token, _l_curly_brace_token, target, for_token)]
+    #[pop_expr(iter)]
+    #[pop_body]
+    fn FOR(
+        _testcase: &mut Self::AST,
+        _token_stack: &mut Vec<Self::Token>,
+        _tl_stack: &mut Vec<Self::TranslatorStack>,
+        _errors: &mut Vec<Self::Error<Self::Token>>,
+    ) {
+        let span = for_token.span.to(&_r_curly_brace_token.span);
+        let target = if let TokenType::IDENTIFIER(ident) = target.get_token_type() {
+            ident.clone()
+        } else {
+            _errors.push_error(&target, &target.span, EXPECT_VARIABLE.to_string());
+            return;
+        };
+
+        let stmt = ForLoop {
+            span,
+            iter,
+            target,
+            body,
+            method: Method::CONTROL_FLOW(CONTROL_FLOW::FOR),
+        };
+        _tl_stack.push_step(Teststep::For(stmt));
     }
 }

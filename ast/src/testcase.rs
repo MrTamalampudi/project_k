@@ -19,7 +19,7 @@ impl TestCase {
 
     pub fn insert_variable(&mut self, var: VarDecl) {
         self.variables
-            .insert(var.name.clone(), var.type_.to_identifier_value());
+            .insert(var.name.clone(), var.rhs.kind.to_identifier_value());
     }
 
     pub fn insert_variable_value(&mut self, ident: String, value: IdentifierValue) {

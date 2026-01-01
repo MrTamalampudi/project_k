@@ -6,11 +6,13 @@ use thirtyfour::error::WebDriverError;
 impl<'a> Engine<'a> {
     pub async fn control_flow(&mut self, teststep: &Teststep) -> EngineResult<()> {
         if let Method::CONTROL_FLOW(method) = &teststep.get_method() {
+            println!("method {:#?}", method);
             match method {
                 CONTROL_FLOW::IF => Box::pin(self.IF(teststep)).await?,
                 CONTROL_FLOW::ELSE_IF => self.ELSE_IF(teststep).await?,
                 CONTROL_FLOW::ELSE => self.ELSE(teststep).await?,
                 CONTROL_FLOW::WHILE => Box::pin(self.WHILE(teststep)).await?,
+                CONTROL_FLOW::FOR => Box::pin(self.FOR(teststep)).await?,
             };
         };
         Ok(())
@@ -45,6 +47,21 @@ impl<'a> ControlFlowEngine for Engine<'a> {
             while condition {
                 self.execute_body(stmt.body.clone()).await?;
                 condition = self.get_boolean(_step).await?;
+            }
+        }
+        Ok(())
+    }
+    async fn FOR(&mut self, _step: &Self::Step) -> Result<(), Self::Error> {
+        if let Teststep::For(stmt) = _step.clone() {
+            let target = stmt.target;
+            let iter_value = match self.eval(&stmt.iter).await {
+                Err(e) => return Err(WebDriverError::FatalError(e)),
+                Ok(value) => value,
+            };
+            let iter = self.get_array_expr(&iter_value).await?;
+            for i in iter.into_iter() {
+                self.testcase.insert_variable_value(target.clone(), i);
+                self.execute_body(stmt.body.clone()).await?;
             }
         }
         Ok(())

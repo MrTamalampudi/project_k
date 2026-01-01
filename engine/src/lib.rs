@@ -95,6 +95,7 @@ impl<'a> Engine<'a> {
                 },
                 Teststep::VarDecl(_) => self.VAR_DECLARATION(&teststep).await?,
                 Teststep::If(_) => self.control_flow(&teststep).await?,
+                Teststep::For(_) => self.control_flow(&teststep).await?,
                 _ => {}
             };
         }
