@@ -1,6 +1,6 @@
 #![allow(non_camel_case_types, unused)]
 
-use crate::{getter::Getter, primitives::Primitives};
+use crate::{getter::Getter, identifier_value::IdentifierValue, primitives::Primitives};
 use macros::Span;
 use span::{Span, SpanData};
 
@@ -10,6 +10,17 @@ pub enum Literal {
     Ident(String, Primitives),
     String(String),
     Boolean(bool),
+}
+
+impl Literal {
+    pub fn to_identifier_value(&self) -> IdentifierValue {
+        match self {
+            Literal::Boolean(_) => IdentifierValue::Boolean(None),
+            Literal::Ident(_, p) => p.to_identifier_value(),
+            Literal::String(_) => IdentifierValue::String(None),
+            Literal::Number(_) => IdentifierValue::Number(None),
+        }
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Span)]
@@ -86,4 +97,16 @@ pub enum ExpKind {
     Lit(Literal),
     Getter(Getter),
     Array(Vec<Expr>),
+}
+
+impl ExpKind {
+    pub fn to_identifier_value(&self) -> IdentifierValue {
+        match self {
+            ExpKind::Binary(_, expr, _) => expr.primitive.to_identifier_value(),
+            ExpKind::Unary(_, expr) => expr.primitive.to_identifier_value(),
+            ExpKind::Lit(lit) => lit.to_identifier_value(),
+            ExpKind::Getter(getter) => getter.returns.to_identifier_value(),
+            ExpKind::Array(array) => IdentifierValue::Array(None, array.first().unwrap().primitive),
+        }
+    }
 }
