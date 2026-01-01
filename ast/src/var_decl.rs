@@ -1,10 +1,4 @@
-use std::{cell::RefCell, rc::Rc};
-
-use crate::{
-    expression::Expr,
-    primitives::Primitives,
-    teststep::{Next, Teststep},
-};
+use crate::{expression::Expr, primitives::Primitives};
 use class::{CUSTOM, Method};
 use macros::{Method, Span};
 use span::{Span, SpanData};
@@ -15,7 +9,6 @@ pub struct VarDecl {
     pub type_: Primitives,
     pub rhs: Expr,
     pub method: Method,
-    pub next: Option<Rc<RefCell<Teststep>>>,
     pub span: Span,
 }
 
@@ -26,17 +19,7 @@ impl VarDecl {
             type_,
             rhs,
             method: Method::CUSTOM(CUSTOM::VAR_DECLARATION),
-            next: None,
             span,
         }
-    }
-}
-
-impl Next for VarDecl {
-    fn set_next(&mut self, next: Rc<RefCell<Teststep>>) {
-        self.next = Some(next);
-    }
-    fn get_next(&self) -> Option<Rc<RefCell<Teststep>>> {
-        self.next.clone()
     }
 }
