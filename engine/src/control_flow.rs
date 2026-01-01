@@ -1,6 +1,6 @@
 use crate::{Engine, EngineResult, e_types};
-use ast::teststep::{GetMethod, Teststep};
-use class::{CONTROL_FLOW, ControlFlowEngine, Method};
+use ast::teststep::Teststep;
+use class::{CONTROL_FLOW, ControlFlowEngine, GetMethod, Method};
 use thirtyfour::error::WebDriverError;
 
 impl<'a> Engine<'a> {

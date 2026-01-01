@@ -2,6 +2,10 @@
 
 use std::future::Future;
 
+pub trait GetMethod {
+    fn get_method(&self) -> Method;
+}
+
 macro_rules! ifdef {
     ([$($_:tt)+] { $($then:tt)* } $(else { $($_else:tt)* })?) => {
         $($then)*

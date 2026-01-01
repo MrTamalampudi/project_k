@@ -3,13 +3,13 @@ use std::{cell::RefCell, rc::Rc};
 use crate::{
     expression::Expr,
     primitives::Primitives,
-    teststep::{GetMethod, Next, Teststep},
+    teststep::{Next, Teststep},
 };
 use class::{CUSTOM, Method};
-use macros::Span;
+use macros::{Method, Span};
 use span::{Span, SpanData};
 
-#[derive(Debug, Clone, PartialEq, Span)]
+#[derive(Debug, Clone, PartialEq, Span, Method)]
 pub struct VarDecl {
     pub name: String,
     pub type_: Primitives,
@@ -29,12 +29,6 @@ impl VarDecl {
             next: None,
             span,
         }
-    }
-}
-
-impl GetMethod for VarDecl {
-    fn get_method(&self) -> Method {
-        self.method.clone()
     }
 }
 

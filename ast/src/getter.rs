@@ -1,20 +1,14 @@
 use std::collections::HashMap;
 
-use crate::{arguments::Args, primitives::Primitives, teststep::GetMethod};
+use crate::{arguments::Args, primitives::Primitives};
 use class::Method;
-use macros::Span;
+use macros::{Method, Span};
 use span::{Span, SpanData};
 
-#[derive(Debug, Clone, PartialEq, Span)]
+#[derive(Debug, Clone, PartialEq, Span, Method)]
 pub struct Getter {
     pub span: Span,
     pub method: Method,
     pub arguments: HashMap<&'static str, Args>,
     pub returns: Primitives,
-}
-
-impl GetMethod for Getter {
-    fn get_method(&self) -> Method {
-        self.method.clone()
-    }
 }

@@ -1,11 +1,8 @@
 use thirtyfour::error::WebDriverError;
 
 use crate::{Engine, EngineResult, e_types};
-use ast::{
-    identifier_value::IdentifierValue,
-    teststep::{GetMethod, Teststep},
-};
-use class::{CUSTOM, CustomEngine, Method};
+use ast::{identifier_value::IdentifierValue, teststep::Teststep};
+use class::{CUSTOM, CustomEngine, GetMethod, Method};
 
 impl<'a> Engine<'a> {
     pub async fn custom(&mut self, teststep: &Teststep) -> EngineResult<()> {

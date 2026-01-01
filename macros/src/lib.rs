@@ -5,8 +5,12 @@ use syn::{
     punctuated::Punctuated,
 };
 
-use crate::span::{span_trait_derive_enum, span_trait_derive_struct, span_trait_derive_union};
+use crate::{
+    method::{method_trait_derive_enum, method_trait_derive_struct, method_trait_derive_union},
+    span::{span_trait_derive_enum, span_trait_derive_struct, span_trait_derive_union},
+};
 
+mod method;
 mod span;
 
 pub(crate) type MacroResult = Result<proc_macro2::TokenStream, &'static str>;
@@ -34,6 +38,21 @@ pub fn span_data_trait_derive(input: TokenStream) -> TokenStream {
         syn::Data::Struct(struct_data) => span_trait_derive_struct(&name, &struct_data),
         syn::Data::Enum(enum_data) => span_trait_derive_enum(&name, &enum_data),
         syn::Data::Union(_) => span_trait_derive_union(),
+    };
+    if let Err(e) = impl_ {
+        return quote! {compile_error!(#e);}.into();
+    }
+    impl_.unwrap().into()
+}
+///Derive macro generating an impl of trait GetMethod
+#[proc_macro_derive(Method)]
+pub fn get_method_trait_derive(input: TokenStream) -> TokenStream {
+    let d_input = parse_macro_input!(input as DeriveInput);
+    let name = d_input.ident;
+    let impl_ = match d_input.data {
+        syn::Data::Struct(struct_data) => method_trait_derive_struct(&name, &struct_data),
+        syn::Data::Enum(enum_data) => method_trait_derive_enum(&name, &enum_data),
+        syn::Data::Union(_) => method_trait_derive_union(),
     };
     if let Err(e) = impl_ {
         return quote! {compile_error!(#e);}.into();

@@ -1,10 +1,12 @@
 use std::{cell::RefCell, rc::Rc};
 
+use macros::Method;
 use macros::Span;
 use span::Location;
 use span::Span;
 use span::SpanData;
 
+use crate::for_loop::ForLoop;
 use crate::{action::Action, getter::Getter, if_stmt::IfStmt, var_decl::VarDecl};
 use class::Method;
 
@@ -37,28 +39,13 @@ impl Body {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Span)]
+#[derive(Debug, Clone, PartialEq, Span, Method)]
 #[allow(non_camel_case_types)]
 pub enum Teststep {
     Action(Action),
     If(IfStmt),
     Getter(Getter),
     VarDecl(VarDecl),
-}
-
-pub trait GetMethod {
-    fn get_method(&self) -> Method;
-}
-
-impl GetMethod for Teststep {
-    fn get_method(&self) -> Method {
-        match self {
-            Teststep::Getter(step) => step.get_method(),
-            Teststep::Action(step) => step.get_method(),
-            Teststep::If(step) => step.get_method(),
-            Teststep::VarDecl(step) => step.get_method(),
-        }
-    }
 }
 
 pub trait Next {

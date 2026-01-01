@@ -2,9 +2,8 @@ use crate::e_types;
 use crate::{Engine, EngineResult};
 use ast::arguments::{Args, URL_ARGKEY};
 use ast::identifier_value::IdentifierValue;
-use ast::teststep::GetMethod;
 use ast::teststep::Teststep;
-use class::{Method, WEB_DRIVER, WebDriverEngine};
+use class::{GetMethod, Method, WEB_DRIVER, WebDriverEngine};
 use log::info;
 use thirtyfour::error::WebDriverError;
 

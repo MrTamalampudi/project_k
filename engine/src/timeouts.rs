@@ -6,9 +6,9 @@ use crate::{Engine, EngineResult, e_types};
 use ast::{
     arguments::{Args, EXPR_ARGKEY},
     identifier_value::IdentifierValue,
-    teststep::{GetMethod, Teststep},
+    teststep::Teststep,
 };
-use class::{Method, TIMEOUTS, TimeoutsEngine};
+use class::{GetMethod, Method, TIMEOUTS, TimeoutsEngine};
 
 impl<'a> Engine<'a> {
     pub async fn timeouts(&mut self, teststep: &Teststep) -> EngineResult<()> {

@@ -1,8 +1,7 @@
 use crate::e_types;
 use crate::{Engine, EngineResult};
-use ast::teststep::GetMethod;
 use ast::teststep::Teststep;
-use class::{ELEMENT, ElementEngine, Method};
+use class::{ELEMENT, ElementEngine, GetMethod, Method};
 use thirtyfour::error::WebDriverError;
 
 impl<'a> Engine<'a> {

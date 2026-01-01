@@ -2,13 +2,13 @@ use std::{cell::RefCell, collections::HashMap, rc::Rc};
 
 use crate::{
     arguments::Args,
-    teststep::{GetMethod, Next, Teststep},
+    teststep::{Next, Teststep},
 };
 use class::Method;
-use macros::Span;
+use macros::{Method, Span};
 use span::{Span, SpanData};
 
-#[derive(Debug, Clone, PartialEq, Span)]
+#[derive(Debug, Clone, PartialEq, Span, Method)]
 #[allow(unused)]
 pub struct Action {
     pub span: Span,
@@ -25,12 +25,6 @@ impl Action {
             arguments,
             next: None,
         }
-    }
-}
-
-impl GetMethod for Action {
-    fn get_method(&self) -> Method {
-        self.method.clone()
     }
 }
 
