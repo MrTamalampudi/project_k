@@ -61,7 +61,8 @@ pub fn parser_slr(parser: &mut Parser) {
     let d_num = || (1 as isize);
     let time = Instant::now();
     let grammar: Grammar<TestCase, Token, TranslatorStack> = grammar!(
-        Start -> Testcase Newlines Teststeps {error:"Testing"}
+        Start -> Testcase Newlines Teststeps
+        {error:"Testing"}
         {action:|ast,token_stack,tl_stack,errors| {
             Shared::set_body(ast, tl_stack.pop_body());
         }}
@@ -77,59 +78,121 @@ pub fn parser_slr(parser: &mut Parser) {
 
         Teststeps ->Teststep Newlines | Teststep Newlines Teststeps;
 
-        Teststep -> Navigate Expression
+        Teststep -> DriverActions
+        | NavigationActions
+        | ElementActions
+        | TimeoutActions
+        | CustomActions
+        | ControlFlow
+        ;
+
+        // ### Driver ###
+        // Actions
+        DriverActions   -> NAVIGATE
+        | CLOSE
+        ;
+
+        NAVIGATE -> Navigate Expression
         {action:|ast,token_stack,tl_stack,errors| {
             Driver::NAVIGATE(ast, token_stack, tl_stack, errors);
-        }}
-        |Close
+        }};
+
+        CLOSE -> Close
         {action:|ast,token_stack,tl_stack,errors| {
             Driver::CLOSE(ast, token_stack, tl_stack, errors);
-        }}
-        |
-        Click Expression
-        {error:"Please check teststeps syntax"}
+        }};
+
+        // Getter
+
+        DriverGetter    -> GET_TITLE
+        | GET_CURRENT_URL
+        ;
+
+        GET_TITLE -> Get Title
         {action:|ast,token_stack,tl_stack,errors| {
-            Element::CLICK(ast,token_stack,tl_stack,errors);
+                Driver::GET_TITLE(ast,token_stack,tl_stack,errors);
+        }};
+
+        GET_CURRENT_URL -> Get Current Url
+        {action:|ast,token_stack,tl_stack,errors| {
+                Driver::GET_CURRENT_URL(ast,token_stack,tl_stack,errors);
         }}
-        |
-        Back
+        ;
+
+        // ### Navigation ###
+        // Actions
+        NavigationActions -> BACK
+        | FORWARD
+        | REFRESH
+        ;
+
+        BACK -> Back
         {error:"Please check teststeps syntax"}
         {action:|ast,token_stack,tl_stack,errors| {
             Navigation::BACK(ast,token_stack,tl_stack,errors);
         }}
-        |
-        Forward
+        ;
+        FORWARD -> Forward
         {action:|ast,token_stack,tl_stack,errors| {
             Navigation::FORWARD(ast,token_stack,tl_stack,errors);
         }}
-        |
-        Refresh
+        ;
+        REFRESH -> Refresh
         {action:|ast,token_stack,tl_stack,errors| {
             Navigation::REFRESH(ast,token_stack,tl_stack,errors);
-        }}
-        |
-        Wait Expression
+        }};
+
+        // ### Element ###
+        // Actions
+        ElementActions -> CLICK
+        | SENDKEYS
+        ;
+
+        CLICK ->Click Expression
+        {error:"Please check teststeps syntax"}
         {action:|ast,token_stack,tl_stack,errors| {
-            Timeouts::WAIT(ast,token_stack,tl_stack,errors);
-        }}
-        |
-        Ident Assign Expression
-        {action:|ast,token_stack,tl_stack,errors| {
-            Custom::VAR_DECLARATION(ast,token_stack,tl_stack,errors);
-        }}
-        |
-        Assert Expression
-        {action:|ast,token_stack,tl_stack,errors| {
-            Custom::ASSERT(ast,token_stack,tl_stack,errors);
-        }}
-        |
-        Enter Expression In Element Expression
+            Element::CLICK(ast,token_stack,tl_stack,errors);
+        }};
+
+        SENDKEYS -> Enter Expression In Element Expression
         {action:|ast,token_stack,tl_stack,errors| {
             Element::SENDKEYS(ast,token_stack,tl_stack,errors);
         }}
-        |
-        ControlFlow
         ;
+
+        // Getter
+        ElementGetter -> GET_ATTRIBUTE;
+
+        GET_ATTRIBUTE -> Get Attribute Expression From Element Expression
+        {action:|ast,token_stack,tl_stack,errors| {
+                Element::GET_ATTRIBUTE(ast,token_stack,tl_stack,errors);
+        }}
+        ;
+
+        // ### Timeouts ###
+        // Actions
+        TimeoutActions -> WAIT;
+
+        WAIT -> Wait Expression
+        {action:|ast,token_stack,tl_stack,errors| {
+            Timeouts::WAIT(ast,token_stack,tl_stack,errors);
+        }};
+
+        // ### Custom ###
+        // Actions
+        CustomActions -> VAR_DECLARATION
+        | ASSERT
+        ;
+
+        VAR_DECLARATION -> Ident Assign Expression
+        {action:|ast,token_stack,tl_stack,errors| {
+            Custom::VAR_DECLARATION(ast,token_stack,tl_stack,errors);
+        }};
+
+        ASSERT -> Assert Expression
+        {action:|ast,token_stack,tl_stack,errors| {
+            Custom::ASSERT(ast,token_stack,tl_stack,errors);
+        }};
 
         ControlFlow -> IfStmt | WhileStmt | ForLoop;
 
@@ -188,21 +251,8 @@ pub fn parser_slr(parser: &mut Parser) {
         }};
         // *****
 
-        Getter ->
-        Get Attribute Expression From Element Expression
-        {action:|ast,token_stack,tl_stack,errors| {
-                Element::GET_ATTRIBUTE(ast,token_stack,tl_stack,errors);
-        }}
-        |
-        Get Current Url
-        {action:|ast,token_stack,tl_stack,errors| {
-                Driver::GET_CURRENT_URL(ast,token_stack,tl_stack,errors);
-        }}
-        |
-        Get Title
-        {action:|ast,token_stack,tl_stack,errors| {
-                Driver::GET_TITLE(ast,token_stack,tl_stack,errors);
-        }}
+        Getter -> DriverGetter
+        | ElementGetter
         ;
 
         Expression  -> LiteralExpression
