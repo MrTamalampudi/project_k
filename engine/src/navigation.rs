@@ -1,7 +1,6 @@
-use crate::{Engine, EngineResult, e_types};
+use crate::{Engine, EngineResult};
 use ast::teststep::Teststep;
-use class::{GetMethod, Method, NAVIGATION, NavigationEngine};
-use thirtyfour::error::WebDriverError;
+use class::{GetMethod, Method, NAVIGATION};
 
 impl<'a> Engine<'a> {
     pub async fn navigation(&mut self, teststep: &Teststep) -> EngineResult<()> {
@@ -16,8 +15,7 @@ impl<'a> Engine<'a> {
     }
 }
 
-impl<'a> NavigationEngine for Engine<'a> {
-    e_types!();
+impl<'a> Engine<'a> {
     async fn REFRESH(&mut self, _body: &Teststep) -> EngineResult<()> {
         self.driver.refresh().await?;
         Ok(())

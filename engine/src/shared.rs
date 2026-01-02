@@ -6,7 +6,6 @@ use crate::{
 };
 use ast::{
     arguments::{ATTRIBUTE_ARGKEY, Args, EXPR_ARGKEY, LOCATOR_ARGKEY},
-    expression::{ExpKind, Expr},
     identifier_value::IdentifierValue,
     teststep::Teststep,
 };

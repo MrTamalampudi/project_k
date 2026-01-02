@@ -1,9 +1,8 @@
-use crate::e_types;
 use crate::{Engine, EngineResult};
 use ast::arguments::{Args, URL_ARGKEY};
 use ast::identifier_value::IdentifierValue;
 use ast::teststep::Teststep;
-use class::{GetMethod, Method, WEB_DRIVER, WebDriverEngine};
+use class::{GetMethod, Method, WEB_DRIVER};
 use log::info;
 use thirtyfour::error::WebDriverError;
 
@@ -35,8 +34,7 @@ impl<'a> Engine<'a> {
     }
 }
 
-impl<'a> WebDriverEngine for Engine<'a> {
-    e_types!();
+impl<'a> Engine<'a> {
     async fn NAVIGATE(&mut self, _body: &Teststep) -> EngineResult<()> {
         info!("Navigated to ");
         if let Teststep::Action(step) = _body {
@@ -62,14 +60,14 @@ impl<'a> WebDriverEngine for Engine<'a> {
         Ok(())
     }
 
-    async fn GET_CURRENT_URL(&mut self, _body: &Teststep) -> EngineResult<Option<String>> {
+    pub async fn GET_CURRENT_URL(&mut self, _body: &Teststep) -> EngineResult<Option<String>> {
         let url = self.driver.current_url().await?;
         Ok(Some(url.to_string()))
     }
     async fn GET_PAGE_SOURCE(&mut self, _body: &Teststep) -> EngineResult<()> {
         Ok(())
     }
-    async fn GET_TITLE(&mut self, _body: &Teststep) -> EngineResult<Option<String>> {
+    pub async fn GET_TITLE(&mut self, _body: &Teststep) -> EngineResult<Option<String>> {
         let title = self.driver.title().await?;
         Ok(Some(title.to_string()))
     }

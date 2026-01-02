@@ -2,13 +2,13 @@ use std::time::{Duration, SystemTime};
 
 use thirtyfour::{By, error::WebDriverError};
 
-use crate::{Engine, EngineResult, e_types};
+use crate::{Engine, EngineResult};
 use ast::{
     arguments::{Args, EXPR_ARGKEY},
     identifier_value::IdentifierValue,
     teststep::Teststep,
 };
-use class::{GetMethod, Method, TIMEOUTS, TimeoutsEngine};
+use class::{GetMethod, Method, TIMEOUTS};
 
 impl<'a> Engine<'a> {
     pub async fn timeouts(&mut self, teststep: &Teststep) -> EngineResult<()> {
@@ -21,8 +21,7 @@ impl<'a> Engine<'a> {
     }
 }
 
-impl<'a> TimeoutsEngine for Engine<'a> {
-    e_types!();
+impl<'a> Engine<'a> {
     async fn WAIT(&mut self, _step: &Teststep) -> Result<(), thirtyfour::prelude::WebDriverError> {
         if let Teststep::Action(step) = _step {
             let secs_arg = step.arguments.get(EXPR_ARGKEY);

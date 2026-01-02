@@ -1,12 +1,11 @@
-use crate::{Engine, EngineResult, e_types};
+use crate::{Engine, EngineResult};
 use ast::teststep::Teststep;
-use class::{CONTROL_FLOW, ControlFlowEngine, GetMethod, Method};
+use class::{CONTROL_FLOW, GetMethod, Method};
 use thirtyfour::error::WebDriverError;
 
 impl<'a> Engine<'a> {
     pub async fn control_flow(&mut self, teststep: &Teststep) -> EngineResult<()> {
         if let Method::CONTROL_FLOW(method) = &teststep.get_method() {
-            println!("method {:#?}", method);
             match method {
                 CONTROL_FLOW::IF => Box::pin(self.IF(teststep)).await?,
                 CONTROL_FLOW::ELSE_IF => self.ELSE_IF(teststep).await?,
@@ -19,8 +18,7 @@ impl<'a> Engine<'a> {
     }
 }
 
-impl<'a> ControlFlowEngine for Engine<'a> {
-    e_types!();
+impl<'a> Engine<'a> {
     async fn IF(&mut self, _step: &Teststep) -> EngineResult<()> {
         if let Teststep::If(stmt) = _step.clone() {
             let condition = self.get_boolean(_step).await?;
@@ -41,7 +39,7 @@ impl<'a> ControlFlowEngine for Engine<'a> {
     async fn ELSE(&mut self, _step: &Teststep) -> EngineResult<()> {
         Ok(())
     }
-    async fn WHILE(&mut self, _step: &Self::Step) -> EngineResult<()> {
+    async fn WHILE(&mut self, _step: &Teststep) -> EngineResult<()> {
         if let Teststep::If(stmt) = _step.clone() {
             let mut condition = self.get_boolean(_step).await?;
             while condition {
@@ -51,7 +49,7 @@ impl<'a> ControlFlowEngine for Engine<'a> {
         }
         Ok(())
     }
-    async fn FOR(&mut self, _step: &Self::Step) -> Result<(), Self::Error> {
+    async fn FOR(&mut self, _step: &Teststep) -> EngineResult<()> {
         if let Teststep::For(stmt) = _step.clone() {
             let target = stmt.target;
             let iter_value = match self.eval(&stmt.iter).await {

@@ -1,3 +1,4 @@
+#![allow(non_snake_case)]
 use std::{
     net::{Ipv4Addr, SocketAddrV4, TcpListener},
     panic,
@@ -14,7 +15,7 @@ use ast::{
     testcase::TestCase,
     teststep::{Body, Teststep},
 };
-use class::{CustomEngine, Method};
+use class::Method;
 
 mod control_flow;
 mod custom;
@@ -28,14 +29,6 @@ mod webdriver;
 
 type Port = u16;
 type EngineResult<T> = Result<T, WebDriverError>;
-
-#[macro_export]
-macro_rules! e_types {
-    () => {
-        type Error = WebDriverError;
-        type Step = Teststep;
-    };
-}
 
 #[tokio::main]
 pub async fn execute(testcase: &mut TestCase) {

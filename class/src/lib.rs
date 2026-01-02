@@ -1,18 +1,7 @@
 #![allow(non_camel_case_types, non_snake_case, unused_parens)]
 
-use std::future::Future;
-
 pub trait GetMethod {
     fn get_method(&self) -> Method;
-}
-
-macro_rules! ifdef {
-    ([$($_:tt)+] { $($then:tt)* } $(else { $($_else:tt)* })?) => {
-        $($then)*
-    };
-    ([] { $($_then:tt)* } $(else { $($else:tt)* })?) => {
-        $($($else)*)?
-    };
 }
 
 macro_rules! class_macro {
@@ -20,24 +9,9 @@ macro_rules! class_macro {
         $(
             {
                 action:$action:ident,
-                engine:$engine:ident,
                 $class:ident {
                     $(
-                        $method:ident$(
-                            {
-                                $(
-                                    action: {
-                                        returns : $action_returns:ident
-                                    }
-                                )?
-                                $(
-                                    engine : {
-                                        $(args: [$($engine_arg_ident:ident: $engine_arg_type:ty),*])?
-                                        $(returns : $engine_returns:ty)?
-                                    }
-                                )?
-                            }
-                        )?
+                        $method:ident
                     ),+
                 }
             }
@@ -54,32 +28,6 @@ macro_rules! class_macro {
         pub enum Method {
             $($class($class)),+
         }
-
-        $(
-            pub trait $engine{
-                type Step;
-                type Error;
-                $(
-                    ifdef! {
-                        [$($($($engine_returns)?)?)?,$($($($($engine_arg_ident),*)?)?)?]
-                        {fn $method(&mut self,_step:&Self::Step,$($($($($engine_arg_ident:$engine_arg_type),*)?)?)?) -> impl Future<Output = Result<($($($($engine_returns)?)?)?),Self::Error>>;}
-                        else
-                        { ifdef! {
-                            [$($($($engine_returns)?)?)?]
-                            {fn $method(&mut self,_step:&Self::Step) -> impl Future<Output = (Result<$($($($engine_returns)?)?)?,Self::Error>)>;}
-                            else
-                            { ifdef! {
-                                [$($($($($engine_arg_ident),*)?)?)?]
-                                {fn $method(&mut self,_step:&Self::Step,$($($($($engine_arg_ident:$engine_arg_type),*)?)?)?) -> impl Future<Output = (Result<(),Self::Error>)>;}
-                                else
-                                {fn $method(&mut self,_step:&Self::Step) -> impl Future<Output = (Result<(),Self::Error>)>;}
-                                }
-                            }}
-                        }
-                    }
-                )+
-            }
-        )+
         $(
             pub trait $action{
                 type AST;
@@ -87,21 +35,12 @@ macro_rules! class_macro {
                 type TranslatorStack;
                 type Error<Token>;
                 $(
-                    ifdef! {[$($($action_returns)?)?]
-                        {fn $method(
-                            _testcase: &mut Self::AST,
-                            _token_stack: &mut Vec<Self::Token>,
-                            _tl_stack:&mut Vec<Self::TranslatorStack>,
-                            _errors: &mut Vec<Self::Error<Self::Token>>
-                        ) -> $($($action_returns)?)?;}
-                        else
-                        {fn $method(
-                            _testcase: &mut Self::AST,
-                            _token_stack: &mut Vec<Self::Token>,
-                            _tl_stack:&mut Vec<Self::TranslatorStack>,
-                            _errors: &mut Vec<Self::Error<Self::Token>>
-                        );}
-                    }
+                    fn $method(
+                        _testcase: &mut Self::AST,
+                        _token_stack: &mut Vec<Self::Token>,
+                        _tl_stack:&mut Vec<Self::TranslatorStack>,
+                        _errors: &mut Vec<Self::Error<Self::Token>>
+                    );
                 )+
             }
         )+
@@ -111,18 +50,13 @@ macro_rules! class_macro {
 class_macro!(
     {
         action: ElementAction,
-        engine: ElementEngine,
         ELEMENT {
             CLEAR,
             CLICK,
             SENDKEYS,
             SUBMIT,
-            GET_ATTRIBUTE {
-                engine:{
-                    returns: Option<String>
-                }
-            },
-            // GET_ACCESSBILE_NAME,
+            GET_ATTRIBUTE ,
+            GET_ACCESSBILE_NAME ,
             // GET_ARIA_ROLE,
             // GET_CSS_VALUE,
             // GET_DOM_PROPERTY,
@@ -130,18 +64,13 @@ class_macro!(
             // GET_SIZE,
             // GET_TAG_NAME,
             // GET_TEXT,
-            IS_DISPLAYED {
-                engine:{
-                    returns: Option<bool>
-                }
-            }
+            IS_DISPLAYED
             // IS_ENABLED,
             // IS_SELECTED
         }
     },
     {
         action: WindowAction,
-        engine: WindowEngine,
         WINDOW {
             FULL_SCREEN,
             GET_POSITION,
@@ -152,18 +81,9 @@ class_macro!(
     },
     {
         action: WebDriverAction,
-        engine: WebDriverEngine,
         WEB_DRIVER {
-            GET_TITLE {
-                engine: {
-                    returns: Option<String>
-                }
-            },
-            GET_CURRENT_URL {
-                engine: {
-                    returns: Option<String>
-                }
-            },
+            GET_TITLE ,
+            GET_CURRENT_URL ,
             GET_PAGE_SOURCE,
             GET_WINDOW_HANDLE,
             CLOSE,
@@ -172,7 +92,6 @@ class_macro!(
     },
     {
         action: AlertAction,
-        engine: AlertEngine,
         ALERT {
             ACCEPT,
             DISMISS,
@@ -182,7 +101,6 @@ class_macro!(
     },
     {
         action: NavigationAction,
-        engine: NavigationEngine,
         NAVIGATION {
             BACK,
             FORWARD,
@@ -191,7 +109,6 @@ class_macro!(
     },
     {
         action: OptionsAction,
-        engine: OptionsEngine,
         OPTIONS {
             ADD_COOKIE,
             DELETE_ALL_COOKIES,
@@ -201,7 +118,6 @@ class_macro!(
     },
     {
         action: TargetLocatorAction,
-        engine: TargetLocatorEngine,
         TARGET_LOCATOR {
             ACTIVE_ELEMENT,
             ALERT,
@@ -213,7 +129,6 @@ class_macro!(
     },
     {
         action: TimeoutsAction,
-        engine: TimeoutsEngine,
         TIMEOUTS {
             WAIT
             // GET_IMPLICIT_TIMEOUT,
@@ -224,7 +139,6 @@ class_macro!(
     },
     {
         action: HasDownloadsAction,
-        engine: HasDownloadsEngine,
         HAS_DOWNLOADS {
             DELETE_DOWNLOADABLE_FILES,
             DOWNLOAD_FILE,
@@ -233,7 +147,6 @@ class_macro!(
     },
     {
         action:CustomAction,
-        engine:CustomEngine,
         CUSTOM {
             VAR_DECLARATION,
             ASSERT
@@ -241,7 +154,6 @@ class_macro!(
     },
     {
         action:ArthimaticExpressionAction,
-        engine:ArthimaticExpressionEngine,
         ARTHIMATICEXPRESSION {
             PLUS,
             MINUS,
@@ -253,7 +165,6 @@ class_macro!(
     },
     {
         action:LiteralExpressionAction,
-        engine:LiteralExpressionEngine,
         LITERALEXPRESSION {
             STRING,
             NUMBER,
@@ -264,7 +175,6 @@ class_macro!(
     },
     {
         action:UnaryExpressionAction,
-        engine:UnaryExpressionEngine,
         UNARYEXPRESSION  {
             NEGATION,
             GROUPED
@@ -272,7 +182,6 @@ class_macro!(
     },
     {
         action:BinaryExpressionAction,
-        engine:BinaryExpressionEngine,
         BINARYEXPRESSION {
             ADD,
             SUB,
@@ -291,7 +200,6 @@ class_macro!(
     },
     {
         action:ControlFlowAction,
-        engine:ControlFlowEngine,
         CONTROL_FLOW {
             IF,
             ELSE_IF,

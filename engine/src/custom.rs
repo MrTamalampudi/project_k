@@ -1,8 +1,8 @@
 use thirtyfour::error::WebDriverError;
 
-use crate::{Engine, EngineResult, e_types};
+use crate::{Engine, EngineResult};
 use ast::{identifier_value::IdentifierValue, teststep::Teststep};
-use class::{CUSTOM, CustomEngine, GetMethod, Method};
+use class::{CUSTOM, GetMethod, Method};
 
 impl<'a> Engine<'a> {
     pub async fn custom(&mut self, teststep: &Teststep) -> EngineResult<()> {
@@ -16,9 +16,8 @@ impl<'a> Engine<'a> {
     }
 }
 
-impl<'a> CustomEngine for Engine<'a> {
-    e_types!();
-    async fn VAR_DECLARATION(&mut self, _body: &Teststep) -> EngineResult<()> {
+impl<'a> Engine<'a> {
+    pub async fn VAR_DECLARATION(&mut self, _body: &Teststep) -> EngineResult<()> {
         if let Teststep::VarDecl(step) = _body {
             let a = self.eval(&step.rhs).await;
             match a {

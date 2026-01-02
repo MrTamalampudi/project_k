@@ -17,7 +17,7 @@ use ast::{
     locator::LocatorStrategy,
     teststep::Teststep,
 };
-use class::{ELEMENT, ElementEngine, Method, WEB_DRIVER, WebDriverEngine};
+use class::{ELEMENT, Method, WEB_DRIVER};
 
 impl<'a> Engine<'a> {
     pub async fn eval(&mut self, expr: &Expr) -> ExpressionEvalResult {

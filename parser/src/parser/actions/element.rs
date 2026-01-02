@@ -174,4 +174,11 @@ impl ElementAction for Element {
         _errors: &mut Vec<ParseError<Token>>,
     ) {
     }
+    fn GET_ACCESSBILE_NAME(
+        _testcase: &mut Self::AST,
+        _token_stack: &mut Vec<Self::Token>,
+        _tl_stack: &mut Vec<Self::TranslatorStack>,
+        _errors: &mut Vec<Self::Error<Self::Token>>,
+    ) {
+    }
 }

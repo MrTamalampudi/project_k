@@ -1,8 +1,6 @@
-use crate::e_types;
 use crate::{Engine, EngineResult};
 use ast::teststep::Teststep;
-use class::{ELEMENT, ElementEngine, GetMethod, Method};
-use thirtyfour::error::WebDriverError;
+use class::{ELEMENT, GetMethod, Method};
 
 impl<'a> Engine<'a> {
     pub async fn element(&mut self, teststep: &Teststep) -> EngineResult<()> {
@@ -18,14 +16,16 @@ impl<'a> Engine<'a> {
                 ELEMENT::IS_DISPLAYED => {
                     self.IS_DISPLAYED(teststep).await?;
                 }
+                ELEMENT::GET_ACCESSBILE_NAME => {
+                    self.GET_ACCESSBILE_NAME(teststep).await?;
+                }
             };
         };
         Ok(())
     }
 }
 
-impl<'a> ElementEngine for Engine<'a> {
-    e_types!();
+impl<'a> Engine<'a> {
     async fn CLEAR(&mut self, _step: &Teststep) -> EngineResult<()> {
         Ok(())
     }
@@ -41,7 +41,7 @@ impl<'a> ElementEngine for Engine<'a> {
         }
         Ok(())
     }
-    async fn GET_ATTRIBUTE(&mut self, _body: &Teststep) -> EngineResult<Option<String>> {
+    pub async fn GET_ATTRIBUTE(&mut self, _body: &Teststep) -> EngineResult<Option<String>> {
         if let Teststep::Getter(_) = _body {
             let locator = self.get_locator(_body).await?;
             let attribute = self.get_attribute(_body).await?;
@@ -61,5 +61,8 @@ impl<'a> ElementEngine for Engine<'a> {
     }
     async fn IS_DISPLAYED(&mut self, _step: &Teststep) -> EngineResult<Option<bool>> {
         Ok(Some(true))
+    }
+    async fn GET_ACCESSBILE_NAME(&mut self, _step: &Teststep) -> EngineResult<Option<String>> {
+        todo!()
     }
 }
