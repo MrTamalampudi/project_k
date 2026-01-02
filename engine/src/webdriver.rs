@@ -60,16 +60,16 @@ impl<'a> Engine<'a> {
         Ok(())
     }
 
-    pub async fn GET_CURRENT_URL(&mut self, _body: &Teststep) -> EngineResult<Option<String>> {
+    pub async fn GET_CURRENT_URL(&mut self, _body: &Teststep) -> EngineResult<IdentifierValue> {
         let url = self.driver.current_url().await?;
-        Ok(Some(url.to_string()))
+        Ok(IdentifierValue::String(Some(url.to_string())))
     }
     async fn GET_PAGE_SOURCE(&mut self, _body: &Teststep) -> EngineResult<()> {
         Ok(())
     }
-    pub async fn GET_TITLE(&mut self, _body: &Teststep) -> EngineResult<Option<String>> {
+    pub async fn GET_TITLE(&mut self, _body: &Teststep) -> EngineResult<IdentifierValue> {
         let title = self.driver.title().await?;
-        Ok(Some(title.to_string()))
+        Ok(IdentifierValue::String(Some(title)))
     }
     async fn GET_WINDOW_HANDLE(&mut self, _body: &Teststep) -> EngineResult<()> {
         Ok(())

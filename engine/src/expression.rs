@@ -220,11 +220,14 @@ impl<'a> Engine<'a> {
             Method::WEB_DRIVER(WEB_DRIVER::GET_TITLE) => {
                 self.GET_TITLE(&Teststep::Getter(getter.clone())).await
             }
+            Method::ELEMENT(ELEMENT::IS_DISPLAYED) => {
+                self.IS_DISPLAYED(&Teststep::Getter(getter.clone())).await
+            }
             _ => return Err("".to_string()),
         };
 
         match a {
-            Ok(ok) => Ok(IdentifierValue::String(ok)),
+            Ok(ok) => Ok(ok),
             Err(_) => Err("".to_string()),
         }
     }

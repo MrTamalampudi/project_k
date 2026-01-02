@@ -4,6 +4,7 @@ use class::{ELEMENT, GetMethod, Method};
 use thirtyfour::error::WebDriverError;
 
 const IS_DISPLAYED_ERROR: &'static str = "Error while evaluating is displayed element action";
+const GET_ATTRIBUTE_ERROR: &'static str = "Error while evaluating get attribute action";
 
 impl<'a> Engine<'a> {
     pub async fn element(&mut self, teststep: &Teststep) -> EngineResult<()> {
@@ -44,14 +45,16 @@ impl<'a> Engine<'a> {
         }
         Ok(())
     }
-    pub async fn GET_ATTRIBUTE(&mut self, _body: &Teststep) -> EngineResult<Option<String>> {
+    pub async fn GET_ATTRIBUTE(&mut self, _body: &Teststep) -> EngineResult<IdentifierValue> {
         if let Teststep::Getter(_) = _body {
             let locator = self.get_locator(_body).await?;
             let attribute = self.get_attribute(_body).await?;
             let element = self.driver.find(locator).await?;
-            return element.attr(attribute).await;
+            let attr = element.attr(attribute).await?;
+            Ok(IdentifierValue::String(attr))
+        } else {
+            Err(WebDriverError::FatalError(GET_ATTRIBUTE_ERROR.to_string()))
         }
-        Ok(None)
     }
 
     async fn CLICK(&mut self, _body: &Teststep) -> EngineResult<()> {
