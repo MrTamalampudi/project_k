@@ -184,13 +184,18 @@ impl ElementAction for Element {
                 return;
             }
         };
-        let action = Action::new(
+        let getter = Getter {
             span,
-            Method::ELEMENT(ELEMENT::IS_DISPLAYED),
-            HashMap::from([(LOCATOR_ARGKEY, locator_arg)]),
-        );
-
-        _tl_stack.push_step(Teststep::Action(action));
+            method: Method::ELEMENT(ELEMENT::IS_DISPLAYED),
+            arguments: HashMap::from([(LOCATOR_ARGKEY, locator_arg)]),
+            returns: Primitives::Boolean,
+        };
+        let expr = Expr {
+            span,
+            kind: ExpKind::Getter(getter),
+            primitive: Primitives::Boolean,
+        };
+        _tl_stack.push_expr(expr);
     }
 
     fn GET_ACCESSBILE_NAME(

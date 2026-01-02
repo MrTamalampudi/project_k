@@ -63,8 +63,8 @@ impl<'a> Engine<'a> {
         Ok(())
     }
 
-    async fn IS_DISPLAYED(&mut self, _step: &Teststep) -> EngineResult<IdentifierValue> {
-        let Teststep::Action(_) = _step else {
+    pub async fn IS_DISPLAYED(&mut self, _step: &Teststep) -> EngineResult<IdentifierValue> {
+        let Teststep::Getter(_) = _step else {
             return Err(WebDriverError::FatalError(IS_DISPLAYED_ERROR.to_string()));
         };
         let locator = self.get_locator(_step).await?;
