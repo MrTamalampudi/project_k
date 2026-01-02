@@ -162,7 +162,10 @@ pub fn parser_slr(parser: &mut Parser) {
 
         // Getter
         ElementGetter -> GET_ATTRIBUTE
-        | IS_DISPLAYED ;
+        | IS_DISPLAYED
+        | IS_ENABLED
+        | IS_SELECTED
+        ;
 
         GET_ATTRIBUTE -> Get Attribute Expression From Element Expression
         {action:|ast,token_stack,tl_stack,errors| {
@@ -173,6 +176,16 @@ pub fn parser_slr(parser: &mut Parser) {
         IS_DISPLAYED -> Is Element Expression Displayed
         {action:|ast,token_stack,tl_stack,errors| {
                 Element::IS_DISPLAYED(ast,token_stack,tl_stack,errors);
+        }}
+        ;
+        IS_ENABLED -> Is Element Expression Enabled
+        {action:|ast,token_stack,tl_stack,errors| {
+                Element::IS_ENABLED(ast,token_stack,tl_stack,errors);
+        }}
+        ;
+        IS_SELECTED -> Is Element Expression Selected
+        {action:|ast,token_stack,tl_stack,errors| {
+                Element::IS_SELECTED(ast,token_stack,tl_stack,errors);
         }}
         ;
 
@@ -431,6 +444,8 @@ pub fn parser_slr(parser: &mut Parser) {
         //Adjectives
         Current             -> [TokenType::CURRENT];
         Displayed           -> [TokenType::DISPLAYED];
+        Enabled             -> [TokenType::ENABLED];
+        Selected            -> [TokenType::SELECTED];
 
         //Operators
         Assign              -> [TokenType::ASSIGN_OP];
@@ -519,7 +534,6 @@ pub fn parser_slr(parser: &mut Parser) {
     parser.ctx.ast = Program {
         testcase: ast.clone(),
     };
-    log::info!("variables {:#?}", parser.ctx.ast.testcase.variables);
 }
 
 fn refine_errors(errors: &mut Vec<ParseError<Token>>) {

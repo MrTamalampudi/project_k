@@ -23,6 +23,12 @@ impl<'a> Engine<'a> {
                 ELEMENT::GET_ACCESSBILE_NAME => {
                     self.GET_ACCESSBILE_NAME(teststep).await?;
                 }
+                ELEMENT::IS_ENABLED => {
+                    self.IS_ENABLED(teststep).await?;
+                }
+                ELEMENT::IS_SELECTED => {
+                    self.IS_SELECTED(teststep).await?;
+                }
             };
         };
         Ok(())
@@ -76,7 +82,25 @@ impl<'a> Engine<'a> {
         Ok(IdentifierValue::Boolean(Some(displayed)))
     }
 
-    async fn GET_ACCESSBILE_NAME(&mut self, _step: &Teststep) -> EngineResult<Option<String>> {
+    pub async fn GET_ACCESSBILE_NAME(&mut self, _step: &Teststep) -> EngineResult<Option<String>> {
         todo!()
+    }
+    pub async fn IS_ENABLED(&mut self, _step: &Teststep) -> EngineResult<IdentifierValue> {
+        let Teststep::Getter(_) = _step else {
+            return Err(WebDriverError::FatalError(IS_DISPLAYED_ERROR.to_string()));
+        };
+        let locator = self.get_locator(_step).await?;
+        let element = self.driver.find(locator).await?;
+        let enabled = element.is_enabled().await?;
+        Ok(IdentifierValue::Boolean(Some(enabled)))
+    }
+    pub async fn IS_SELECTED(&mut self, _step: &Teststep) -> EngineResult<IdentifierValue> {
+        let Teststep::Getter(_) = _step else {
+            return Err(WebDriverError::FatalError(IS_DISPLAYED_ERROR.to_string()));
+        };
+        let locator = self.get_locator(_step).await?;
+        let element = self.driver.find(locator).await?;
+        let selected = element.is_selected().await?;
+        Ok(IdentifierValue::Boolean(Some(selected)))
     }
 }

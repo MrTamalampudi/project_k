@@ -116,6 +116,8 @@ define_tokens!(
     //adjective
     CURRENT,
     DISPLAYED,
+    ENABLED,
+    SELECTED,
     //conjunctions
     AND,
     OR,

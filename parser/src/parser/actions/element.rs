@@ -21,6 +21,38 @@ use manodae::error::ParseError;
 
 pub struct Element {}
 
+impl Element {
+    fn is_common(
+        start_token: Token,
+        end_token: Token,
+        expr: Expr,
+        method: ELEMENT,
+        e: &mut Vec<ParseError<Token>>,
+        t: &mut Vec<TranslatorStack>,
+    ) {
+        let span = start_token.span.to(&end_token.span);
+        let locator_arg = match Shared::get_locator_arg(&expr) {
+            Ok(arg) => arg,
+            Err(err) => {
+                e.push_error(&start_token, &expr.span, err.clone());
+                return;
+            }
+        };
+        let getter = Getter {
+            span,
+            method: Method::ELEMENT(method),
+            arguments: HashMap::from([(LOCATOR_ARGKEY, locator_arg)]),
+            returns: Primitives::Boolean,
+        };
+        let expr = Expr {
+            span,
+            kind: ExpKind::Getter(getter),
+            primitive: Primitives::Boolean,
+        };
+        t.push_expr(expr);
+    }
+}
+
 impl ElementAction for Element {
     a_types!();
     // click expr
@@ -176,26 +208,35 @@ impl ElementAction for Element {
         _tl_stack: &mut Vec<TranslatorStack>,
         _errors: &mut Vec<ParseError<Token>>,
     ) {
-        let span = is.span.to(&displayed.span);
-        let locator_arg = match Shared::get_locator_arg(&expr) {
-            Ok(arg) => arg,
-            Err(err) => {
-                _errors.push_error(&is, &expr.span, err.clone());
-                return;
-            }
-        };
-        let getter = Getter {
-            span,
-            method: Method::ELEMENT(ELEMENT::IS_DISPLAYED),
-            arguments: HashMap::from([(LOCATOR_ARGKEY, locator_arg)]),
-            returns: Primitives::Boolean,
-        };
-        let expr = Expr {
-            span,
-            kind: ExpKind::Getter(getter),
-            primitive: Primitives::Boolean,
-        };
-        _tl_stack.push_expr(expr);
+        Element::is_common(
+            is,
+            displayed,
+            expr,
+            ELEMENT::IS_DISPLAYED,
+            _errors,
+            _tl_stack,
+        );
+    }
+
+    #[pop_token(enabled, _element, is)]
+    #[pop_expr(expr)]
+    fn IS_ENABLED(
+        _testcase: &mut Self::AST,
+        _token_stack: &mut Vec<Self::Token>,
+        _tl_stack: &mut Vec<Self::TranslatorStack>,
+        _errors: &mut Vec<Self::Error<Self::Token>>,
+    ) {
+        Element::is_common(is, enabled, expr, ELEMENT::IS_ENABLED, _errors, _tl_stack);
+    }
+    #[pop_token(selected, _element, is)]
+    #[pop_expr(expr)]
+    fn IS_SELECTED(
+        _testcase: &mut Self::AST,
+        _token_stack: &mut Vec<Self::Token>,
+        _tl_stack: &mut Vec<Self::TranslatorStack>,
+        _errors: &mut Vec<Self::Error<Self::Token>>,
+    ) {
+        Element::is_common(is, selected, expr, ELEMENT::IS_SELECTED, _errors, _tl_stack);
     }
 
     fn GET_ACCESSBILE_NAME(

@@ -64,9 +64,9 @@ class_macro!(
             // GET_SIZE,
             // GET_TAG_NAME,
             // GET_TEXT,
-            IS_DISPLAYED
-            // IS_ENABLED,
-            // IS_SELECTED
+            IS_DISPLAYED,
+            IS_ENABLED,
+            IS_SELECTED
         }
     },
     {

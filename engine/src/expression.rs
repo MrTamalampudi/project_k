@@ -223,6 +223,12 @@ impl<'a> Engine<'a> {
             Method::ELEMENT(ELEMENT::IS_DISPLAYED) => {
                 self.IS_DISPLAYED(&Teststep::Getter(getter.clone())).await
             }
+            Method::ELEMENT(ELEMENT::IS_ENABLED) => {
+                self.IS_ENABLED(&Teststep::Getter(getter.clone())).await
+            }
+            Method::ELEMENT(ELEMENT::IS_SELECTED) => {
+                self.IS_SELECTED(&Teststep::Getter(getter.clone())).await
+            }
             _ => return Err("".to_string()),
         };
 
