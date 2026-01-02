@@ -161,11 +161,18 @@ pub fn parser_slr(parser: &mut Parser) {
         ;
 
         // Getter
-        ElementGetter -> GET_ATTRIBUTE;
+        ElementGetter -> GET_ATTRIBUTE
+        | IS_DISPLAYED ;
 
         GET_ATTRIBUTE -> Get Attribute Expression From Element Expression
         {action:|ast,token_stack,tl_stack,errors| {
                 Element::GET_ATTRIBUTE(ast,token_stack,tl_stack,errors);
+        }}
+        ;
+
+        IS_DISPLAYED -> Is Element Expression Displayed
+        {action:|ast,token_stack,tl_stack,errors| {
+                Element::IS_DISPLAYED(ast,token_stack,tl_stack,errors);
         }}
         ;
 
@@ -419,9 +426,11 @@ pub fn parser_slr(parser: &mut Parser) {
         From                -> [TokenType::FROM];
         To                  -> [TokenType::TO];
         In                  -> [TokenType::IN];
+        Is                  -> [TokenType::IS];
 
         //Adjectives
         Current             -> [TokenType::CURRENT];
+        Displayed           -> [TokenType::DISPLAYED];
 
         //Operators
         Assign              -> [TokenType::ASSIGN_OP];

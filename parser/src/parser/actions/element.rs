@@ -167,13 +167,32 @@ impl ElementAction for Element {
         _tl_stack.push_expr(expr);
     }
 
+    //action: is element expression displayed
+    #[pop_token(displayed, _element, is)]
+    #[pop_expr(expr)]
     fn IS_DISPLAYED(
         _testcase: &mut TestCase,
         _token_stack: &mut Vec<Token>,
         _tl_stack: &mut Vec<TranslatorStack>,
         _errors: &mut Vec<ParseError<Token>>,
     ) {
+        let span = is.span.to(&displayed.span);
+        let locator_arg = match Shared::get_locator_arg(&expr) {
+            Ok(arg) => arg,
+            Err(err) => {
+                _errors.push_error(&is, &expr.span, err.clone());
+                return;
+            }
+        };
+        let action = Action::new(
+            span,
+            Method::ELEMENT(ELEMENT::IS_DISPLAYED),
+            HashMap::from([(LOCATOR_ARGKEY, locator_arg)]),
+        );
+
+        _tl_stack.push_step(Teststep::Action(action));
     }
+
     fn GET_ACCESSBILE_NAME(
         _testcase: &mut Self::AST,
         _token_stack: &mut Vec<Self::Token>,

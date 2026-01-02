@@ -1,6 +1,9 @@
 use crate::{Engine, EngineResult};
-use ast::teststep::Teststep;
+use ast::{identifier_value::IdentifierValue, teststep::Teststep};
 use class::{ELEMENT, GetMethod, Method};
+use thirtyfour::error::WebDriverError;
+
+const IS_DISPLAYED_ERROR: &'static str = "Error while evaluating is displayed element action";
 
 impl<'a> Engine<'a> {
     pub async fn element(&mut self, teststep: &Teststep) -> EngineResult<()> {
@@ -59,9 +62,17 @@ impl<'a> Engine<'a> {
         }
         Ok(())
     }
-    async fn IS_DISPLAYED(&mut self, _step: &Teststep) -> EngineResult<Option<bool>> {
-        Ok(Some(true))
+
+    async fn IS_DISPLAYED(&mut self, _step: &Teststep) -> EngineResult<IdentifierValue> {
+        let Teststep::Action(_) = _step else {
+            return Err(WebDriverError::FatalError(IS_DISPLAYED_ERROR.to_string()));
+        };
+        let locator = self.get_locator(_step).await?;
+        let element = self.driver.find(locator).await?;
+        let displayed = element.is_displayed().await?;
+        Ok(IdentifierValue::Boolean(Some(displayed)))
     }
+
     async fn GET_ACCESSBILE_NAME(&mut self, _step: &Teststep) -> EngineResult<Option<String>> {
         todo!()
     }

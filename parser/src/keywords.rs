@@ -112,8 +112,10 @@ define_tokens!(
     FROM,
     TO,
     IN,
+    IS,
     //adjective
     CURRENT,
+    DISPLAYED,
     //conjunctions
     AND,
     OR,
