@@ -62,15 +62,15 @@ pub fn parser_slr(parser: &mut Parser) {
     let time = Instant::now();
     let grammar: Grammar<TestCase, Token, TranslatorStack> = grammar!(
         Start -> Testcase Newlines Teststeps
-        { |ast,token_stack,tl_stack,errors| {
-            Shared::set_body(ast, tl_stack.pop_body());
-        }};
+        { |ast,token_stack,tl_stack,errors| Shared::set_body(ast, tl_stack.pop_body()) };
 
         [non_terminal_productions]
 
-        Newlines -> Newline | Newline Newlines;
+        Newlines -> Newline
+        | Newline Newlines;
 
-        Teststeps ->Teststep Newlines | Teststep Newlines Teststeps;
+        Teststeps ->Teststep Newlines
+        | Teststep Newlines Teststeps;
 
         Teststep -> DriverActions
         | NavigationActions
@@ -87,324 +87,188 @@ pub fn parser_slr(parser: &mut Parser) {
         ;
 
         NAVIGATE -> Navigate Expression
-        {|ast,token_stack,tl_stack,errors| {
-            Driver::NAVIGATE(ast, token_stack, tl_stack, errors);
-        }};
+        {|ast,token_stack,tl_stack,errors| Driver::NAVIGATE(ast, token_stack, tl_stack, errors) };
 
         CLOSE -> Close
-        {|ast,token_stack,tl_stack,errors| {
-            Driver::CLOSE(ast, token_stack, tl_stack, errors);
-        }};
+        {|ast,token_stack,tl_stack,errors| Driver::CLOSE(ast, token_stack, tl_stack, errors) };
 
         // Getter
 
         DriverGetter    -> GET_TITLE
-        | GET_CURRENT_URL
-        ;
+        | GET_CURRENT_URL ;
 
         GET_TITLE -> Get Title
-        {|ast,token_stack,tl_stack,errors| {
-                Driver::GET_TITLE(ast,token_stack,tl_stack,errors);
-        }};
+        {|ast,token_stack,tl_stack,errors| Driver::GET_TITLE(ast,token_stack,tl_stack,errors)};
 
         GET_CURRENT_URL -> Get Current Url
-        {|ast,token_stack,tl_stack,errors| {
-                Driver::GET_CURRENT_URL(ast,token_stack,tl_stack,errors);
-        }}
-        ;
+        {|ast,token_stack,tl_stack,errors| Driver::GET_CURRENT_URL(ast,token_stack,tl_stack,errors) };
 
         // ### Navigation ###
         // Actions
         NavigationActions -> BACK
         | FORWARD
-        | REFRESH
-        ;
+        | REFRESH ;
 
         BACK -> Back
-        {|ast,token_stack,tl_stack,errors| {
-            Navigation::BACK(ast,token_stack,tl_stack,errors);
-        }}
-        ;
+        { |ast,token_stack,tl_stack,errors| Navigation::BACK(ast,token_stack,tl_stack,errors) };
+
         FORWARD -> Forward
-        {|ast,token_stack,tl_stack,errors| {
-            Navigation::FORWARD(ast,token_stack,tl_stack,errors);
-        }}
-        ;
+        { |ast,token_stack,tl_stack,errors| Navigation::FORWARD(ast,token_stack,tl_stack,errors) };
         REFRESH -> Refresh
-        {|ast,token_stack,tl_stack,errors| {
-            Navigation::REFRESH(ast,token_stack,tl_stack,errors);
-        }};
+        { |ast,token_stack,tl_stack,errors| Navigation::REFRESH(ast,token_stack,tl_stack,errors) };
 
         // ### Element ###
         // Actions
         ElementActions -> CLICK
-        | SENDKEYS
-        ;
+        | SENDKEYS ;
 
         CLICK ->Click Expression
-        {|ast,token_stack,tl_stack,errors| {
-            Element::CLICK(ast,token_stack,tl_stack,errors);
-        }};
+        { |ast,token_stack,tl_stack,errors| Element::CLICK(ast,token_stack,tl_stack,errors) };
 
         SENDKEYS -> Enter Expression In Element Expression
-        {|ast,token_stack,tl_stack,errors| {
-            Element::SENDKEYS(ast,token_stack,tl_stack,errors);
-        }}
-        ;
+        {|ast,token_stack,tl_stack,errors| Element::SENDKEYS(ast,token_stack,tl_stack,errors) };
 
         // Getter
         ElementGetter -> GET_ATTRIBUTE
         | IS_DISPLAYED
         | IS_ENABLED
-        | IS_SELECTED
-        ;
+        | IS_SELECTED ;
 
         GET_ATTRIBUTE -> Get Attribute Expression From Element Expression
-        {|ast,token_stack,tl_stack,errors| {
-                Element::GET_ATTRIBUTE(ast,token_stack,tl_stack,errors);
-        }}
-        ;
+        { |ast,token_stack,tl_stack,errors| Element::GET_ATTRIBUTE(ast,token_stack,tl_stack,errors) };
 
         IS_DISPLAYED -> Is Element Expression Displayed
-        {|ast,token_stack,tl_stack,errors| {
-                Element::IS_DISPLAYED(ast,token_stack,tl_stack,errors);
-        }}
-        ;
+        { |ast,token_stack,tl_stack,errors| Element::IS_DISPLAYED(ast,token_stack,tl_stack,errors) };
+
         IS_ENABLED -> Is Element Expression Enabled
-        {|ast,token_stack,tl_stack,errors| {
-                Element::IS_ENABLED(ast,token_stack,tl_stack,errors);
-        }}
-        ;
+        { |ast,token_stack,tl_stack,errors| Element::IS_ENABLED(ast,token_stack,tl_stack,errors) };
+
         IS_SELECTED -> Is Element Expression Selected
-        {|ast,token_stack,tl_stack,errors| {
-                Element::IS_SELECTED(ast,token_stack,tl_stack,errors);
-        }}
-        ;
+        { |ast,token_stack,tl_stack,errors| Element::IS_SELECTED(ast,token_stack,tl_stack,errors) };
 
         // ### Timeouts ###
         // Actions
         TimeoutActions -> WAIT;
 
         WAIT -> Wait Expression
-        {|ast,token_stack,tl_stack,errors| {
-            Timeouts::WAIT(ast,token_stack,tl_stack,errors);
-        }};
+        { |ast,token_stack,tl_stack,errors| Timeouts::WAIT(ast,token_stack,tl_stack,errors) };
 
         // ### Custom ###
         // Actions
         CustomActions -> VAR_DECLARATION
-        | ASSERT
-        ;
+        | ASSERT ;
 
         VAR_DECLARATION -> Ident Assign Expression
-        {|ast,token_stack,tl_stack,errors| {
-            Custom::VAR_DECLARATION(ast,token_stack,tl_stack,errors);
-        }};
+        { |ast,token_stack,tl_stack,errors| Custom::VAR_DECLARATION(ast,token_stack,tl_stack,errors) };
 
         ASSERT -> Assert Expression
-        {|ast,token_stack,tl_stack,errors| {
-            Custom::ASSERT(ast,token_stack,tl_stack,errors);
-        }};
+        { |ast,token_stack,tl_stack,errors| Custom::ASSERT(ast,token_stack,tl_stack,errors) };
 
-        ControlFlow -> IfStmt | WhileStmt | ForLoop;
+        ControlFlow -> IfStmt
+        | WhileStmt
+        | ForLoop;
 
         // ***** Control flow statement *****
         IfStmt -> IfExpr
-        {|ast,token_stack,tl_stack,errors| {
-            ControlFlow::IF(ast,token_stack,tl_stack,errors);
-        }}
+        { |ast,token_stack,tl_stack,errors| ControlFlow::IF(ast,token_stack,tl_stack,errors) }
         | IfExpr ElseIfStmt
-        {|ast,token_stack,tl_stack,errors| {
-            ControlFlow::IF(ast,token_stack,tl_stack,errors);
-        }}
+        { |ast,token_stack,tl_stack,errors| ControlFlow::IF(ast,token_stack,tl_stack,errors) }
         | IfExpr ElseExpr
-        {|ast,token_stack,tl_stack,errors| {
-            ControlFlow::IF(ast,token_stack,tl_stack,errors);
-        }}
-        ;
+        { |ast,token_stack,tl_stack,errors| ControlFlow::IF(ast,token_stack,tl_stack,errors) };
 
         ElseIfStmt -> ElseIfExpr
-        {|ast,token_stack,tl_stack,errors| {
-            ControlFlow::ELSE_IF(ast,token_stack,tl_stack,errors);
-        }}
+        { |ast,token_stack,tl_stack,errors| ControlFlow::ELSE_IF(ast,token_stack,tl_stack,errors) }
         | ElseIfExpr ElseIfStmt
-        {|ast,token_stack,tl_stack,errors| {
-            ControlFlow::ELSE_IF(ast,token_stack,tl_stack,errors);
-        }}
+        { |ast,token_stack,tl_stack,errors| ControlFlow::ELSE_IF(ast,token_stack,tl_stack,errors) }
         | ElseIfExpr ElseExpr
-        {|ast,token_stack,tl_stack,errors| {
-            ControlFlow::ELSE_IF(ast,token_stack,tl_stack,errors);
-        }}
-        ;
+        { |ast,token_stack,tl_stack,errors| ControlFlow::ELSE_IF(ast,token_stack,tl_stack,errors) };
 
         IfExpr -> If Expression L_CurlyBrace Newline Teststeps R_CurlyBrace;
 
         ElseIfExpr-> Else If Expression L_CurlyBrace Newline Teststeps R_CurlyBrace;
 
         ElseExpr -> Else L_CurlyBrace Newline Teststeps R_CurlyBrace
-        {|ast,token_stack,tl_stack,errors| {
-            ControlFlow::ELSE(ast,token_stack,tl_stack,errors);
-        }}
-        ;
+        { |ast,token_stack,tl_stack,errors| ControlFlow::ELSE(ast,token_stack,tl_stack,errors) };
 
         WhileStmt -> While Expression L_CurlyBrace Newline Teststeps R_CurlyBrace
-        {|ast,token_stack,tl_stack,errors| {
-            ControlFlow::WHILE(ast,token_stack,tl_stack,errors);
-        }};
+        { |ast,token_stack,tl_stack,errors| ControlFlow::WHILE(ast,token_stack,tl_stack,errors) };
 
         ForLoop -> For ForLoopHelper L_CurlyBrace Newline Teststeps R_CurlyBrace
-        {|ast,token_stack,tl_stack,errors| {
-            ControlFlow::FOR(ast,token_stack,tl_stack,errors);
-        }};
+        { |ast,token_stack,tl_stack,errors| ControlFlow::FOR(ast,token_stack,tl_stack,errors) };
 
         ForLoopHelper -> Ident In Expression
-        {|ast,token_stack,tl_stack,errors| {
-            ControlFlow::HELPER(ast,token_stack,tl_stack,errors);
-        }};
+        { |ast,token_stack,tl_stack,errors| ControlFlow::HELPER(ast,token_stack,tl_stack,errors) };
         // *****
 
         Getter -> DriverGetter
-        | ElementGetter
-        ;
+        | ElementGetter ;
 
         Expression  -> LiteralExpression
         | BinaryExpression
         | UnaryExpression
         | ArrayExpression
-        {|ast,token_stack,tl_stack,errors| {
-            LiteralExpression::ARRAY(ast, token_stack, tl_stack, errors);
-        }}
-        | Getter
-        ;
+        { |ast,token_stack,tl_stack,errors| LiteralExpression::ARRAY(ast, token_stack, tl_stack, errors) }
+        | Getter;
 
-        LiteralExpression ->
-        Number
-        {|ast,token_stack,tl_stack,errors| {
-            LiteralExpression::NUMBER(ast, token_stack, tl_stack, errors);
-        }}
-        |
-        String
-        {|ast,token_stack,tl_stack,errors| {
-            LiteralExpression::STRING(ast, token_stack, tl_stack, errors);
-        }}
-        |
-        Ident
-        {|ast,token_stack,tl_stack,errors| {
-            LiteralExpression::IDENT(ast, token_stack, tl_stack, errors);
-        }}
-        |
-        True
-        {|ast,token_stack,tl_stack,errors| {
-            LiteralExpression::BOOLEAN(ast, token_stack, tl_stack, errors);
-        }}
-        |
-        False
-        {|ast,token_stack,tl_stack,errors| {
-            LiteralExpression::BOOLEAN(ast, token_stack, tl_stack, errors);
-        }}
-        ;
+        LiteralExpression -> Number
+        { |ast,token_stack,tl_stack,errors| LiteralExpression::NUMBER(ast, token_stack, tl_stack, errors) }
+        | String
+        { |ast,token_stack,tl_stack,errors| LiteralExpression::STRING(ast, token_stack, tl_stack, errors) }
+        | Ident
+        { |ast,token_stack,tl_stack,errors| LiteralExpression::IDENT(ast, token_stack, tl_stack, errors) }
+        | True
+        { |ast,token_stack,tl_stack,errors| LiteralExpression::BOOLEAN(ast, token_stack, tl_stack, errors) }
+        | False
+        { |ast,token_stack,tl_stack,errors| LiteralExpression::BOOLEAN(ast, token_stack, tl_stack, errors) };
 
-        UnaryExpression -> NegationExpression | GroupedExpression;
+        UnaryExpression -> NegationExpression
+        | GroupedExpression ;
 
-        NegationExpression ->
-        Negation GroupedExpression
-        {|ast,token_stack,tl_stack,errors| {
-            UnaryExpression::NEGATION(ast, token_stack, tl_stack, errors);
-        }}
-        ;
+        NegationExpression -> Negation GroupedExpression
+        { |ast,token_stack,tl_stack,errors| UnaryExpression::NEGATION(ast, token_stack, tl_stack, errors) };
 
-        GroupedExpression ->
-        Left_paran Expression Right_paran
-        {|ast,token_stack,tl_stack,errors| {
-            UnaryExpression::GROUPED(ast, token_stack, tl_stack, errors);
-        }}
-        ;
+        GroupedExpression -> Left_paran Expression Right_paran
+        { |ast,token_stack,tl_stack,errors| UnaryExpression::GROUPED(ast, token_stack, tl_stack, errors) };
 
-        BinaryExpression ->
-        ComparisionExpression
-        |
-        ArthimaticExpression
-        |
-        LogicalExpression
-        ;
+        BinaryExpression -> ComparisionExpression
+        | ArthimaticExpression
+        | LogicalExpression;
 
-        LogicalExpression ->
-        Expression And Expression
-        {|ast,token_stack,tl_stack,errors| {
-            BinaryExpression::AND(ast, token_stack, tl_stack, errors);
-        }}
-        |
-        Expression Or Expression
-        {|ast,token_stack,tl_stack,errors| {
-            BinaryExpression::OR(ast, token_stack, tl_stack, errors);
-        }}
-        ;
+        LogicalExpression -> Expression And Expression
+        { |ast,token_stack,tl_stack,errors| BinaryExpression::AND(ast, token_stack, tl_stack, errors) }
+        | Expression Or Expression
+        { |ast,token_stack,tl_stack,errors| BinaryExpression::OR(ast, token_stack, tl_stack, errors) };
 
-        ComparisionExpression ->
-        Expression Equality Expression
-        {|ast,token_stack,tl_stack,errors| {
-            BinaryExpression::EQ(ast, token_stack, tl_stack, errors);
-        }}
-        |
-        Expression Not_equal Expression
-        {|ast,token_stack,tl_stack,errors| {
-            BinaryExpression::NE(ast, token_stack, tl_stack, errors);
-        }}
-        |
-        Expression Greater_than Expression
-        {|ast,token_stack,tl_stack,errors| {
-            BinaryExpression::GT(ast, token_stack, tl_stack, errors);
-        }}
-        |
-        Expression Lesser_than Expression
-        {|ast,token_stack,tl_stack,errors| {
-            BinaryExpression::LT(ast, token_stack, tl_stack, errors);
-        }}
-        |
-        Expression Greater_than_equal Expression
-        {|ast,token_stack,tl_stack,errors| {
-            BinaryExpression::GE(ast, token_stack, tl_stack, errors);
-        }}
-        |
-        Expression Lesser_than_equal Expression
-        {|ast,token_stack,tl_stack,errors| {
-            BinaryExpression::LE(ast, token_stack, tl_stack, errors);
-        }}
-        ;
+        ComparisionExpression -> Expression Equality Expression
+        { |ast,token_stack,tl_stack,errors| BinaryExpression::EQ(ast, token_stack, tl_stack, errors) }
+        | Expression Not_equal Expression
+        { |ast,token_stack,tl_stack,errors| BinaryExpression::NE(ast, token_stack, tl_stack, errors) }
+        | Expression Greater_than Expression
+        { |ast,token_stack,tl_stack,errors| BinaryExpression::GT(ast, token_stack, tl_stack, errors) }
+        | Expression Lesser_than Expression
+        { |ast,token_stack,tl_stack,errors| BinaryExpression::LT(ast, token_stack, tl_stack, errors) }
+        | Expression Greater_than_equal Expression
+        { |ast,token_stack,tl_stack,errors| BinaryExpression::GE(ast, token_stack, tl_stack, errors) }
+        | Expression Lesser_than_equal Expression
+        { |ast,token_stack,tl_stack,errors| BinaryExpression::LE(ast, token_stack, tl_stack, errors) } ;
 
-        ArthimaticExpression ->
-        Expression Plus Expression
-        {|ast,token_stack,tl_stack,errors| {
-            BinaryExpression::ADD(ast, token_stack, tl_stack, errors);
-        }}
-        |
-        Expression Minus Expression
-        {|ast,token_stack,tl_stack,errors| {
-            BinaryExpression::SUB(ast, token_stack, tl_stack, errors);
-        }}
-        |
-        Expression Multiply Expression
-        {|ast,token_stack,tl_stack,errors| {
-            BinaryExpression::MUL(ast, token_stack, tl_stack, errors);
-        }}
-        |
-        Expression Forward_slash Expression
-        {|ast,token_stack,tl_stack,errors| {
-            BinaryExpression::DIV(ast, token_stack, tl_stack, errors);
-        }}
-        |
-        Expression Modulus Expression
-        {|ast,token_stack,tl_stack,errors| {
-            BinaryExpression::REM(ast, token_stack, tl_stack, errors);
-        }}
-        ;
+        ArthimaticExpression -> Expression Plus Expression
+        { |ast,token_stack,tl_stack,errors| BinaryExpression::ADD(ast, token_stack, tl_stack, errors) }
+        | Expression Minus Expression
+        { |ast,token_stack,tl_stack,errors| BinaryExpression::SUB(ast, token_stack, tl_stack, errors) }
+        | Expression Multiply Expression
+        { |ast,token_stack,tl_stack,errors| BinaryExpression::MUL(ast, token_stack, tl_stack, errors) }
+        | Expression Forward_slash Expression
+        { |ast,token_stack,tl_stack,errors| BinaryExpression::DIV(ast, token_stack, tl_stack, errors) }
+        | Expression Modulus Expression
+        { |ast,token_stack,tl_stack,errors| BinaryExpression::REM(ast, token_stack, tl_stack, errors) } ;
 
         ArrayExpression -> L_SquareBrace R_SquareBrace
         | L_SquareBrace ArrayElements R_SquareBrace;
 
         ArrayElements -> Expression
         | Expression Comma ArrayElements
-        {|ast,token_stack,tl_stack,errors| {
+        { |ast,token_stack,tl_stack,errors| {
             //pop comma token
             token_stack.pop();
         }};
@@ -412,10 +276,7 @@ pub fn parser_slr(parser: &mut Parser) {
         [terminal_productions]
 
         Testcase -> [TokenType::TESTCASE]
-        {|ast,token_stack,tl_stack,errors| {
-            tl_stack.push(TranslatorStack::Body(Body::new()));
-        }}
-        ;
+        { |ast,token_stack,tl_stack,errors| tl_stack.push(TranslatorStack::Body(Body::new())) };
 
         //Actions
         Navigate            -> [TokenType::NAVIGATE];
@@ -479,15 +340,11 @@ pub fn parser_slr(parser: &mut Parser) {
         L_CurlyBrace        -> [TokenType::L_CURLY_BRACE]
         // L_CURLY_BRACE means starting of a block
         // so we are keeping this action to add new body to tl_stack
-        {|ast,token_stack,tl_stack,errors| {
-            tl_stack.push(TranslatorStack::Body(Body::new()));
-        }};
+        { |ast,token_stack,tl_stack,errors| tl_stack.push(TranslatorStack::Body(Body::new())) };
 
         R_CurlyBrace        -> [TokenType::R_CURLY_BRACE];
         L_SquareBrace       -> [TokenType::L_SQUARE_BRACE]
-        {|ast,token_stack,tl_stack,errors| {
-            tl_stack.push(TranslatorStack::ArrayDelim);
-        }};
+        { |ast,token_stack,tl_stack,errors| tl_stack.push(TranslatorStack::ArrayDelim) };
 
         R_SquareBrace       -> [TokenType::R_SQUARE_BRACE];
 
@@ -501,7 +358,7 @@ pub fn parser_slr(parser: &mut Parser) {
         False              -> [TokenType::FALSE];
 
         Newline            -> [TokenType::NEW_LINE]
-        {|ast,token_stack,tl_stack,errors| {
+        { |ast,token_stack,tl_stack,errors|{
             token_stack.pop(); //pop newline token
         }};
     );
