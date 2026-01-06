@@ -1,10 +1,4 @@
-use ast::{
-    action::Action,
-    expression::Expr,
-    if_stmt::IfStmt,
-    teststep::{Body, Teststep},
-    var_decl::VarDecl,
-};
+use ast::{expression::Expr, Action, Body, IfStmt, Teststep, VarDecl};
 
 use class::{Method, CONTROL_FLOW};
 

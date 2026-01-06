@@ -7,10 +7,10 @@ use crate::parser::errors::MISMATCHED_TYPES;
 use crate::parser::errorss::ActionError;
 use crate::parser::translator_stack::TLVec;
 use crate::{parser::translator_stack::TranslatorStack, token::Token};
-use ast::primitives::Primitives;
+use ast::Primitives;
 use ast::{
     expression::{BinOpKind, ExpKind, Expr},
-    testcase::TestCase,
+    TestCase,
 };
 
 pub struct BinaryExpression;

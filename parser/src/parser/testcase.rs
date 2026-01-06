@@ -4,22 +4,15 @@ use std::time::Instant;
 use super::Parser;
 use crate::error_handler::{parse_error_to_error_info, ErrorInfo};
 use crate::keywords::TokenType;
-use crate::parser::actions::binary_expr::BinaryExpression;
-use crate::parser::actions::control_flow::ControlFlow;
-use crate::parser::actions::custom::Custom;
-use crate::parser::actions::driver::Driver;
-use crate::parser::actions::element::Element;
-use crate::parser::actions::getter::Getter;
-use crate::parser::actions::literal_expression::LiteralExpression;
-use crate::parser::actions::navigation::Navigation;
-use crate::parser::actions::shared::Shared;
-use crate::parser::actions::timeouts::Timeouts;
-use crate::parser::actions::unary_expr::UnaryExpression;
+use crate::parser::actions::{
+    BinaryExpression, ControlFlow, Custom, Driver, Element, Getter, LiteralExpression, Navigation,
+    Shared, Timeouts, UnaryExpression,
+};
 use crate::parser::translator_stack::{TLVec, TranslatorStack};
 use crate::program::Program;
 use crate::token::Token;
-use ast::testcase::TestCase;
-use ast::teststep::Body;
+use ast::Body;
+use ast::TestCase;
 use class::{
     BinaryExpressionAction, ControlFlowAction, CustomAction, ElementAction, GetterAction,
     LiteralExpressionAction, NavigationAction, TimeoutsAction, UnaryExpressionAction,

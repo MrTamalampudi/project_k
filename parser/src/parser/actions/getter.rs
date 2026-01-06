@@ -1,12 +1,9 @@
 use std::collections::HashMap;
 
 use ast::{
-    arguments::{Args, ATTRIBUTE_ARGKEY, LOCATOR_ARGKEY},
     expression::{ExpKind, Expr, Literal},
-    getter::Getter as G,
-    locator::LocatorStrategy,
-    primitives::Primitives,
-    testcase::TestCase,
+    ArgKeys::{Args, ATTRIBUTE_ARGKEY, LOCATOR_ARGKEY},
+    Getter as G, LocatorStrategy, Primitives, TestCase,
 };
 use class::{GetterAction, Method, GETTER};
 use macros::{pop_expr, pop_token};

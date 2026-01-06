@@ -11,10 +11,7 @@ use log::{error, info};
 use thirtyfour::{DesiredCapabilities, WebDriver, error::WebDriverError};
 use webdriver_manager::{WebdriverManager, chrome::ChromeManager};
 
-use ast::{
-    testcase::TestCase,
-    teststep::{Body, Teststep},
-};
+use ast::{Body, TestCase, Teststep};
 use class::Method;
 
 mod control_flow;

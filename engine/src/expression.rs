@@ -11,11 +11,8 @@ use crate::{
     },
 };
 use ast::{
+    Getter, IdentifierValue, LocatorStrategy, Teststep,
     expression::{BinOpKind, ExpKind, Expr, Literal, UnOp},
-    getter::Getter,
-    identifier_value::IdentifierValue,
-    locator::LocatorStrategy,
-    teststep::Teststep,
 };
 
 impl<'a> Engine<'a> {

@@ -6,15 +6,9 @@ use crate::{
     parser::translator_stack::{TLVec, TranslatorStack},
     token::Token,
 };
-use ast::expression::ExpKind;
-use ast::for_loop::ForLoop;
-use ast::identifier_value::IdentifierValue;
-use ast::teststep::Teststep;
 use ast::{
-    expression::{Expr, Literal},
-    if_stmt::IfStmt,
-    primitives::Primitives,
-    testcase::TestCase,
+    expression::{ExpKind, Expr, Literal},
+    ForLoop, IdentifierValue, IfStmt, Primitives, TestCase, Teststep,
 };
 use class::{ControlFlowAction, Method, CONTROL_FLOW};
 use macros::{pop_body, pop_else, pop_expr, pop_token};

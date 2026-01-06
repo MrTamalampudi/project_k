@@ -48,8 +48,3 @@ pub enum Teststep {
     VarDecl(VarDecl),
     For(ForLoop),
 }
-
-pub trait Next {
-    fn set_next(&mut self, next: Rc<RefCell<Teststep>>);
-    fn get_next(&self) -> Option<Rc<RefCell<Teststep>>>;
-}

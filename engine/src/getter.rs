@@ -1,4 +1,4 @@
-use ast::{identifier_value::IdentifierValue, teststep::Teststep};
+use ast::{IdentifierValue, Teststep};
 use class::{GETTER, GetMethod, Method};
 use thirtyfour::error::WebDriverError;
 

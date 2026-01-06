@@ -14,8 +14,7 @@ use crate::{
 };
 use ast::{
     expression::{ExpKind, Expr, Literal as LE},
-    primitives::Primitives,
-    testcase::TestCase,
+    Primitives, TestCase,
 };
 
 pub struct LiteralExpression {}

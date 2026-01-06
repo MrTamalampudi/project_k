@@ -1,5 +1,5 @@
 #![allow(dead_code)]
-use ast::identifier_value::IdentifierValue;
+use ast::IdentifierValue;
 
 pub type ExpressionEvalResult = Result<IdentifierValue, String>;
 

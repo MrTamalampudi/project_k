@@ -1,5 +1,5 @@
 use crate::{Engine, EngineResult};
-use ast::teststep::Teststep;
+use ast::Teststep;
 use class::{ELEMENT, GetMethod, Method};
 
 impl<'a> Engine<'a> {

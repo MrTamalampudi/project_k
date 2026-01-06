@@ -1,7 +1,7 @@
 use thirtyfour::error::WebDriverError;
 
 use crate::{Engine, EngineResult};
-use ast::{identifier_value::IdentifierValue, teststep::Teststep};
+use ast::{IdentifierValue, Teststep};
 use class::{CUSTOM, GetMethod, Method};
 
 impl<'a> Engine<'a> {

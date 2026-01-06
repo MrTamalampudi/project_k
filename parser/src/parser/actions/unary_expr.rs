@@ -13,8 +13,7 @@ use crate::{
 };
 use ast::{
     expression::{ExpKind, Expr, UnOp},
-    primitives::Primitives,
-    testcase::TestCase,
+    Primitives, TestCase,
 };
 
 pub struct UnaryExpression;

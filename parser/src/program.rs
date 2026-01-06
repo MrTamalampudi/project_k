@@ -1,4 +1,4 @@
-use ast::testcase::TestCase;
+use ast::TestCase;
 
 #[derive(Debug, Clone)]
 pub struct Program {
