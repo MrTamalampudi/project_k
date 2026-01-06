@@ -166,7 +166,11 @@ pub fn parser_slr(parser: &mut Parser) {
         | GET_ATTRIBUTE
         | IS_DISPLAYED
         | IS_ENABLED
-        | IS_SELECTED ;
+        | IS_SELECTED
+        | GET_TEXT
+        | GET_CSS_VALUE
+        | GET_TAG_NAME
+        ;
 
         GET_TITLE -> Get Title
         {|ast,token_stack,tl_stack,errors| Getter::GET_TITLE(ast,token_stack,tl_stack,errors)};
@@ -185,6 +189,15 @@ pub fn parser_slr(parser: &mut Parser) {
 
         IS_SELECTED -> Is Element Expression Selected
         { |ast,token_stack,tl_stack,errors| Getter::IS_SELECTED(ast,token_stack,tl_stack,errors) };
+
+        GET_TEXT -> Get Text From Element Expression
+        { |ast,token_stack,tl_stack,errors| Getter::GET_TEXT(ast,token_stack,tl_stack,errors) };
+
+        GET_CSS_VALUE -> Get Css Value Expression From Element Expression
+        { |ast,token_stack,tl_stack,errors| Getter::GET_CSS_VALUE(ast,token_stack,tl_stack,errors) };
+
+        GET_TAG_NAME -> Get Tag Name From Element Expression
+        { |ast,token_stack,tl_stack,errors| Getter::GET_TAG_NAME(ast,token_stack,tl_stack,errors) };
 
         Expression  -> LiteralExpression
         | BinaryExpression
@@ -278,6 +291,11 @@ pub fn parser_slr(parser: &mut Parser) {
         Element             -> [TokenType::ELEMENT];
         Url                 -> [TokenType::URL];
         Title               -> [TokenType::TITLE];
+        Css                 -> [TokenType::CSS];
+        Value               -> [TokenType::VALUE];
+        Text                -> [TokenType::TEXT];
+        Tag                 -> [TokenType::TAG];
+        Name                -> [TokenType::NAME];
 
         //Prepositions
         From                -> [TokenType::FROM];

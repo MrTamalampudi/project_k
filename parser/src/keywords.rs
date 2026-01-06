@@ -108,6 +108,11 @@ define_tokens!(
     ELEMENT,
     URL,
     TITLE,
+    CSS,
+    VALUE,
+    TEXT,
+    TAG,
+    NAME,
     //prepositions
     FROM,
     TO,

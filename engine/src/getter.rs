@@ -7,6 +7,7 @@ use crate::{Engine, EngineResult};
 const IS_DISPLAYED_ERROR: &'static str = "Error while evaluating is displayed element action";
 const GET_ATTRIBUTE_ERROR: &'static str = "Error while evaluating get attribute action";
 const GETTER_ERROR: &'static str = "Failed to evaluate getter action";
+const GET_CSS_VALUE_ERROR: &'static str = "Failed to evaluate get css value action";
 
 impl<'a> Engine<'a> {
     pub async fn getter(&mut self, teststep: &Teststep) -> EngineResult<IdentifierValue> {
@@ -19,6 +20,9 @@ impl<'a> Engine<'a> {
                 IS_SELECTED => self.IS_SELECTED(teststep).await,
                 GET_TITLE => self.GET_TITLE(teststep).await,
                 GET_CURRENT_URL => self.GET_CURRENT_URL(teststep).await,
+                GET_CSS_VALUE => self.GET_CSS_VALUE(teststep).await,
+                GET_TEXT => self.GET_TEXT(teststep).await,
+                GET_TAG_NAME => self.GET_TAG_NAME(teststep).await,
             }
         } else {
             Err(WebDriverError::FatalError(GETTER_ERROR.to_string()))
@@ -74,5 +78,31 @@ impl<'a> Engine<'a> {
     pub async fn GET_TITLE(&mut self, _body: &Teststep) -> EngineResult<IdentifierValue> {
         let title = self.driver.title().await?;
         Ok(IdentifierValue::String(Some(title)))
+    }
+
+    pub async fn GET_TEXT(&mut self, _body: &Teststep) -> EngineResult<IdentifierValue> {
+        let locator = self.get_locator(_body).await?;
+        let element = self.driver.find(locator).await?;
+        let text = element.text().await?;
+        Ok(IdentifierValue::String(Some(text)))
+    }
+
+    pub async fn GET_TAG_NAME(&mut self, _body: &Teststep) -> EngineResult<IdentifierValue> {
+        let locator = self.get_locator(_body).await?;
+        let element = self.driver.find(locator).await?;
+        let text = element.tag_name().await?;
+        Ok(IdentifierValue::String(Some(text)))
+    }
+
+    pub async fn GET_CSS_VALUE(&mut self, _body: &Teststep) -> EngineResult<IdentifierValue> {
+        if let Teststep::Getter(_) = _body {
+            let locator = self.get_locator(_body).await?;
+            let css_value = self.get_attribute(_body).await?;
+            let element = self.driver.find(locator).await?;
+            let text = element.css_value(css_value).await?;
+            Ok(IdentifierValue::String(Some(text)))
+        } else {
+            Err(WebDriverError::FatalError(GET_CSS_VALUE_ERROR.to_string()))
+        }
     }
 }

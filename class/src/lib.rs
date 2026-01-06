@@ -57,12 +57,12 @@ class_macro!(
             IS_SELECTED,
             // GET_ACCESSBILE_NAME ,
             // GET_ARIA_ROLE,
-            // GET_CSS_VALUE,
+            GET_CSS_VALUE,
             // GET_DOM_PROPERTY,
             // GET_LOCATION,
             // GET_SIZE,
-            // GET_TAG_NAME,
-            // GET_TEXT,
+            GET_TAG_NAME,
+            GET_TEXT,
             //
             GET_TITLE ,
             GET_CURRENT_URL

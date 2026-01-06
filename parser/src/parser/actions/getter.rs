@@ -211,4 +211,126 @@ impl GetterAction for Getter {
 
         _tl_stack.push_expr(expr);
     }
+
+    //Get Text From Element Expression
+    #[pop_token(_element, _from, _text, get)]
+    #[pop_expr(locator_expr)]
+    fn GET_TEXT(
+        _testcase: &mut Self::AST,
+        _token_stack: &mut Vec<Self::Token>,
+        _tl_stack: &mut Vec<Self::TranslatorStack>,
+        _errors: &mut Vec<Self::Error<Self::Token>>,
+    ) {
+        if Primitives::String != locator_expr.primitive {
+            _errors.push_error(&get, &locator_expr.span, EXPECT_STRING_EXPR.to_string());
+            return;
+        }
+
+        let locator_arg = if let ExpKind::Lit(Literal::String(locator)) = &locator_expr.kind {
+            Args::Locator(LocatorStrategy::parse(&locator))
+        } else {
+            Args::Expr(locator_expr.clone())
+        };
+
+        let span = get.span.to(&locator_expr.span);
+        let getter = G {
+            span,
+            method: Method::GETTER(GETTER::GET_TEXT),
+            arguments: HashMap::from([(LOCATOR_ARGKEY, locator_arg)]),
+            returns: Primitives::String,
+        };
+
+        let expr = Expr {
+            span,
+            kind: ExpKind::Getter(getter),
+            primitive: Primitives::String,
+        };
+
+        _tl_stack.push_expr(expr);
+    }
+
+    //Get Css Value Expression From Element Expression
+    #[pop_token(_element, _from, _value, _css, get)]
+    #[pop_expr(locator_expr, css_expr)]
+    fn GET_CSS_VALUE(
+        _testcase: &mut Self::AST,
+        _token_stack: &mut Vec<Self::Token>,
+        _tl_stack: &mut Vec<Self::TranslatorStack>,
+        _errors: &mut Vec<Self::Error<Self::Token>>,
+    ) {
+        if Primitives::String != css_expr.primitive {
+            _errors.push_error(&get, &locator_expr.span, EXPECT_STRING_EXPR.to_string());
+            return;
+        }
+
+        if Primitives::String != locator_expr.primitive {
+            _errors.push_error(&get, &locator_expr.span, EXPECT_STRING_EXPR.to_string());
+            return;
+        }
+
+        let locator_arg = if let ExpKind::Lit(Literal::String(locator)) = &locator_expr.kind {
+            Args::Locator(LocatorStrategy::parse(&locator))
+        } else {
+            Args::Expr(locator_expr.clone())
+        };
+
+        let css = if let ExpKind::Lit(Literal::String(css)) = css_expr.kind {
+            Args::String(css)
+        } else {
+            Args::Expr(css_expr)
+        };
+
+        let span = get.span.to(&locator_expr.span);
+        let getter = G {
+            span,
+            method: Method::GETTER(GETTER::GET_CSS_VALUE),
+            arguments: HashMap::from([(ATTRIBUTE_ARGKEY, css), (LOCATOR_ARGKEY, locator_arg)]),
+            returns: Primitives::String,
+        };
+
+        let expr = Expr {
+            span,
+            kind: ExpKind::Getter(getter),
+            primitive: Primitives::String,
+        };
+
+        _tl_stack.push_expr(expr);
+    }
+
+    //Get Tag Name From Element Expression
+    #[pop_token(_element, _from, _tag, _name, get)]
+    #[pop_expr(locator_expr)]
+    fn GET_TAG_NAME(
+        _testcase: &mut Self::AST,
+        _token_stack: &mut Vec<Self::Token>,
+        _tl_stack: &mut Vec<Self::TranslatorStack>,
+        _errors: &mut Vec<Self::Error<Self::Token>>,
+    ) {
+        if Primitives::String != locator_expr.primitive {
+            _errors.push_error(&get, &locator_expr.span, EXPECT_STRING_EXPR.to_string());
+            return;
+        }
+
+        let locator_arg = if let ExpKind::Lit(Literal::String(locator)) = &locator_expr.kind {
+            Args::Locator(LocatorStrategy::parse(&locator))
+        } else {
+            Args::Expr(locator_expr.clone())
+        };
+
+        let span = get.span.to(&locator_expr.span);
+        let getter = G {
+            span,
+            method: Method::GETTER(GETTER::GET_TAG_NAME),
+            arguments: HashMap::from([(LOCATOR_ARGKEY, locator_arg)]),
+            returns: Primitives::String,
+        };
+
+        let expr = Expr {
+            span,
+            kind: ExpKind::Getter(getter),
+            primitive: Primitives::String,
+        };
+
+        _tl_stack.push_expr(expr);
+    }
 }
