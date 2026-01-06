@@ -51,6 +51,57 @@ impl Element {
         };
         t.push_expr(expr);
     }
+
+    fn get_common(
+        get_token: Token,
+        expr: Expr,
+        locator_expr: Expr,
+        method: ELEMENT,
+        e: &mut Vec<ParseError<Token>>,
+        t: &mut Vec<TranslatorStack>,
+    ) {
+        if Primitives::String != expr.primitive {
+            e.push_error(&get_token, &expr.span, EXPECT_STRING_EXPR.to_string());
+            return;
+        }
+
+        if Primitives::String != locator_expr.primitive {
+            e.push_error(
+                &get_token,
+                &locator_expr.span,
+                EXPECT_STRING_EXPR.to_string(),
+            );
+            return;
+        }
+
+        let locator_arg = if let ExpKind::Lit(Literal::String(locator)) = &locator_expr.kind {
+            Args::Locator(LocatorStrategy::parse(&locator))
+        } else {
+            Args::Expr(locator_expr.clone())
+        };
+
+        let target = if let ExpKind::Lit(Literal::String(target)) = expr.kind {
+            Args::String(target)
+        } else {
+            Args::Expr(expr)
+        };
+
+        let span = get_token.span.to(&locator_expr.span);
+        let getter = Getter {
+            span,
+            method: Method::ELEMENT(method),
+            arguments: HashMap::from([(ATTRIBUTE_ARGKEY, target), (LOCATOR_ARGKEY, locator_arg)]),
+            returns: Primitives::String,
+        };
+
+        let expr = Expr {
+            span,
+            kind: ExpKind::Getter(getter),
+            primitive: Primitives::String,
+        };
+
+        t.push_expr(expr);
+    }
 }
 
 impl ElementAction for Element {
@@ -149,54 +200,14 @@ impl ElementAction for Element {
         _tl_stack: &mut Vec<TranslatorStack>,
         _errors: &mut Vec<ParseError<Token>>,
     ) {
-        if Primitives::String != attribute_expr.primitive {
-            _errors.push_error(
-                &get_token,
-                &attribute_expr.span,
-                EXPECT_STRING_EXPR.to_string(),
-            );
-            return;
-        }
-
-        if Primitives::String != locator_expr.primitive {
-            _errors.push_error(
-                &get_token,
-                &locator_expr.span,
-                EXPECT_STRING_EXPR.to_string(),
-            );
-            return;
-        }
-
-        let locator_arg = if let ExpKind::Lit(Literal::String(locator)) = &locator_expr.kind {
-            Args::Locator(LocatorStrategy::parse(&locator))
-        } else {
-            Args::Expr(locator_expr.clone())
-        };
-
-        let attribute_arg = if let ExpKind::Lit(Literal::String(attribute)) = attribute_expr.kind {
-            Args::String(attribute)
-        } else {
-            Args::Expr(attribute_expr)
-        };
-
-        let span = get_token.span.to(&locator_expr.span);
-        let getter = Getter {
-            span,
-            method: Method::ELEMENT(ELEMENT::GET_ATTRIBUTE),
-            arguments: HashMap::from([
-                (ATTRIBUTE_ARGKEY, attribute_arg),
-                (LOCATOR_ARGKEY, locator_arg),
-            ]),
-            returns: Primitives::String,
-        };
-
-        let expr = Expr {
-            span,
-            kind: ExpKind::Getter(getter),
-            primitive: Primitives::String,
-        };
-
-        _tl_stack.push_expr(expr);
+        Element::get_common(
+            get_token,
+            attribute_expr,
+            locator_expr,
+            ELEMENT::GET_ATTRIBUTE,
+            _errors,
+            _tl_stack,
+        );
     }
 
     //action: is element expression displayed
@@ -237,13 +248,5 @@ impl ElementAction for Element {
         _errors: &mut Vec<Self::Error<Self::Token>>,
     ) {
         Element::is_common(is, selected, expr, ELEMENT::IS_SELECTED, _errors, _tl_stack);
-    }
-
-    fn GET_ACCESSBILE_NAME(
-        _testcase: &mut Self::AST,
-        _token_stack: &mut Vec<Self::Token>,
-        _tl_stack: &mut Vec<Self::TranslatorStack>,
-        _errors: &mut Vec<Self::Error<Self::Token>>,
-    ) {
     }
 }
