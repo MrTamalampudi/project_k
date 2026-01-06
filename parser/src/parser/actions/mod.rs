@@ -1,13 +1,14 @@
-pub mod binary_expr;
-pub mod control_flow;
-pub mod custom;
-pub mod driver;
-pub mod element;
-pub mod literal_expression;
-pub mod navigation;
-pub mod shared;
-pub mod timeouts;
-pub mod unary_expr;
+pub(super) mod binary_expr;
+pub(super) mod control_flow;
+pub(super) mod custom;
+pub(super) mod driver;
+pub(super) mod element;
+pub(super) mod getter;
+pub(super) mod literal_expression;
+pub(super) mod navigation;
+pub(super) mod shared;
+pub(super) mod timeouts;
+pub(super) mod unary_expr;
 
 #[macro_export]
 macro_rules! pop_expr {

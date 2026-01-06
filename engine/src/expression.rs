@@ -17,7 +17,6 @@ use ast::{
     locator::LocatorStrategy,
     teststep::Teststep,
 };
-use class::{ELEMENT, Method, WEB_DRIVER};
 
 impl<'a> Engine<'a> {
     pub async fn eval(&mut self, expr: &Expr) -> ExpressionEvalResult {
@@ -209,28 +208,7 @@ impl<'a> Engine<'a> {
 
     #[inline]
     async fn getter_eval(&mut self, getter: &Getter) -> ExpressionEvalResult {
-        let a = match getter.method {
-            Method::ELEMENT(ELEMENT::GET_ATTRIBUTE) => {
-                self.GET_ATTRIBUTE(&Teststep::Getter(getter.clone())).await
-            }
-            Method::WEB_DRIVER(WEB_DRIVER::GET_CURRENT_URL) => {
-                self.GET_CURRENT_URL(&Teststep::Getter(getter.clone()))
-                    .await
-            }
-            Method::WEB_DRIVER(WEB_DRIVER::GET_TITLE) => {
-                self.GET_TITLE(&Teststep::Getter(getter.clone())).await
-            }
-            Method::ELEMENT(ELEMENT::IS_DISPLAYED) => {
-                self.IS_DISPLAYED(&Teststep::Getter(getter.clone())).await
-            }
-            Method::ELEMENT(ELEMENT::IS_ENABLED) => {
-                self.IS_ENABLED(&Teststep::Getter(getter.clone())).await
-            }
-            Method::ELEMENT(ELEMENT::IS_SELECTED) => {
-                self.IS_SELECTED(&Teststep::Getter(getter.clone())).await
-            }
-            _ => return Err("".to_string()),
-        };
+        let a = self.getter(&Teststep::Getter(getter.clone())).await;
 
         match a {
             Ok(ok) => Ok(ok),

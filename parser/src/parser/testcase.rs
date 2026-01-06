@@ -9,6 +9,7 @@ use crate::parser::actions::control_flow::ControlFlow;
 use crate::parser::actions::custom::Custom;
 use crate::parser::actions::driver::Driver;
 use crate::parser::actions::element::Element;
+use crate::parser::actions::getter::Getter;
 use crate::parser::actions::literal_expression::LiteralExpression;
 use crate::parser::actions::navigation::Navigation;
 use crate::parser::actions::shared::Shared;
@@ -20,7 +21,7 @@ use crate::token::Token;
 use ast::testcase::TestCase;
 use ast::teststep::Body;
 use class::{
-    BinaryExpressionAction, ControlFlowAction, CustomAction, ElementAction,
+    BinaryExpressionAction, ControlFlowAction, CustomAction, ElementAction, GetterAction,
     LiteralExpressionAction, NavigationAction, TimeoutsAction, UnaryExpressionAction,
     WebDriverAction,
 };
@@ -92,19 +93,7 @@ pub fn parser_slr(parser: &mut Parser) {
         CLOSE -> Close
         {|ast,token_stack,tl_stack,errors| Driver::CLOSE(ast, token_stack, tl_stack, errors) };
 
-        // Getter
-
-        DriverGetter    -> GET_TITLE
-        | GET_CURRENT_URL ;
-
-        GET_TITLE -> Get Title
-        {|ast,token_stack,tl_stack,errors| Driver::GET_TITLE(ast,token_stack,tl_stack,errors)};
-
-        GET_CURRENT_URL -> Get Current Url
-        {|ast,token_stack,tl_stack,errors| Driver::GET_CURRENT_URL(ast,token_stack,tl_stack,errors) };
-
         // ### Navigation ###
-        // Actions
         NavigationActions -> BACK
         | FORWARD
         | REFRESH ;
@@ -118,7 +107,6 @@ pub fn parser_slr(parser: &mut Parser) {
         { |ast,token_stack,tl_stack,errors| Navigation::REFRESH(ast,token_stack,tl_stack,errors) };
 
         // ### Element ###
-        // Actions
         ElementActions -> CLICK
         | SENDKEYS ;
 
@@ -128,33 +116,13 @@ pub fn parser_slr(parser: &mut Parser) {
         SENDKEYS -> Enter Expression In Element Expression
         {|ast,token_stack,tl_stack,errors| Element::SENDKEYS(ast,token_stack,tl_stack,errors) };
 
-        // Getter
-        ElementGetter -> GET_ATTRIBUTE
-        | IS_DISPLAYED
-        | IS_ENABLED
-        | IS_SELECTED ;
-
-        GET_ATTRIBUTE -> Get Attribute Expression From Element Expression
-        { |ast,token_stack,tl_stack,errors| Element::GET_ATTRIBUTE(ast,token_stack,tl_stack,errors) };
-
-        IS_DISPLAYED -> Is Element Expression Displayed
-        { |ast,token_stack,tl_stack,errors| Element::IS_DISPLAYED(ast,token_stack,tl_stack,errors) };
-
-        IS_ENABLED -> Is Element Expression Enabled
-        { |ast,token_stack,tl_stack,errors| Element::IS_ENABLED(ast,token_stack,tl_stack,errors) };
-
-        IS_SELECTED -> Is Element Expression Selected
-        { |ast,token_stack,tl_stack,errors| Element::IS_SELECTED(ast,token_stack,tl_stack,errors) };
-
         // ### Timeouts ###
-        // Actions
         TimeoutActions -> WAIT;
 
         WAIT -> Wait Expression
         { |ast,token_stack,tl_stack,errors| Timeouts::WAIT(ast,token_stack,tl_stack,errors) };
 
         // ### Custom ###
-        // Actions
         CustomActions -> VAR_DECLARATION
         | ASSERT ;
 
@@ -200,8 +168,30 @@ pub fn parser_slr(parser: &mut Parser) {
         { |ast,token_stack,tl_stack,errors| ControlFlow::HELPER(ast,token_stack,tl_stack,errors) };
         // *****
 
-        Getter -> DriverGetter
-        | ElementGetter ;
+        Getter -> GET_TITLE
+        | GET_CURRENT_URL
+        | GET_ATTRIBUTE
+        | IS_DISPLAYED
+        | IS_ENABLED
+        | IS_SELECTED ;
+
+        GET_TITLE -> Get Title
+        {|ast,token_stack,tl_stack,errors| Getter::GET_TITLE(ast,token_stack,tl_stack,errors)};
+
+        GET_CURRENT_URL -> Get Current Url
+        {|ast,token_stack,tl_stack,errors| Getter::GET_CURRENT_URL(ast,token_stack,tl_stack,errors) };
+
+        GET_ATTRIBUTE -> Get Attribute Expression From Element Expression
+        { |ast,token_stack,tl_stack,errors| Getter::GET_ATTRIBUTE(ast,token_stack,tl_stack,errors) };
+
+        IS_DISPLAYED -> Is Element Expression Displayed
+        { |ast,token_stack,tl_stack,errors| Getter::IS_DISPLAYED(ast,token_stack,tl_stack,errors) };
+
+        IS_ENABLED -> Is Element Expression Enabled
+        { |ast,token_stack,tl_stack,errors| Getter::IS_ENABLED(ast,token_stack,tl_stack,errors) };
+
+        IS_SELECTED -> Is Element Expression Selected
+        { |ast,token_stack,tl_stack,errors| Getter::IS_SELECTED(ast,token_stack,tl_stack,errors) };
 
         Expression  -> LiteralExpression
         | BinaryExpression

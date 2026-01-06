@@ -1,13 +1,12 @@
 use std::collections::HashMap;
 
 use crate::a_types;
-use crate::parser::errors::{EXPECT_EXPR, EXPECT_STRING_EXPR, VALID_URL, VALID_URL_SHCEME};
+use crate::parser::errors::{EXPECT_STRING_EXPR, VALID_URL, VALID_URL_SHCEME};
 use crate::parser::translator_stack::{TLVec, TranslatorStack};
 use crate::token::Token;
 use ast::action::Action;
 use ast::arguments::{Args, URL_ARGKEY};
-use ast::expression::{ExpKind, Expr, Literal};
-use ast::getter::Getter;
+use ast::expression::{ExpKind, Literal};
 use ast::primitives::Primitives;
 use ast::testcase::TestCase;
 use ast::teststep::Teststep;
@@ -77,67 +76,5 @@ impl WebDriverAction for Driver {
             HashMap::new(),
         );
         _tl_stack.push_step(Teststep::Action(action));
-    }
-
-    #[pop_token(url_token, _current_token, get_token)]
-    fn GET_CURRENT_URL(
-        _testcase: &mut TestCase,
-        _token_stack: &mut Vec<Token>,
-        _tl_stack: &mut Vec<TranslatorStack>,
-        _errors: &mut Vec<ParseError<Token>>,
-    ) -> () {
-        let span = get_token.span.to(&url_token.span);
-        let getter = Getter {
-            span,
-            method: Method::WEB_DRIVER(WEB_DRIVER::GET_CURRENT_URL),
-            arguments: HashMap::new(),
-            returns: Primitives::String,
-        };
-
-        let expr = Expr {
-            span,
-            kind: ExpKind::Getter(getter),
-            primitive: Primitives::String,
-        };
-
-        _tl_stack.push_expr(expr);
-    }
-
-    fn GET_PAGE_SOURCE(
-        _testcase: &mut TestCase,
-        _token_stack: &mut Vec<Token>,
-        _tl_stack: &mut Vec<TranslatorStack>,
-        _errors: &mut Vec<ParseError<Token>>,
-    ) -> () {
-    }
-
-    #[pop_token(title_token, get_token)]
-    fn GET_TITLE(
-        _testcase: &mut TestCase,
-        _token_stack: &mut Vec<Token>,
-        _tl_stack: &mut Vec<TranslatorStack>,
-        _errors: &mut Vec<ParseError<Token>>,
-    ) -> () {
-        let span = get_token.span.to(&title_token.span);
-        let getter = Getter {
-            span,
-            method: Method::WEB_DRIVER(WEB_DRIVER::GET_TITLE),
-            arguments: HashMap::new(),
-            returns: Primitives::String,
-        };
-        let expr = Expr {
-            span,
-            kind: ExpKind::Getter(getter),
-            primitive: Primitives::String,
-        };
-
-        _tl_stack.push_expr(expr);
-    }
-    fn GET_WINDOW_HANDLE(
-        _testcase: &mut TestCase,
-        _token_stack: &mut Vec<Token>,
-        _tl_stack: &mut Vec<TranslatorStack>,
-        _errors: &mut Vec<ParseError<Token>>,
-    ) -> () {
     }
 }

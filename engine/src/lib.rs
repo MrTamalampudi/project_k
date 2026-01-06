@@ -22,6 +22,7 @@ mod custom;
 mod element;
 mod errors;
 mod expression;
+mod getter;
 mod navigation;
 mod shared;
 mod timeouts;

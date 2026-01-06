@@ -49,14 +49,13 @@ macro_rules! class_macro {
 
 class_macro!(
     {
-        action: ElementAction,
-        ELEMENT {
-            CLEAR,
-            CLICK,
-            SENDKEYS,
-            SUBMIT,
-            GET_ATTRIBUTE ,
-            GET_ACCESSBILE_NAME ,
+        action:GetterAction,
+        GETTER {
+            GET_ATTRIBUTE,
+            IS_DISPLAYED,
+            IS_ENABLED,
+            IS_SELECTED,
+            // GET_ACCESSBILE_NAME ,
             // GET_ARIA_ROLE,
             // GET_CSS_VALUE,
             // GET_DOM_PROPERTY,
@@ -64,9 +63,20 @@ class_macro!(
             // GET_SIZE,
             // GET_TAG_NAME,
             // GET_TEXT,
-            IS_DISPLAYED,
-            IS_ENABLED,
-            IS_SELECTED
+            //
+            GET_TITLE ,
+            GET_CURRENT_URL
+            // GET_PAGE_SOURCE,
+            // GET_WINDOW_HANDLE
+        }
+    },
+    {
+        action: ElementAction,
+        ELEMENT {
+            CLEAR,
+            CLICK,
+            SENDKEYS,
+            SUBMIT
         }
     },
     {
@@ -82,10 +92,6 @@ class_macro!(
     {
         action: WebDriverAction,
         WEB_DRIVER {
-            GET_TITLE ,
-            GET_CURRENT_URL ,
-            GET_PAGE_SOURCE,
-            GET_WINDOW_HANDLE,
             CLOSE,
             NAVIGATE
         }
