@@ -1,7 +1,7 @@
 use proc_macro::TokenStream;
 use quote::quote;
 use syn::{
-    DeriveInput, Ident, ItemFn, Stmt, Token, parse::Parse, parse_macro_input,
+    DeriveInput, Fields, Ident, ItemFn, Stmt, Token, parse::Parse, parse_macro_input,
     punctuated::Punctuated,
 };
 
@@ -116,4 +116,44 @@ pub fn pop_else(_attrs: TokenStream, item: TokenStream) -> TokenStream {
     let stmt = parse_macro_input!(stmt_token_stream as Stmt);
     func.block.stmts.insert(0, stmt);
     return quote! {#func}.into();
+}
+
+#[proc_macro_derive(EnumToString)]
+pub fn to_string_trait_derive(input: TokenStream) -> TokenStream {
+    let error: &'static str = "Currently ToString derive-macro is supported only for enum";
+    let d_input = parse_macro_input!(input as DeriveInput);
+    let name = d_input.ident;
+    let enum_data = match d_input.data {
+        syn::Data::Struct(_) => return quote! {compile_error!(#error);}.into(),
+        syn::Data::Enum(enum_data) => enum_data,
+        syn::Data::Union(_) => return quote! {compile_error!(#error);}.into(),
+    };
+
+    let mut match_arms = quote! {};
+    for variant in enum_data.variants.iter() {
+        let v_ident = &variant.ident;
+
+        let ts = if variant.fields == Fields::Unit {
+            quote! {
+                #v_ident => stringify!(#v_ident).to_lowercase(),
+            }
+        } else {
+            quote! {
+                #v_ident(..) => stringify!(#v_ident).to_lowercase(),
+            }
+        };
+        match_arms.extend(ts);
+    }
+
+    quote! {
+        impl ToString for #name{
+            fn to_string(&self) -> String {
+                use #name::*;
+                match self {
+                    #match_arms
+                }
+            }
+        }
+    }
+    .into()
 }
