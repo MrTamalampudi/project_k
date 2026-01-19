@@ -15,3 +15,4 @@ macros = {path = "../macros"}
 quote = "1.0.42"
 ast = {path = "../ast"}
 engine = {path = "../engine"}
+logos = "0.16.0"

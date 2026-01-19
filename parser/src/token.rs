@@ -1,13 +1,12 @@
-use crate::keywords::TokenType;
-use manodae::token_kind::TokenKind;
-use span::{Location, Span};
+use crate::keywords::NTokenType;
+use logos::Span;
+use manodae::token::TokenKind;
 
 #[derive(Debug, Clone, PartialEq)]
 #[allow(unused)]
 pub struct Token {
-    pub token_type: TokenType,
+    pub token_type: NTokenType,
     pub span: Span,
-    pub source_path: String,
 }
 
 impl ToString for Token {
@@ -17,29 +16,20 @@ impl ToString for Token {
 }
 
 impl Token {
-    pub fn new(token_type: TokenType, start: Location, end: Location, source_path: String) -> Self {
-        let span = Span { start, end };
-        Self {
-            token_type,
-            span,
-            source_path,
-        }
+    pub fn new(token_type: NTokenType, span: Span) -> Self {
+        Self { token_type, span }
     }
 
-    pub fn get_start_location(&self) -> Location {
+    pub fn get_start_location(&self) -> usize {
         self.span.start
     }
 
-    pub fn get_end_location(&self) -> Location {
+    pub fn get_end_location(&self) -> usize {
         self.span.end
     }
 
-    pub fn get_token_type(&self) -> TokenType {
+    pub fn get_token_type(&self) -> NTokenType {
         self.token_type.clone()
-    }
-
-    pub fn get_source_path(&self) -> String {
-        self.source_path.clone()
     }
 
     ///Creates a dummy token with a new span
@@ -47,15 +37,5 @@ impl Token {
         let mut new = self.clone();
         new.span = span.clone();
         new
-    }
-}
-
-impl TokenKind for Token {
-    type TokenKind = TokenType;
-    fn error() -> Self::TokenKind {
-        TokenType::ERROR
-    }
-    fn eof() -> Self::TokenKind {
-        TokenType::EOF
     }
 }

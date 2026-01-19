@@ -3,7 +3,6 @@ use std::collections::HashMap;
 use crate::a_types;
 use crate::parser::translator_stack::TLVec;
 use crate::parser::translator_stack::TranslatorStack;
-use crate::token::Token;
 use ast::Action;
 use ast::TestCase;
 use ast::Teststep;
@@ -20,11 +19,11 @@ impl NavigationAction for Navigation {
     #[pop_token(back_token)]
     fn BACK(
         _testcase: &mut TestCase,
-        _token_stack: &mut Vec<Token>,
+        _token_stack: &mut Vec<Self::Token>,
         _tl_stack: &mut Vec<TranslatorStack>,
-        _errors: &mut Vec<ParseError<Token>>,
+        _errors: &mut Vec<ParseError>,
     ) {
-        let span = back_token.span;
+        let span = back_token.1;
         let test_step = Action::new(span, Method::NAVIGATION(NAVIGATION::BACK), HashMap::new());
 
         _tl_stack.push_step(Teststep::Action(test_step));
@@ -33,11 +32,11 @@ impl NavigationAction for Navigation {
     #[pop_token(forward_token)]
     fn FORWARD(
         _testcase: &mut TestCase,
-        _token_stack: &mut Vec<Token>,
+        _token_stack: &mut Vec<Self::Token>,
         _tl_stack: &mut Vec<TranslatorStack>,
-        _errors: &mut Vec<ParseError<Token>>,
+        _errors: &mut Vec<ParseError>,
     ) {
-        let span = forward_token.span;
+        let span = forward_token.1;
         let test_step = Action::new(
             span,
             Method::NAVIGATION(NAVIGATION::FORWARD),
@@ -50,11 +49,11 @@ impl NavigationAction for Navigation {
     #[pop_token(refresh_token)]
     fn REFRESH(
         _testcase: &mut TestCase,
-        _token_stack: &mut Vec<Token>,
+        _token_stack: &mut Vec<Self::Token>,
         _tl_stack: &mut Vec<TranslatorStack>,
-        _errors: &mut Vec<ParseError<Token>>,
+        _errors: &mut Vec<ParseError>,
     ) {
-        let span = refresh_token.span;
+        let span = refresh_token.1;
         let test_step = Action::new(
             span,
             Method::NAVIGATION(NAVIGATION::REFRESH),

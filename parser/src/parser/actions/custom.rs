@@ -1,13 +1,12 @@
 use std::collections::HashMap;
 
 use crate::a_types;
-use crate::keywords::TokenType;
+use crate::keywords::NTokenType;
 use crate::parser::errors::EXPECT_BOOL_EXPR;
 use crate::parser::errors::MISMATCHED_TYPES;
 use crate::parser::errorss::ActionError;
 use crate::parser::translator_stack::TLVec;
 use crate::parser::translator_stack::TranslatorStack;
-use crate::token::Token;
 use ast::Action;
 use ast::ArgKeys::Args;
 use ast::ArgKeys::EXPR_ARGKEY;
@@ -20,7 +19,6 @@ use class::CUSTOM;
 use macros::pop_expr;
 use macros::pop_token;
 use manodae::error::ParseError;
-use span::Span;
 use span::SpanData;
 
 pub struct Custom {}
@@ -32,12 +30,12 @@ impl CustomAction for Custom {
     #[pop_token(_assign, identifier_token)]
     fn VAR_DECLARATION(
         _testcase: &mut TestCase,
-        _token_stack: &mut Vec<Token>,
+        _token_stack: &mut Vec<Self::Token>,
         _tl_stack: &mut Vec<TranslatorStack>,
-        _errors: &mut Vec<ParseError<Token>>,
+        _errors: &mut Vec<ParseError>,
     ) {
-        let identifier = match identifier_token.get_token_type() {
-            TokenType::IDENTIFIER(ident) => ident,
+        let identifier = match identifier_token.0 {
+            NTokenType::IDENTIFIER(ident) => ident,
             _ => return,
         };
 
@@ -48,22 +46,21 @@ impl CustomAction for Custom {
             }
         };
 
-        let span = identifier_token.span.to(&var_rhs.get_span());
+        let span = identifier_token.1.start..var_rhs.get_span().end;
         let var_decl = VarDecl::new(identifier.clone(), var_rhs.primitive, var_rhs, span);
 
         if let Some(variable) = _testcase.variables.get(&identifier) {
             if variable.to_primitive().ne(&var_decl.type_) {
                 if let Some(token) = _token_stack.get(2) {
-                    _errors.push(ParseError {
-                        token: token.clone(),
-                        message: String::from(format!(
+                    _errors.push_error(
+                        &token.1,
+                        String::from(format!(
                             "{}, expected {} found {}",
                             MISMATCHED_TYPES,
                             variable.to_primitive().to_string(),
                             var_decl.type_.to_string()
                         )),
-                        production_end: false,
-                    });
+                    );
                 };
                 return;
             }
@@ -78,19 +75,16 @@ impl CustomAction for Custom {
     #[pop_expr(expr)]
     fn ASSERT(
         _testcase: &mut TestCase,
-        _token_stack: &mut Vec<Token>,
+        _token_stack: &mut Vec<Self::Token>,
         _tl_stack: &mut Vec<TranslatorStack>,
-        _errors: &mut Vec<ParseError<Token>>,
+        _errors: &mut Vec<ParseError>,
     ) {
         if !expr.boolean() {
-            _errors.push_error(&assert_token, &expr.span, EXPECT_BOOL_EXPR.to_string());
+            _errors.push_error(&expr.span, EXPECT_BOOL_EXPR.to_string());
             return;
         }
         let teststep = Action::new(
-            Span {
-                start: assert_token.get_start_location(),
-                end: expr.span.end,
-            },
+            assert_token.1.start..expr.span.end,
             Method::CUSTOM(CUSTOM::ASSERT),
             HashMap::from([(EXPR_ARGKEY, Args::Expr(expr))]),
         );

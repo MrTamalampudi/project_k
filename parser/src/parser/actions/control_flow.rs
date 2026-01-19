@@ -1,19 +1,18 @@
+use std::ops::Range;
+
 use crate::a_types;
-use crate::keywords::TokenType;
+use crate::keywords::NTokenType;
 use crate::parser::errors::{EXPECT_ARRAY, EXPECT_BOOL_EXPR, EXPECT_VARIABLE};
 use crate::parser::errorss::ActionError;
-use crate::{
-    parser::translator_stack::{TLVec, TranslatorStack},
-    token::Token,
-};
+use crate::parser::translator_stack::{TLVec, TranslatorStack};
 use ast::{
     expression::{ExpKind, Expr, Literal},
     ForLoop, IdentifierValue, IfStmt, Primitives, TestCase, Teststep,
 };
 use class::{ControlFlowAction, Method, CONTROL_FLOW};
+use logos::Span;
 use macros::{pop_body, pop_else, pop_expr, pop_token};
 use manodae::error::ParseError;
-use span::Span;
 
 pub struct ControlFlow;
 
@@ -23,22 +22,22 @@ impl ControlFlow {
     #[pop_expr(iter)]
     pub fn HELPER(
         _testcase: &mut TestCase,
-        _token_stack: &mut Vec<Token>,
+        _token_stack: &mut Vec<(NTokenType, Span)>,
         _tl_stack: &mut Vec<TranslatorStack>,
-        _errors: &mut Vec<ParseError<Token>>,
+        _errors: &mut Vec<ParseError>,
     ) {
         if let ExpKind::Lit(Literal::Ident(name, _)) = &iter.kind {
             let value = _testcase.variables.get(name);
             let IdentifierValue::Array(_, _) = value.unwrap() else {
-                _errors.push_error(&ident, &iter.span, EXPECT_ARRAY.to_string());
+                _errors.push_error(&iter.span, EXPECT_ARRAY.to_string());
                 return;
             };
         };
         let primitive = iter.primitive;
-        if let TokenType::IDENTIFIER(ident) = ident.get_token_type() {
+        if let NTokenType::IDENTIFIER(ident) = &ident.0 {
             _testcase
                 .variables
-                .insert(ident, primitive.to_identifier_value());
+                .insert(ident.clone(), primitive.to_identifier_value());
         }
         _token_stack.push(ident);
         _tl_stack.push_expr(iter);
@@ -54,13 +53,13 @@ impl ControlFlowAction for ControlFlow {
     #[pop_else]
     fn IF(
         _testcase: &mut TestCase,
-        _token_stack: &mut Vec<Token>,
+        _token_stack: &mut Vec<Self::Token>,
         _tl_stack: &mut Vec<TranslatorStack>,
-        _errors: &mut Vec<ParseError<Token>>,
+        _errors: &mut Vec<ParseError>,
     ) {
-        let span = _if_token.span.to(&_r_curly_brace_token.span);
+        let span = _if_token.1.start.._r_curly_brace_token.1.start;
         if cond_expr.primitive != Primitives::Boolean {
-            _errors.push_error(&_if_token, &cond_expr.span, EXPECT_BOOL_EXPR.to_string());
+            _errors.push_error(&cond_expr.span, EXPECT_BOOL_EXPR.to_string());
             return;
         }
         let stmt = IfStmt {
@@ -79,13 +78,13 @@ impl ControlFlowAction for ControlFlow {
     #[pop_else]
     fn ELSE_IF(
         _testcase: &mut TestCase,
-        _token_stack: &mut Vec<Token>,
+        _token_stack: &mut Vec<Self::Token>,
         _tl_stack: &mut Vec<TranslatorStack>,
-        _errors: &mut Vec<ParseError<Token>>,
+        _errors: &mut Vec<ParseError>,
     ) {
-        let span = _else_token.span.to(&_r_curly_brace_token.span);
+        let span = _else_token.1.start.._r_curly_brace_token.1.end;
         if cond_expr.primitive != Primitives::Boolean {
-            _errors.push_error(&_else_token, &cond_expr.span, EXPECT_BOOL_EXPR.to_string());
+            _errors.push_error(&cond_expr.span, EXPECT_BOOL_EXPR.to_string());
             return;
         }
 
@@ -103,16 +102,16 @@ impl ControlFlowAction for ControlFlow {
     #[pop_body]
     fn ELSE(
         _testcase: &mut TestCase,
-        _token_stack: &mut Vec<Token>,
+        _token_stack: &mut Vec<Self::Token>,
         _tl_stack: &mut Vec<TranslatorStack>,
-        _errors: &mut Vec<ParseError<Token>>,
+        _errors: &mut Vec<ParseError>,
     ) {
-        let span = _else_token.span.to(&_r_curly_brace_token.span);
+        let span = _else_token.1.start.._r_curly_brace_token.1.end;
         let stmt = IfStmt {
             span,
             condition: Expr {
                 kind: ExpKind::Lit(Literal::Boolean(true)),
-                span: Span::dummy(),
+                span: Range::default(),
                 primitive: Primitives::Boolean,
             },
             body,
@@ -127,11 +126,11 @@ impl ControlFlowAction for ControlFlow {
     #[pop_body]
     fn WHILE(
         _testcase: &mut TestCase,
-        _token_stack: &mut Vec<Token>,
+        _token_stack: &mut Vec<Self::Token>,
         _tl_stack: &mut Vec<TranslatorStack>,
-        _errors: &mut Vec<ParseError<Token>>,
+        _errors: &mut Vec<ParseError>,
     ) {
-        let span = _while_token.span.to(&_r_curly_brace_token.span);
+        let span = _while_token.1.start.._r_curly_brace_token.1.end;
         let stmt = IfStmt {
             span,
             condition,
@@ -150,13 +149,13 @@ impl ControlFlowAction for ControlFlow {
         _testcase: &mut Self::AST,
         _token_stack: &mut Vec<Self::Token>,
         _tl_stack: &mut Vec<Self::TranslatorStack>,
-        _errors: &mut Vec<Self::Error<Self::Token>>,
+        _errors: &mut Vec<Self::Error>,
     ) {
-        let span = for_token.span.to(&_r_curly_brace_token.span);
-        let target = if let TokenType::IDENTIFIER(ident) = target.get_token_type() {
+        let span = for_token.1.start.._r_curly_brace_token.1.end;
+        let target = if let NTokenType::IDENTIFIER(ident) = target.0 {
             ident.clone()
         } else {
-            _errors.push_error(&target, &target.span, EXPECT_VARIABLE.to_string());
+            _errors.push_error(&target.1, EXPECT_VARIABLE.to_string());
             return;
         };
 

@@ -3,7 +3,7 @@ use std::time::Instant;
 
 use super::Parser;
 use crate::error_handler::{parse_error_to_error_info, ErrorInfo};
-use crate::keywords::TokenType;
+use crate::keywords::NTokenType;
 use crate::parser::actions::{
     BinaryExpression, ControlFlow, Custom, Driver, Element, Getter, LiteralExpression, Navigation,
     Shared, Timeouts, UnaryExpression,
@@ -50,11 +50,10 @@ macro_rules! get_input_from_token_stack {
 
 #[allow(non_camel_case_types, unused)]
 pub fn parser_slr(parser: &mut Parser) {
-    let tt: Vec<Token> = parser.lexer.tokens.iter().cloned().collect();
     let d_string = || "".to_string();
     let d_num = || (1 as isize);
     let time = Instant::now();
-    let grammar: Grammar<TestCase, Token, TranslatorStack> = grammar!(
+    let grammar: Grammar<TestCase, NTokenType, TranslatorStack> = grammar!(
         Start -> Testcase Newlines Teststeps
         { |ast,token_stack,tl_stack,errors| Shared::set_body(ast, tl_stack.pop_body()) };
 
@@ -212,9 +211,7 @@ pub fn parser_slr(parser: &mut Parser) {
         { |ast,token_stack,tl_stack,errors| LiteralExpression::STRING(ast, token_stack, tl_stack, errors) }
         | Ident
         { |ast,token_stack,tl_stack,errors| LiteralExpression::IDENT(ast, token_stack, tl_stack, errors) }
-        | True
-        { |ast,token_stack,tl_stack,errors| LiteralExpression::BOOLEAN(ast, token_stack, tl_stack, errors) }
-        | False
+        | Boolean
         { |ast,token_stack,tl_stack,errors| LiteralExpression::BOOLEAN(ast, token_stack, tl_stack, errors) };
 
         UnaryExpression -> NegationExpression
@@ -271,94 +268,93 @@ pub fn parser_slr(parser: &mut Parser) {
 
         [terminal_productions]
 
-        Testcase -> [TokenType::TESTCASE]
+        Testcase -> [NTokenType::TESTCASE]
         { |ast,token_stack,tl_stack,errors| tl_stack.push(TranslatorStack::Body(Body::new())) };
 
         //Actions
-        Navigate            -> [TokenType::NAVIGATE];
-        Click               -> [TokenType::CLICK];
-        Back                -> [TokenType::BACK];
-        Forward             -> [TokenType::FORWARD];
-        Refresh             -> [TokenType::REFRESH];
-        Get                 -> [TokenType::GET];
-        Wait                -> [TokenType::WAIT];
-        Assert              -> [TokenType::ASSERT];
-        Enter               -> [TokenType::ENTER];
-        Close               -> [TokenType::CLOSE];
+        Navigate            -> [NTokenType::NAVIGATE];
+        Click               -> [NTokenType::CLICK];
+        Back                -> [NTokenType::BACK];
+        Forward             -> [NTokenType::FORWARD];
+        Refresh             -> [NTokenType::REFRESH];
+        Get                 -> [NTokenType::GET];
+        Wait                -> [NTokenType::WAIT];
+        Assert              -> [NTokenType::ASSERT];
+        Enter               -> [NTokenType::ENTER];
+        Close               -> [NTokenType::CLOSE];
 
         //Nouns
-        Attribute           -> [TokenType::ATTRIBUTE];
-        Element             -> [TokenType::ELEMENT];
-        Url                 -> [TokenType::URL];
-        Title               -> [TokenType::TITLE];
-        Css                 -> [TokenType::CSS];
-        Value               -> [TokenType::VALUE];
-        Text                -> [TokenType::TEXT];
-        Tag                 -> [TokenType::TAG];
-        Name                -> [TokenType::NAME];
+        Attribute           -> [NTokenType::ATTRIBUTE];
+        Element             -> [NTokenType::ELEMENT];
+        Url                 -> [NTokenType::URL];
+        Title               -> [NTokenType::TITLE];
+        Css                 -> [NTokenType::CSS];
+        Value               -> [NTokenType::VALUE];
+        Text                -> [NTokenType::TEXT];
+        Tag                 -> [NTokenType::TAG];
+        Name                -> [NTokenType::NAME];
 
         //Prepositions
-        From                -> [TokenType::FROM];
-        To                  -> [TokenType::TO];
-        In                  -> [TokenType::IN];
-        Is                  -> [TokenType::IS];
+        From                -> [NTokenType::FROM];
+        To                  -> [NTokenType::TO];
+        In                  -> [NTokenType::IN];
+        Is                  -> [NTokenType::IS];
 
         //Adjectives
-        Current             -> [TokenType::CURRENT];
-        Displayed           -> [TokenType::DISPLAYED];
-        Enabled             -> [TokenType::ENABLED];
-        Selected            -> [TokenType::SELECTED];
+        Current             -> [NTokenType::CURRENT];
+        Displayed           -> [NTokenType::DISPLAYED];
+        Enabled             -> [NTokenType::ENABLED];
+        Selected            -> [NTokenType::SELECTED];
 
         //Operators
-        Assign              -> [TokenType::ASSIGN_OP];
-        Negation            -> [TokenType::NEGATION];
-        Plus                -> [TokenType::PLUS];
-        Minus               -> [TokenType::MINUS];
-        Multiply            -> [TokenType::MULTIPLY];
-        Forward_slash       -> [TokenType::FORWARDSLASH];
-        Modulus             -> [TokenType::MODULUS];
-        Equality            -> [TokenType::EQUALITY];
-        Not_equal           -> [TokenType::NOT_EQUAL];
-        Greater_than        -> [TokenType::GREATER_THAN];
-        Lesser_than         -> [TokenType::LESSER_THAN];
-        Greater_than_equal  -> [TokenType::GREATER_THAN_EQUAL_TO];
-        Lesser_than_equal   -> [TokenType::LESSER_THAN_EQUAL_TO];
+        Assign              -> [NTokenType::ASSIGN_OP];
+        Negation            -> [NTokenType::NEGATION];
+        Plus                -> [NTokenType::PLUS];
+        Minus               -> [NTokenType::MINUS];
+        Multiply            -> [NTokenType::MULTIPLY];
+        Forward_slash       -> [NTokenType::FORWARDSLASH];
+        Modulus             -> [NTokenType::MODULUS];
+        Equality            -> [NTokenType::EQUALITY];
+        Not_equal           -> [NTokenType::NOT_EQUAL];
+        Greater_than        -> [NTokenType::GREATER_THAN];
+        Lesser_than         -> [NTokenType::LESSER_THAN];
+        Greater_than_equal  -> [NTokenType::GREATER_THAN_EQUAL_TO];
+        Lesser_than_equal   -> [NTokenType::LESSER_THAN_EQUAL_TO];
 
         //Punctuations
-        Comma               -> [TokenType::COMMA];
+        Comma               -> [NTokenType::COMMA];
 
         //Conjunctions
-        And                 -> [TokenType::AND];
-        Or                  -> [TokenType::OR];
-        If                  -> [TokenType::IF];
-        Else                -> [TokenType::ELSE];
-        While               -> [TokenType::WHILE];
-        For                 -> [TokenType::FOR];
+        And                 -> [NTokenType::AND];
+        Or                  -> [NTokenType::OR];
+        If                  -> [NTokenType::IF];
+        Else                -> [NTokenType::ELSE];
+        While               -> [NTokenType::WHILE];
+        For                 -> [NTokenType::FOR];
 
         //chars
-        Left_paran          -> [TokenType::LEFT_PARAN];
-        Right_paran         -> [TokenType::RIGHT_PARAN];
-        L_CurlyBrace        -> [TokenType::L_CURLY_BRACE]
+        Left_paran          -> [NTokenType::LEFT_PARAN];
+        Right_paran         -> [NTokenType::RIGHT_PARAN];
+        L_CurlyBrace        -> [NTokenType::L_CURLY_BRACE]
         // L_CURLY_BRACE means starting of a block
         // so we are keeping this action to add new body to tl_stack
         { |ast,token_stack,tl_stack,errors| tl_stack.push(TranslatorStack::Body(Body::new())) };
 
-        R_CurlyBrace        -> [TokenType::R_CURLY_BRACE];
-        L_SquareBrace       -> [TokenType::L_SQUARE_BRACE]
+        R_CurlyBrace        -> [NTokenType::R_CURLY_BRACE];
+        L_SquareBrace       -> [NTokenType::L_SQUARE_BRACE]
         { |ast,token_stack,tl_stack,errors| tl_stack.push(TranslatorStack::ArrayDelim) };
 
-        R_SquareBrace       -> [TokenType::R_SQUARE_BRACE];
+        R_SquareBrace       -> [NTokenType::R_SQUARE_BRACE];
 
         //Inputs
-        String              -> [TokenType::STRING(d_string())];
-        Ident               -> [TokenType::IDENTIFIER(d_string())];
-        Number              -> [TokenType::NUMBER(d_num())];
+        String              -> [NTokenType::STRING(String::new())];
+        Ident               -> [NTokenType::IDENTIFIER(String::new())];
+        Number              -> [NTokenType::NUMBER(1.0)];
 
         //Boolean
-        True               -> [TokenType::TRUE];
-        False              -> [TokenType::FALSE];
+        Boolean            -> [NTokenType::BOOL(true)];
 
-        Newline            -> [TokenType::NEW_LINE]
+        Newline            -> [NTokenType::NEWLINE]
         { |ast,token_stack,tl_stack,errors|{
             token_stack.pop(); //pop newline token
         }};
@@ -373,14 +369,14 @@ pub fn parser_slr(parser: &mut Parser) {
         .parent()
         .unwrap()
         .to_path_buf();
-    Codegen::gen(path, grammar, ["TestCase", "Token", "TranslatorStack"]);
+    Codegen::gen(path, grammar, ["TestCase", "NTokenType", "TranslatorStack"]);
     let els = time.elapsed();
     debug!("codegeneration time {:#?}", els);
     // render(&lalr_parser);
-    let mut errors: Vec<ParseError<Token>> = Vec::new();
+    let mut errors: Vec<ParseError> = Vec::new();
     let mut ast: TestCase = TestCase::new();
     let time = Instant::now();
-    get_parser().parse(tt, &mut errors, &mut ast);
+    get_parser().parse(parser.lexer.clone(), &mut errors, &mut ast);
     let els = time.elapsed();
     debug!("parsing time {:#?}", els);
     refine_errors(&mut errors);
@@ -394,9 +390,9 @@ pub fn parser_slr(parser: &mut Parser) {
     };
 }
 
-fn refine_errors(errors: &mut Vec<ParseError<Token>>) {
+fn refine_errors(errors: &mut Vec<ParseError>) {
     errors
         .iter_mut()
         .filter(|e| e.production_end)
-        .for_each(|e| e.token.span.start = e.token.span.end);
+        .for_each(|e| e.span.start = e.span.end);
 }

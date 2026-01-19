@@ -1,12 +1,14 @@
 #![allow(non_camel_case_types, unused)]
 
+use std::ops::Range;
+
 use crate::{getter::Getter, identifier_value::IdentifierValue, primitives::Primitives};
 use macros::Span;
-use span::{Span, SpanData};
+use span::SpanData;
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum Literal {
-    Number(isize),
+    Number(f64),
     Ident(String, Primitives),
     String(String),
     Boolean(bool),
@@ -26,7 +28,7 @@ impl Literal {
 #[derive(Debug, Clone, PartialEq, Span)]
 pub struct Expr {
     pub kind: ExpKind,
-    pub span: Span,
+    pub span: Range<usize>,
     pub primitive: Primitives,
 }
 

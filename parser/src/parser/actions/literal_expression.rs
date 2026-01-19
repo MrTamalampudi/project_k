@@ -4,13 +4,12 @@ use manodae::error::ParseError;
 
 use crate::{
     a_types,
-    keywords::TokenType,
+    keywords::NTokenType,
     parser::{
         errors::{EMPTY_ARRAY_EXPR, EXPECT_BOOL_EXPR, VARIABLE_NOT_DEFINED},
         errorss::ActionError,
         translator_stack::{TLVec, TranslatorStack},
     },
-    token::Token,
 };
 use ast::{
     expression::{ExpKind, Expr, Literal as LE},
@@ -24,15 +23,15 @@ impl LiteralExpressionAction for LiteralExpression {
     #[pop_token(string_token)]
     fn STRING(
         _testcase: &mut TestCase,
-        _token_stack: &mut Vec<Token>,
+        _token_stack: &mut Vec<Self::Token>,
         _tl_stack: &mut Vec<TranslatorStack>,
-        _errors: &mut Vec<ParseError<Token>>,
+        _errors: &mut Vec<ParseError>,
     ) {
-        if let TokenType::STRING(string) = string_token.get_token_type() {
+        if let NTokenType::STRING(string) = string_token.0 {
             let expr_kind = ExpKind::Lit(LE::String(string));
             _tl_stack.push(TranslatorStack::Expression(Expr {
                 primitive: Primitives::String,
-                span: string_token.span,
+                span: string_token.1,
                 kind: expr_kind,
             }));
         }
@@ -41,15 +40,15 @@ impl LiteralExpressionAction for LiteralExpression {
     #[pop_token(number_token)]
     fn NUMBER(
         _testcase: &mut TestCase,
-        _token_stack: &mut Vec<Token>,
+        _token_stack: &mut Vec<Self::Token>,
         _tl_stack: &mut Vec<TranslatorStack>,
-        _errors: &mut Vec<ParseError<Token>>,
+        _errors: &mut Vec<ParseError>,
     ) {
-        if let TokenType::NUMBER(number) = number_token.get_token_type() {
+        if let NTokenType::NUMBER(number) = number_token.0 {
             let expr_kind = ExpKind::Lit(LE::Number(number));
             _tl_stack.push(TranslatorStack::Expression(Expr {
                 primitive: Primitives::Number,
-                span: number_token.span,
+                span: number_token.1,
                 kind: expr_kind,
             }));
         }
@@ -58,26 +57,21 @@ impl LiteralExpressionAction for LiteralExpression {
     #[pop_token(boolean_token)]
     fn BOOLEAN(
         _testcase: &mut TestCase,
-        _token_stack: &mut Vec<Token>,
+        _token_stack: &mut Vec<Self::Token>,
         _tl_stack: &mut Vec<TranslatorStack>,
-        _errors: &mut Vec<ParseError<Token>>,
+        _errors: &mut Vec<ParseError>,
     ) {
-        let truth_value = match boolean_token.token_type {
-            TokenType::TRUE => true,
-            TokenType::FALSE => false,
+        let truth_value = match boolean_token.0 {
+            NTokenType::BOOL(t) => t,
             _ => {
-                _errors.push_error(
-                    &boolean_token,
-                    &boolean_token.span,
-                    EXPECT_BOOL_EXPR.to_string(),
-                );
+                _errors.push_error(&boolean_token.1, EXPECT_BOOL_EXPR.to_string());
                 return;
             }
         };
         let expr_kind = ExpKind::Lit(LE::Boolean(truth_value));
         _tl_stack.push(TranslatorStack::Expression(Expr {
             primitive: Primitives::Boolean,
-            span: boolean_token.span,
+            span: boolean_token.1,
             kind: expr_kind,
         }));
     }
@@ -85,25 +79,21 @@ impl LiteralExpressionAction for LiteralExpression {
     #[pop_token(ident_token)]
     fn IDENT(
         _testcase: &mut TestCase,
-        _token_stack: &mut Vec<Token>,
+        _token_stack: &mut Vec<Self::Token>,
         _tl_stack: &mut Vec<TranslatorStack>,
-        _errors: &mut Vec<ParseError<Token>>,
+        _errors: &mut Vec<ParseError>,
     ) {
-        if let TokenType::IDENTIFIER(ident) = ident_token.get_token_type() {
+        if let NTokenType::IDENTIFIER(ident) = ident_token.0 {
             let variable = _testcase.variables.get(&ident);
             if variable.is_none() {
-                _errors.push(ParseError {
-                    token: ident_token.clone(),
-                    message: String::from(VARIABLE_NOT_DEFINED),
-                    production_end: false,
-                });
+                _errors.push_error(&ident_token.1, String::from(VARIABLE_NOT_DEFINED));
                 return;
             }
             let variable_type = variable.unwrap().to_primitive();
             let expr_kind = ExpKind::Lit(LE::Ident(ident, variable_type.clone()));
             _tl_stack.push(TranslatorStack::Expression(Expr {
                 primitive: variable_type,
-                span: ident_token.span,
+                span: ident_token.1,
                 kind: expr_kind,
             }));
         }
@@ -114,7 +104,7 @@ impl LiteralExpressionAction for LiteralExpression {
         _testcase: &mut Self::AST,
         _token_stack: &mut Vec<Self::Token>,
         _tl_stack: &mut Vec<Self::TranslatorStack>,
-        _errors: &mut Vec<Self::Error<Self::Token>>,
+        _errors: &mut Vec<Self::Error>,
     ) {
         let mut expr_arr = vec![];
         //pop expression from tl_stack till ArrayDelim
@@ -133,11 +123,11 @@ impl LiteralExpressionAction for LiteralExpression {
         // [a,b,c] -> [c,b,a] -> [a,b,c]
         // ^orginal  ^expr_arr  ^reverse
         expr_arr.reverse();
-        let span = l_space_brac.span.to(&r_space_brac.span);
+        let span = l_space_brac.1.start..r_space_brac.1.end;
         if expr_arr.is_empty() {
             //if it is an empty array it is impossible to determine
             //its primitive at the time of declaration
-            _errors.push_error(&l_space_brac, &span, EMPTY_ARRAY_EXPR.to_string());
+            _errors.push_error(&span, EMPTY_ARRAY_EXPR.to_string());
             return;
         }
         let primitive = expr_arr.first().unwrap().primitive;

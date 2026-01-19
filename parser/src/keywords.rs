@@ -1,174 +1,11 @@
-use std::collections::HashMap;
-
 use logos::Logos;
 use macros::EnumToString;
-
-macro_rules! define_tokens {
-    ($($keyword:ident $(= $string:literal)?),*) => {
-        #[derive(Debug,Clone,PartialEq)]
-        #[allow(non_camel_case_types)]
-        pub enum TokenType {
-            NEW_LINE,
-            STRING(String),
-            IDENTIFIER(String),
-            NUMBER(isize),
-            //capbilities
-            NONE,
-            $($keyword),*
-        }
-
-        impl TokenType {
-            pub fn from_string(token_string:&str) -> TokenType {
-                let mut keyword_map: HashMap<String,TokenType> = HashMap::new();
-                $(
-                    if(stringify!($keyword).contains("ACTION_")){
-                        keyword_map.insert(
-                            stringify!($keyword).replace("ACTION_","").replace("_"," ").to_lowercase(),
-                            TokenType::$keyword
-                        );
-                    } else if (stringify!($keyword).contains("OPTION_")){
-                        keyword_map.insert(
-                            stringify!($keyword).replace("OPTION_","").replace("_"," ").to_lowercase(),
-                            TokenType::$keyword
-                        );
-                    } else if stringify!($($string)?).len() > 0{
-                        keyword_map.insert(
-                            String::from(stringify!($($string)?)),
-                            TokenType::$keyword
-                        );
-                    } else {
-                        keyword_map.insert(
-                            stringify!($keyword).replace("_"," ").to_lowercase(),
-                            TokenType::$keyword
-                        );
-                    }
-                )*
-
-                    keyword_map.get(token_string).cloned().unwrap_or(TokenType::IDENTIFIER(token_string.to_string()))
-            }
-
-            pub fn len(&self) -> usize {
-                match self {
-                    TokenType::STRING(string) => string.len(),
-                    TokenType::IDENTIFIER(ident) => ident.len(),
-                    TokenType::NUMBER(num) => num.to_string().len(),
-                    TokenType::NONE => 0,
-                    TokenType::NEW_LINE => 1,
-                    $(TokenType::$keyword =>{
-                        let string = if stringify!($keyword) == "EOF"{
-                            "EOF".to_string()
-                        } else if stringify!($($string)?).len() > 0 {
-                            String::from(stringify!($($string)?))
-                        } else {
-                            stringify!($keyword).replace("_"," ").to_lowercase()
-                        };
-                        string.len()
-                    }
-                    ,)*
-                }
-            }
-
-            pub fn to_string(&self) -> String {
-                match self {
-                    TokenType::STRING(_) => String::from("string"),
-                    TokenType::IDENTIFIER(_) => String::from("identifier"),
-                    TokenType::NUMBER(_) => String::from("number"),
-                    TokenType::NONE => "none".to_string(),
-                    $(TokenType::$keyword =>{
-                        if stringify!($keyword) == "EOF"{
-                            "EOF".to_string()
-                        } else if stringify!($($string)?).len() > 0 {
-                            String::from(stringify!($($string)?))
-                        } else {
-                            stringify!($keyword).replace("_"," ").to_lowercase()
-                        }}
-                    ,)*
-                    TokenType::NEW_LINE => "new line".to_string(),
-                }
-            }
-        }
-    };
-}
-
-define_tokens!(
-    //FileType
-    TESTCASE,
-    TESTSUITE,
-    TESTPLAN,
-    //actions
-    NAVIGATE,
-    CLICK,
-    BACK,
-    FORWARD,
-    REFRESH,
-    GET,
-    WAIT,
-    ASSERT,
-    ENTER,
-    CLOSE,
-    //nouns
-    ATTRIBUTE,
-    ELEMENT,
-    URL,
-    TITLE,
-    CSS,
-    VALUE,
-    TEXT,
-    TAG,
-    NAME,
-    //prepositions
-    FROM,
-    TO,
-    IN,
-    IS,
-    //adjective
-    CURRENT,
-    DISPLAYED,
-    ENABLED,
-    SELECTED,
-    //conjunctions
-    AND,
-    OR,
-    IF,
-    ELSE,
-    WHILE,
-    FOR,
-    //operators
-    ASSIGN_OP = '=',
-    NEGATION = '!', //from here
-    PLUS = '+',
-    MINUS = '-',
-    MULTIPLY = '*',
-    FORWARDSLASH = '/',
-    MODULUS = '%',
-    LEFT_PARAN = '(',
-    RIGHT_PARAN = ')',
-    L_CURLY_BRACE = '{',
-    R_CURLY_BRACE = '}',
-    L_SQUARE_BRACE = '[',
-    R_SQUARE_BRACE = ']',
-    EQUALITY = "==",
-    NOT_EQUAL = "!=",
-    GREATER_THAN = '>',
-    LESSER_THAN = '<',
-    GREATER_THAN_EQUAL_TO = ">=",
-    LESSER_THAN_EQUAL_TO = "<=",
-    //Punctuation
-    COMMA = ',',
-    //boolean
-    TRUE,
-    FALSE,
-    //High level tokens
-    TESTSTEPS,
-    CAPABILITIES,
-    PREREQUISITE,
-    EOF,
-    ERROR
-);
+use manodae::token::TokenKind;
 
 #[allow(non_camel_case_types)]
 #[derive(EnumToString, Logos, Debug, Clone, PartialEq)]
-#[logos(skip r"[ ]")]
+#[logos(skip r" ")]
+#[logos(skip r"//.*\n")]
 pub enum NTokenType {
     #[token("#testcase")]
     TESTCASE,
@@ -347,7 +184,7 @@ pub enum NTokenType {
     BOOL(bool),
 
     //inputs
-    #[regex(r#""([^"\\\x00-\x1F]|\\(["\\bnfrt/]|u[a-fA-F0-9]{4}))*""#, |lex| lex.slice().to_owned())]
+    #[regex(r#""([^"\\\x00-\x1F]|\\(["\\bnfrt/]|u[a-fA-F0-9]{4}))*""#, |lex| lex.slice()[1..lex.slice().len()-1].to_string())]
     STRING(String),
 
     #[regex(r"-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?", |lex| lex.slice().parse::<f64>().unwrap())]
@@ -360,4 +197,14 @@ pub enum NTokenType {
     NEWLINE,
 
     EOF,
+}
+
+impl TokenKind for NTokenType {
+    type TokenKind = NTokenType;
+    fn error() -> Self::TokenKind {
+        NTokenType::EOF
+    }
+    fn eof() -> Self::TokenKind {
+        NTokenType::EOF
+    }
 }

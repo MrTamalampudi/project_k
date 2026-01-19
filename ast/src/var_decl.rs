@@ -1,7 +1,9 @@
+use std::ops::Range;
+
 use crate::{expression::Expr, primitives::Primitives};
 use class::{CUSTOM, Method};
 use macros::{Method, Span};
-use span::{Span, SpanData};
+use span::SpanData;
 
 #[derive(Debug, Clone, PartialEq, Span, Method)]
 pub struct VarDecl {
@@ -9,11 +11,11 @@ pub struct VarDecl {
     pub type_: Primitives,
     pub rhs: Expr,
     pub method: Method,
-    pub span: Span,
+    pub span: Range<usize>,
 }
 
 impl VarDecl {
-    pub fn new(name: String, type_: Primitives, rhs: Expr, span: Span) -> VarDecl {
+    pub fn new(name: String, type_: Primitives, rhs: Expr, span: Range<usize>) -> VarDecl {
         VarDecl {
             name,
             type_,

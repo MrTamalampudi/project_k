@@ -1,7 +1,7 @@
+use std::ops::Range;
+
 use macros::Method;
 use macros::Span;
-use span::Location;
-use span::Span;
 use span::SpanData;
 
 use crate::for_loop::ForLoop;
@@ -10,26 +10,21 @@ use class::Method;
 
 #[derive(PartialEq, Clone, Debug, Span)]
 pub struct Body {
-    pub span: Span,
+    pub span: Range<usize>,
     pub teststeps: Vec<Teststep>,
 }
 
 impl Body {
     pub fn new() -> Self {
         Body {
-            span: Span {
-                start: Location::dummy(),
-                end: Location::dummy(),
-            },
+            span: 0..0,
             teststeps: vec![],
         }
     }
     pub fn insert_teststep(&mut self, teststep: Teststep) {
-        let body_span = self.get_span();
-        let teststep_span = teststep.get_span();
-        let span = body_span.to(&teststep_span);
+        let span = self.span_to(&teststep.get_span());
         if self.teststeps.is_empty() {
-            self.span = teststep_span;
+            self.span = teststep.get_span();
         } else {
             self.span = span
         }

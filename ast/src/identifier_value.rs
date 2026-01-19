@@ -5,7 +5,7 @@ use thirtyfour::WebElement;
 #[derive(Debug, Clone, PartialEq)]
 pub enum IdentifierValue {
     String(Option<String>),
-    Number(Option<isize>),
+    Number(Option<f64>),
     Element(Option<WebElement>),
     Boolean(Option<bool>),
     Array(Option<Vec<IdentifierValue>>, Primitives),

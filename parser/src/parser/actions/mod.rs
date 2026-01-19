@@ -39,8 +39,8 @@ macro_rules! pop_expr {
 macro_rules! a_types {
     () => {
         type AST = TestCase;
-        type Token = Token;
+        type Token = (crate::keywords::NTokenType, std::ops::Range<usize>);
         type TranslatorStack = TranslatorStack;
-        type Error<Token> = ParseError<Token>;
+        type Error = ParseError;
     };
 }

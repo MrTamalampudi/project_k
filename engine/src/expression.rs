@@ -1,4 +1,4 @@
-use std::ops::BitXor;
+use std::ops::{Add, BitXor, Div, Mul};
 
 use thirtyfour::By;
 
@@ -80,37 +80,25 @@ impl<'a> Engine<'a> {
             },
             Sub => match (expr1_value, expr2_value) {
                 (IdentifierValue::Number(num1), IdentifierValue::Number(num2)) => Ok(
-                    IdentifierValue::Number(Some(match num1.unwrap().checked_sub(num2.unwrap()) {
-                        Some(res) => res,
-                        None => return Err(INT_OVERFLOW.to_string()),
-                    })),
+                    IdentifierValue::Number(Some(num1.unwrap().add(num2.unwrap()))),
                 ),
                 (_, _) => Err(INVALID_SUB_OP.to_string()),
             },
             Mul => match (expr1_value, expr2_value) {
                 (IdentifierValue::Number(num1), IdentifierValue::Number(num2)) => Ok(
-                    IdentifierValue::Number(Some(match num1.unwrap().checked_mul(num2.unwrap()) {
-                        Some(res) => res,
-                        None => return Err(INT_OVERFLOW.to_string()),
-                    })),
+                    IdentifierValue::Number(Some(num1.unwrap().mul(num2.unwrap()))),
                 ),
                 (_, _) => Err(INVALID_SUB_OP.to_string()),
             },
             Div => match (expr1_value, expr2_value) {
                 (IdentifierValue::Number(num1), IdentifierValue::Number(num2)) => Ok(
-                    IdentifierValue::Number(Some(match num1.unwrap().checked_div(num2.unwrap()) {
-                        Some(res) => res,
-                        None => return Err(INT_OVERFLOW.to_string()),
-                    })),
+                    IdentifierValue::Number(Some(num1.unwrap().div(num2.unwrap()))),
                 ),
                 (_, _) => Err(INVALID_SUB_OP.to_string()),
             },
             Rem => match (expr1_value, expr2_value) {
                 (IdentifierValue::Number(num1), IdentifierValue::Number(num2)) => Ok(
-                    IdentifierValue::Number(Some(match num1.unwrap().checked_rem(num2.unwrap()) {
-                        Some(res) => res,
-                        None => return Err(INT_OVERFLOW.to_string()),
-                    })),
+                    IdentifierValue::Number(Some(num1.unwrap().rem_euclid(num2.unwrap()))),
                 ),
                 (_, _) => Err(INVALID_SUB_OP.to_string()),
             },
