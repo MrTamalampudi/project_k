@@ -54,16 +54,13 @@ pub fn parser_slr(parser: &mut Parser) {
     let d_num = || (1 as isize);
     let time = Instant::now();
     let grammar: Grammar<TestCase, NTokenType, TranslatorStack> = grammar!(
-        Start -> Testcase Newlines Teststeps
+        Start -> Testcase Teststeps
         { |ast,token_stack,tl_stack,errors| Shared::set_body(ast, tl_stack.pop_body()) };
 
         [non_terminal_productions]
 
-        Newlines -> Newline
-        | Newline Newlines;
-
-        Teststeps ->Teststep Newlines
-        | Teststep Newlines Teststeps;
+        Teststeps ->Teststep
+        | Teststep Teststeps;
 
         Teststep -> DriverActions
         | NavigationActions
@@ -143,17 +140,17 @@ pub fn parser_slr(parser: &mut Parser) {
         | ElseIfExpr ElseExpr
         { |ast,token_stack,tl_stack,errors| ControlFlow::ELSE_IF(ast,token_stack,tl_stack,errors) };
 
-        IfExpr -> If Expression L_CurlyBrace Newline Teststeps R_CurlyBrace;
+        IfExpr -> If Expression L_CurlyBrace Teststeps R_CurlyBrace;
 
-        ElseIfExpr-> Else If Expression L_CurlyBrace Newline Teststeps R_CurlyBrace;
+        ElseIfExpr-> Else If Expression L_CurlyBrace Teststeps R_CurlyBrace;
 
-        ElseExpr -> Else L_CurlyBrace Newline Teststeps R_CurlyBrace
+        ElseExpr -> Else L_CurlyBrace Teststeps R_CurlyBrace
         { |ast,token_stack,tl_stack,errors| ControlFlow::ELSE(ast,token_stack,tl_stack,errors) };
 
-        WhileStmt -> While Expression L_CurlyBrace Newline Teststeps R_CurlyBrace
+        WhileStmt -> While Expression L_CurlyBrace Teststeps R_CurlyBrace
         { |ast,token_stack,tl_stack,errors| ControlFlow::WHILE(ast,token_stack,tl_stack,errors) };
 
-        ForLoop -> For ForLoopHelper L_CurlyBrace Newline Teststeps R_CurlyBrace
+        ForLoop -> For ForLoopHelper L_CurlyBrace Teststeps R_CurlyBrace
         { |ast,token_stack,tl_stack,errors| ControlFlow::FOR(ast,token_stack,tl_stack,errors) };
 
         ForLoopHelper -> Ident In Expression
@@ -353,11 +350,6 @@ pub fn parser_slr(parser: &mut Parser) {
 
         //Boolean
         Boolean            -> [NTokenType::BOOL(true)];
-
-        Newline            -> [NTokenType::NEWLINE]
-        { |ast,token_stack,tl_stack,errors|{
-            token_stack.pop(); //pop newline token
-        }};
     );
     let els = time.elapsed();
     debug!("grammar macro expansion time {:#?}", els);
