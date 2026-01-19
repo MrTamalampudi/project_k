@@ -4,7 +4,6 @@ use crate::a_types;
 use crate::parser::errors::{EXPECT_NUMBER_EXPR, NEGATIVE_TIME};
 use crate::parser::errorss::ActionError;
 use crate::parser::translator_stack::{TLVec, TranslatorStack};
-use crate::token::Token;
 use ast::expression::{ExpKind, Literal};
 use ast::Action;
 use ast::ArgKeys::{Args, EXPR_ARGKEY};
@@ -24,23 +23,23 @@ impl TimeoutsAction for Timeouts {
     #[pop_expr(expr)]
     fn WAIT(
         _testcase: &mut TestCase,
-        _token_stack: &mut Vec<Token>,
+        _token_stack: &mut Vec<Self::Token>,
         _tl_stack: &mut Vec<TranslatorStack>,
-        _errors: &mut Vec<ParseError<Token>>,
+        _errors: &mut Vec<ParseError>,
     ) {
         if Primitives::Number != expr.primitive {
-            _errors.push_error(&wait_token, &expr.span, EXPECT_NUMBER_EXPR.to_string());
+            _errors.push_error(&expr.span, EXPECT_NUMBER_EXPR.to_string());
             return;
         }
 
         if let ExpKind::Lit(Literal::Number(secs)) = expr.kind {
-            if secs < 0 {
-                _errors.push_error(&wait_token, &expr.span, NEGATIVE_TIME.to_string());
+            if secs < 0.0 {
+                _errors.push_error(&expr.span, NEGATIVE_TIME.to_string());
                 return;
             }
         }
 
-        let span = wait_token.span.to(&expr.span);
+        let span = wait_token.1.start..expr.span.end;
         let action = Action::new(
             span,
             Method::TIMEOUTS(TIMEOUTS::WAIT),

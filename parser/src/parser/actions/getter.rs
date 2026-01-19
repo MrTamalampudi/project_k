@@ -11,36 +11,36 @@ use manodae::error::ParseError;
 
 use crate::{
     a_types,
+    keywords::NTokenType,
     parser::{
         actions::shared::Shared,
         errors::EXPECT_STRING_EXPR,
         errorss::ActionError,
         translator_stack::{TLVec, TranslatorStack},
     },
-    token::Token,
 };
 
 pub struct Getter;
 
 impl Getter {
     fn is_common(
-        start_token: Token,
-        end_token: Token,
+        start_token: (NTokenType, std::ops::Range<usize>),
+        end_token: (NTokenType, std::ops::Range<usize>),
         expr: Expr,
         method: GETTER,
-        e: &mut Vec<ParseError<Token>>,
+        e: &mut Vec<ParseError>,
         t: &mut Vec<TranslatorStack>,
     ) {
-        let span = start_token.span.to(&end_token.span);
+        let span = start_token.1.start..end_token.1.end;
         let locator_arg = match Shared::get_locator_arg(&expr) {
             Ok(arg) => arg,
             Err(err) => {
-                e.push_error(&start_token, &expr.span, err.clone());
+                e.push_error(&expr.span, err.clone());
                 return;
             }
         };
         let getter = G {
-            span,
+            span: span.clone(),
             method: Method::GETTER(method),
             arguments: HashMap::from([(LOCATOR_ARGKEY, locator_arg)]),
             returns: Primitives::Boolean,
@@ -54,24 +54,20 @@ impl Getter {
     }
 
     fn get_common(
-        get_token: Token,
+        get_token: (NTokenType, std::ops::Range<usize>),
         expr: Expr,
         locator_expr: Expr,
         method: GETTER,
-        e: &mut Vec<ParseError<Token>>,
+        e: &mut Vec<ParseError>,
         t: &mut Vec<TranslatorStack>,
     ) {
         if Primitives::String != expr.primitive {
-            e.push_error(&get_token, &expr.span, EXPECT_STRING_EXPR.to_string());
+            e.push_error(&expr.span, EXPECT_STRING_EXPR.to_string());
             return;
         }
 
         if Primitives::String != locator_expr.primitive {
-            e.push_error(
-                &get_token,
-                &locator_expr.span,
-                EXPECT_STRING_EXPR.to_string(),
-            );
+            e.push_error(&locator_expr.span, EXPECT_STRING_EXPR.to_string());
             return;
         }
 
@@ -87,9 +83,9 @@ impl Getter {
             Args::Expr(expr)
         };
 
-        let span = get_token.span.to(&locator_expr.span);
+        let span = get_token.1.start..locator_expr.span.end;
         let getter = G {
-            span,
+            span: span.clone(),
             method: Method::GETTER(method),
             arguments: HashMap::from([(ATTRIBUTE_ARGKEY, target), (LOCATOR_ARGKEY, locator_arg)]),
             returns: Primitives::String,
@@ -112,9 +108,9 @@ impl GetterAction for Getter {
     #[pop_expr(locator_expr, attribute_expr)]
     fn GET_ATTRIBUTE(
         _testcase: &mut TestCase,
-        _token_stack: &mut Vec<Token>,
+        _token_stack: &mut Vec<Self::Token>,
         _tl_stack: &mut Vec<TranslatorStack>,
-        _errors: &mut Vec<ParseError<Token>>,
+        _errors: &mut Vec<ParseError>,
     ) {
         Getter::get_common(
             get_token,
@@ -131,9 +127,9 @@ impl GetterAction for Getter {
     #[pop_expr(expr)]
     fn IS_DISPLAYED(
         _testcase: &mut TestCase,
-        _token_stack: &mut Vec<Token>,
+        _token_stack: &mut Vec<Self::Token>,
         _tl_stack: &mut Vec<TranslatorStack>,
-        _errors: &mut Vec<ParseError<Token>>,
+        _errors: &mut Vec<ParseError>,
     ) {
         Getter::is_common(
             is,
@@ -151,7 +147,7 @@ impl GetterAction for Getter {
         _testcase: &mut Self::AST,
         _token_stack: &mut Vec<Self::Token>,
         _tl_stack: &mut Vec<Self::TranslatorStack>,
-        _errors: &mut Vec<Self::Error<Self::Token>>,
+        _errors: &mut Vec<Self::Error>,
     ) {
         Getter::is_common(is, enabled, expr, GETTER::IS_ENABLED, _errors, _tl_stack);
     }
@@ -161,7 +157,7 @@ impl GetterAction for Getter {
         _testcase: &mut Self::AST,
         _token_stack: &mut Vec<Self::Token>,
         _tl_stack: &mut Vec<Self::TranslatorStack>,
-        _errors: &mut Vec<Self::Error<Self::Token>>,
+        _errors: &mut Vec<Self::Error>,
     ) {
         Getter::is_common(is, selected, expr, GETTER::IS_SELECTED, _errors, _tl_stack);
     }
@@ -169,13 +165,13 @@ impl GetterAction for Getter {
     #[pop_token(url_token, _current_token, get_token)]
     fn GET_CURRENT_URL(
         _testcase: &mut TestCase,
-        _token_stack: &mut Vec<Token>,
+        _token_stack: &mut Vec<Self::Token>,
         _tl_stack: &mut Vec<TranslatorStack>,
-        _errors: &mut Vec<ParseError<Token>>,
+        _errors: &mut Vec<ParseError>,
     ) -> () {
-        let span = get_token.span.to(&url_token.span);
+        let span = get_token.1.start..url_token.1.end;
         let getter = G {
-            span,
+            span: span.clone(),
             method: Method::GETTER(GETTER::GET_CURRENT_URL),
             arguments: HashMap::new(),
             returns: Primitives::String,
@@ -192,13 +188,13 @@ impl GetterAction for Getter {
     #[pop_token(title_token, get_token)]
     fn GET_TITLE(
         _testcase: &mut TestCase,
-        _token_stack: &mut Vec<Token>,
+        _token_stack: &mut Vec<Self::Token>,
         _tl_stack: &mut Vec<TranslatorStack>,
-        _errors: &mut Vec<ParseError<Token>>,
+        _errors: &mut Vec<ParseError>,
     ) -> () {
-        let span = get_token.span.to(&title_token.span);
+        let span = get_token.1.start..title_token.1.end;
         let getter = G {
-            span,
+            span: span.clone(),
             method: Method::GETTER(GETTER::GET_TITLE),
             arguments: HashMap::new(),
             returns: Primitives::String,
@@ -219,10 +215,10 @@ impl GetterAction for Getter {
         _testcase: &mut Self::AST,
         _token_stack: &mut Vec<Self::Token>,
         _tl_stack: &mut Vec<Self::TranslatorStack>,
-        _errors: &mut Vec<Self::Error<Self::Token>>,
+        _errors: &mut Vec<Self::Error>,
     ) {
         if Primitives::String != locator_expr.primitive {
-            _errors.push_error(&get, &locator_expr.span, EXPECT_STRING_EXPR.to_string());
+            _errors.push_error(&locator_expr.span, EXPECT_STRING_EXPR.to_string());
             return;
         }
 
@@ -232,9 +228,9 @@ impl GetterAction for Getter {
             Args::Expr(locator_expr.clone())
         };
 
-        let span = get.span.to(&locator_expr.span);
+        let span = get.1.start..locator_expr.span.end;
         let getter = G {
-            span,
+            span: span.clone(),
             method: Method::GETTER(GETTER::GET_TEXT),
             arguments: HashMap::from([(LOCATOR_ARGKEY, locator_arg)]),
             returns: Primitives::String,
@@ -256,15 +252,15 @@ impl GetterAction for Getter {
         _testcase: &mut Self::AST,
         _token_stack: &mut Vec<Self::Token>,
         _tl_stack: &mut Vec<Self::TranslatorStack>,
-        _errors: &mut Vec<Self::Error<Self::Token>>,
+        _errors: &mut Vec<Self::Error>,
     ) {
         if Primitives::String != css_expr.primitive {
-            _errors.push_error(&get, &locator_expr.span, EXPECT_STRING_EXPR.to_string());
+            _errors.push_error(&css_expr.span, EXPECT_STRING_EXPR.to_string());
             return;
         }
 
         if Primitives::String != locator_expr.primitive {
-            _errors.push_error(&get, &locator_expr.span, EXPECT_STRING_EXPR.to_string());
+            _errors.push_error(&locator_expr.span, EXPECT_STRING_EXPR.to_string());
             return;
         }
 
@@ -280,9 +276,9 @@ impl GetterAction for Getter {
             Args::Expr(css_expr)
         };
 
-        let span = get.span.to(&locator_expr.span);
+        let span = get.1.start..locator_expr.span.end;
         let getter = G {
-            span,
+            span: span.clone(),
             method: Method::GETTER(GETTER::GET_CSS_VALUE),
             arguments: HashMap::from([(ATTRIBUTE_ARGKEY, css), (LOCATOR_ARGKEY, locator_arg)]),
             returns: Primitives::String,
@@ -304,10 +300,10 @@ impl GetterAction for Getter {
         _testcase: &mut Self::AST,
         _token_stack: &mut Vec<Self::Token>,
         _tl_stack: &mut Vec<Self::TranslatorStack>,
-        _errors: &mut Vec<Self::Error<Self::Token>>,
+        _errors: &mut Vec<Self::Error>,
     ) {
         if Primitives::String != locator_expr.primitive {
-            _errors.push_error(&get, &locator_expr.span, EXPECT_STRING_EXPR.to_string());
+            _errors.push_error(&locator_expr.span, EXPECT_STRING_EXPR.to_string());
             return;
         }
 
@@ -317,9 +313,9 @@ impl GetterAction for Getter {
             Args::Expr(locator_expr.clone())
         };
 
-        let span = get.span.to(&locator_expr.span);
+        let span = get.1.start..locator_expr.span.end;
         let getter = G {
-            span,
+            span: span.clone(),
             method: Method::GETTER(GETTER::GET_TAG_NAME),
             arguments: HashMap::from([(LOCATOR_ARGKEY, locator_arg)]),
             returns: Primitives::String,

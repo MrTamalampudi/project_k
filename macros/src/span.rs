@@ -18,10 +18,10 @@ pub fn span_trait_derive_struct(name: &Ident, input: &DataStruct) -> MacroResult
     };
     Ok(quote! {
         impl SpanData for #name{
-            fn get_span(&self) -> Span {
+            fn get_span(&self) -> Range<usize> {
                 self.span.clone()
             }
-            fn set_span(&mut self,span:Span) {
+            fn set_span(&mut self,span:Range<usize>) {
                 self.span = span;
             }
         }
@@ -42,12 +42,12 @@ pub fn span_trait_derive_enum(name: &Ident, _enum: &DataEnum) -> MacroResult {
 
     Ok(quote! {
         impl SpanData for #name{
-            fn get_span(&self) -> Span {
+            fn get_span(&self) -> Range<usize> {
                 match self {
                     #match_arms
                 }
             }
-            fn set_span(&mut self,span:Span){
+            fn set_span(&mut self,span:Range<usize>){
                 match self {
                     #match_set_arms
                 }

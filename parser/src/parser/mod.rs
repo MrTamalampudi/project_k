@@ -1,7 +1,6 @@
+use crate::{keywords::NTokenType, CompilationContext};
+use logos::Lexer;
 use testcase::parser_slr;
-
-use crate::lexer::Lexer;
-use crate::{CompilationContext, TokenType};
 
 mod actions;
 mod errors;
@@ -11,12 +10,12 @@ pub mod translator_stack;
 
 #[derive(Debug)]
 pub struct Parser<'a, 'b> {
-    lexer: &'a mut Lexer,
-    ctx: &'b mut CompilationContext,
+    lexer: Lexer<'b, NTokenType>,
+    ctx: &'a mut CompilationContext,
 }
 
 impl<'a, 'b> Parser<'a, 'b> {
-    pub fn new(lexer: &'a mut Lexer, ctx: &'b mut CompilationContext) -> Parser<'a, 'b> {
+    pub fn new(lexer: Lexer<'b, NTokenType>, ctx: &'a mut CompilationContext) -> Parser<'a, 'b> {
         Parser { lexer, ctx }
     }
     pub fn parse(&mut self) {
@@ -30,18 +29,5 @@ impl<'a, 'b> Parser<'a, 'b> {
         //     _ => return,
         // };
         // self.ctx.program.set_entrypoint(entrypoint);
-    }
-
-    pub fn set_lexer(&mut self, lexer: Lexer) {
-        *self.lexer = lexer;
-    }
-}
-
-pub fn consume_new_line_token(parser: &mut Parser) {
-    match parser.lexer.peek_token() {
-        TokenType::NEW_LINE => {
-            parser.lexer.next_token();
-        }
-        _ => (),
     }
 }

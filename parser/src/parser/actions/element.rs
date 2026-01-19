@@ -5,7 +5,6 @@ use crate::parser::actions::shared::Shared;
 use crate::parser::errors::EXPECT_STRING_EXPR;
 use crate::parser::errorss::ActionError;
 use crate::parser::translator_stack::{TLVec, TranslatorStack};
-use crate::token::Token;
 use ast::expression::{ExpKind, Literal};
 use ast::Action;
 use ast::ArgKeys::{Args, EXPR_ARGKEY, LOCATOR_ARGKEY};
@@ -26,16 +25,16 @@ impl ElementAction for Element {
     #[pop_expr(expr)]
     fn CLICK(
         _testcase: &mut TestCase,
-        _token_stack: &mut Vec<Token>,
+        _token_stack: &mut Vec<Self::Token>,
         _tl_stack: &mut Vec<TranslatorStack>,
-        _errors: &mut Vec<ParseError<Token>>,
+        _errors: &mut Vec<ParseError>,
     ) {
-        let span = click_token.span.to(&expr.span);
+        let span = click_token.1.start..expr.span.end;
 
         let locator_arg = match Shared::get_locator_arg(&expr) {
             Ok(arg) => arg,
             Err(err) => {
-                _errors.push_error(&click_token, &expr.span, err.clone());
+                _errors.push_error(&expr.span, err.clone());
                 return;
             }
         };
@@ -50,9 +49,9 @@ impl ElementAction for Element {
     }
     fn CLEAR(
         _testcase: &mut TestCase,
-        _token_stack: &mut Vec<Token>,
+        _token_stack: &mut Vec<Self::Token>,
         _tl_stack: &mut Vec<TranslatorStack>,
-        _errors: &mut Vec<ParseError<Token>>,
+        _errors: &mut Vec<ParseError>,
     ) {
     }
 
@@ -61,26 +60,22 @@ impl ElementAction for Element {
     #[pop_expr(locator_expr, text_expr)]
     fn SENDKEYS(
         _testcase: &mut TestCase,
-        _token_stack: &mut Vec<Token>,
+        _token_stack: &mut Vec<Self::Token>,
         _tl_stack: &mut Vec<TranslatorStack>,
-        _errors: &mut Vec<ParseError<Token>>,
+        _errors: &mut Vec<ParseError>,
     ) {
-        let span = enter_token.span.to(&locator_expr.span);
+        let span = enter_token.1.start..locator_expr.span.end;
 
         let locator_arg = match Shared::get_locator_arg(&locator_expr) {
             Ok(arg) => arg,
             Err(err) => {
-                _errors.push_error(&enter_token, &locator_expr.span, err.clone());
+                _errors.push_error(&locator_expr.span, err.clone());
                 return;
             }
         };
 
         if text_expr.primitive != Primitives::String {
-            _errors.push_error(
-                &enter_token,
-                &text_expr.span,
-                EXPECT_STRING_EXPR.to_string(),
-            );
+            _errors.push_error(&text_expr.span, EXPECT_STRING_EXPR.to_string());
             return;
         }
 
@@ -100,9 +95,9 @@ impl ElementAction for Element {
     }
     fn SUBMIT(
         _testcase: &mut TestCase,
-        _token_stack: &mut Vec<Token>,
+        _token_stack: &mut Vec<Self::Token>,
         _tl_stack: &mut Vec<TranslatorStack>,
-        _errors: &mut Vec<ParseError<Token>>,
+        _errors: &mut Vec<ParseError>,
     ) {
     }
 }

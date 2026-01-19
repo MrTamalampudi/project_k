@@ -1,12 +1,14 @@
 use class::BinaryExpressionAction;
 use macros::{pop_expr, pop_token};
 use manodae::error::ParseError;
+use span::SpanData;
 
 use crate::a_types;
+use crate::keywords::NTokenType;
 use crate::parser::errors::MISMATCHED_TYPES;
 use crate::parser::errorss::ActionError;
 use crate::parser::translator_stack::TLVec;
-use crate::{parser::translator_stack::TranslatorStack, token::Token};
+use crate::parser::translator_stack::TranslatorStack;
 use ast::Primitives;
 use ast::{
     expression::{BinOpKind, ExpKind, Expr},
@@ -16,20 +18,20 @@ use ast::{
 pub struct BinaryExpression;
 
 impl BinaryExpression {
-    #[pop_token(token)]
+    #[pop_token(_token)]
     #[pop_expr(expr2, expr1)]
     fn common(
         _testcase: &mut TestCase,
-        _token_stack: &mut Vec<Token>,
+        _token_stack: &mut Vec<(NTokenType, std::ops::Range<usize>)>,
         _tl_stack: &mut Vec<TranslatorStack>,
-        _errors: &mut Vec<ParseError<Token>>,
+        _errors: &mut Vec<ParseError>,
         op: BinOpKind,
     ) {
-        let span = expr1.span.to(&expr2.span);
+        let span = expr1.span_to(&expr2.span);
 
         //typechecking
         if expr1.primitive != expr2.primitive {
-            _errors.push_error(&token, &span, MISMATCHED_TYPES.to_string());
+            _errors.push_error(&span, MISMATCHED_TYPES.to_string());
             return;
         }
 
@@ -57,105 +59,105 @@ impl BinaryExpressionAction for BinaryExpression {
     //expr + expr
     fn ADD(
         _testcase: &mut TestCase,
-        _token_stack: &mut Vec<Token>,
+        _token_stack: &mut Vec<Self::Token>,
         _tl_stack: &mut Vec<TranslatorStack>,
-        _errors: &mut Vec<ParseError<Token>>,
+        _errors: &mut Vec<ParseError>,
     ) {
         BinaryExpression::common(_testcase, _token_stack, _tl_stack, _errors, BinOpKind::Add);
     }
     fn SUB(
         _testcase: &mut TestCase,
-        _token_stack: &mut Vec<Token>,
+        _token_stack: &mut Vec<Self::Token>,
         _tl_stack: &mut Vec<TranslatorStack>,
-        _errors: &mut Vec<ParseError<Token>>,
+        _errors: &mut Vec<ParseError>,
     ) {
         BinaryExpression::common(_testcase, _token_stack, _tl_stack, _errors, BinOpKind::Sub);
     }
     fn MUL(
         _testcase: &mut TestCase,
-        _token_stack: &mut Vec<Token>,
+        _token_stack: &mut Vec<Self::Token>,
         _tl_stack: &mut Vec<TranslatorStack>,
-        _errors: &mut Vec<ParseError<Token>>,
+        _errors: &mut Vec<ParseError>,
     ) {
         BinaryExpression::common(_testcase, _token_stack, _tl_stack, _errors, BinOpKind::Mul);
     }
     fn DIV(
         _testcase: &mut TestCase,
-        _token_stack: &mut Vec<Token>,
+        _token_stack: &mut Vec<Self::Token>,
         _tl_stack: &mut Vec<TranslatorStack>,
-        _errors: &mut Vec<ParseError<Token>>,
+        _errors: &mut Vec<ParseError>,
     ) {
         BinaryExpression::common(_testcase, _token_stack, _tl_stack, _errors, BinOpKind::Div);
     }
     fn REM(
         _testcase: &mut TestCase,
-        _token_stack: &mut Vec<Token>,
+        _token_stack: &mut Vec<Self::Token>,
         _tl_stack: &mut Vec<TranslatorStack>,
-        _errors: &mut Vec<ParseError<Token>>,
+        _errors: &mut Vec<ParseError>,
     ) {
         BinaryExpression::common(_testcase, _token_stack, _tl_stack, _errors, BinOpKind::Rem);
     }
     fn AND(
         _testcase: &mut TestCase,
-        _token_stack: &mut Vec<Token>,
+        _token_stack: &mut Vec<Self::Token>,
         _tl_stack: &mut Vec<TranslatorStack>,
-        _errors: &mut Vec<ParseError<Token>>,
+        _errors: &mut Vec<ParseError>,
     ) {
         BinaryExpression::common(_testcase, _token_stack, _tl_stack, _errors, BinOpKind::And);
     }
     fn OR(
         _testcase: &mut TestCase,
-        _token_stack: &mut Vec<Token>,
+        _token_stack: &mut Vec<Self::Token>,
         _tl_stack: &mut Vec<TranslatorStack>,
-        _errors: &mut Vec<ParseError<Token>>,
+        _errors: &mut Vec<ParseError>,
     ) {
         BinaryExpression::common(_testcase, _token_stack, _tl_stack, _errors, BinOpKind::Or);
     }
     fn EQ(
         _testcase: &mut TestCase,
-        _token_stack: &mut Vec<Token>,
+        _token_stack: &mut Vec<Self::Token>,
         _tl_stack: &mut Vec<TranslatorStack>,
-        _errors: &mut Vec<ParseError<Token>>,
+        _errors: &mut Vec<ParseError>,
     ) {
         BinaryExpression::common(_testcase, _token_stack, _tl_stack, _errors, BinOpKind::Eq);
     }
     fn NE(
         _testcase: &mut TestCase,
-        _token_stack: &mut Vec<Token>,
+        _token_stack: &mut Vec<Self::Token>,
         _tl_stack: &mut Vec<TranslatorStack>,
-        _errors: &mut Vec<ParseError<Token>>,
+        _errors: &mut Vec<ParseError>,
     ) {
         BinaryExpression::common(_testcase, _token_stack, _tl_stack, _errors, BinOpKind::Ne);
     }
     fn LT(
         _testcase: &mut TestCase,
-        _token_stack: &mut Vec<Token>,
+        _token_stack: &mut Vec<Self::Token>,
         _tl_stack: &mut Vec<TranslatorStack>,
-        _errors: &mut Vec<ParseError<Token>>,
+        _errors: &mut Vec<ParseError>,
     ) {
         BinaryExpression::common(_testcase, _token_stack, _tl_stack, _errors, BinOpKind::Lt);
     }
     fn LE(
         _testcase: &mut TestCase,
-        _token_stack: &mut Vec<Token>,
+        _token_stack: &mut Vec<Self::Token>,
         _tl_stack: &mut Vec<TranslatorStack>,
-        _errors: &mut Vec<ParseError<Token>>,
+        _errors: &mut Vec<ParseError>,
     ) {
         BinaryExpression::common(_testcase, _token_stack, _tl_stack, _errors, BinOpKind::Le);
     }
     fn GE(
         _testcase: &mut TestCase,
-        _token_stack: &mut Vec<Token>,
+        _token_stack: &mut Vec<Self::Token>,
         _tl_stack: &mut Vec<TranslatorStack>,
-        _errors: &mut Vec<ParseError<Token>>,
+        _errors: &mut Vec<ParseError>,
     ) {
         BinaryExpression::common(_testcase, _token_stack, _tl_stack, _errors, BinOpKind::Ge);
     }
     fn GT(
         _testcase: &mut TestCase,
-        _token_stack: &mut Vec<Token>,
+        _token_stack: &mut Vec<Self::Token>,
         _tl_stack: &mut Vec<TranslatorStack>,
-        _errors: &mut Vec<ParseError<Token>>,
+        _errors: &mut Vec<ParseError>,
     ) {
         BinaryExpression::common(_testcase, _token_stack, _tl_stack, _errors, BinOpKind::Gt);
     }

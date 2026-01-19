@@ -33,13 +33,13 @@ macro_rules! class_macro {
                 type AST;
                 type Token;
                 type TranslatorStack;
-                type Error<Token>;
+                type Error;
                 $(
                     fn $method(
                         _testcase: &mut Self::AST,
                         _token_stack: &mut Vec<Self::Token>,
                         _tl_stack:&mut Vec<Self::TranslatorStack>,
-                        _errors: &mut Vec<Self::Error<Self::Token>>
+                        _errors: &mut Vec<Self::Error>
                     );
                 )+
             }

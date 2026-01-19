@@ -1,12 +1,13 @@
 use class::Method;
 use macros::{Method, Span};
-use span::{Span, SpanData};
+use span::SpanData;
+use std::ops::Range;
 
 use crate::{expression::Expr, teststep::Body};
 
 #[derive(Debug, Clone, PartialEq, Span, Method)]
 pub struct ForLoop {
-    pub span: Span,
+    pub span: Range<usize>,
     pub iter: Expr,
     pub target: String,
     pub body: Body,

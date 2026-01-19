@@ -2,8 +2,8 @@ use std::collections::HashMap;
 
 use crate::a_types;
 use crate::parser::errors::{EXPECT_STRING_EXPR, VALID_URL, VALID_URL_SHCEME};
+use crate::parser::errorss::ActionError;
 use crate::parser::translator_stack::{TLVec, TranslatorStack};
-use crate::token::Token;
 use ast::expression::{ExpKind, Literal};
 use ast::Action;
 use ast::ArgKeys::{Args, URL_ARGKEY};
@@ -14,9 +14,7 @@ use class::WebDriverAction;
 use class::{Method, WEB_DRIVER};
 use macros::{pop_expr, pop_token};
 use manodae::error::ParseError;
-use span::SpanData;
 use url::Url;
-
 pub struct Driver;
 
 impl WebDriverAction for Driver {
@@ -25,13 +23,12 @@ impl WebDriverAction for Driver {
     #[pop_expr(url_expr)]
     fn NAVIGATE(
         _testcase: &mut TestCase,
-        _token_stack: &mut Vec<Token>,
+        _token_stack: &mut Vec<Self::Token>,
         _tl_stack: &mut Vec<TranslatorStack>,
-        _errors: &mut Vec<ParseError<Token>>,
+        _errors: &mut Vec<ParseError>,
     ) -> () {
         if Primitives::String != url_expr.primitive {
-            let nt = navigate_token.make_dummy_token(&url_expr.get_span());
-            _errors.push(ParseError::new(nt, EXPECT_STRING_EXPR.to_string()));
+            _errors.push_error(&url_expr.span, EXPECT_STRING_EXPR.to_string());
             return;
         }
 
@@ -40,22 +37,15 @@ impl WebDriverAction for Driver {
                 match Url::parse(&url[..]) {
                     Ok(parsed_url) => {
                         if parsed_url.scheme() != "https" {
-                            _errors.push(ParseError {
-                                token: _token_stack.last().unwrap().clone(),
-                                message: String::from(VALID_URL_SHCEME),
-                                production_end: false,
-                            })
+                            _errors.push_error(&url_expr.span, String::from(VALID_URL_SHCEME))
                         }
                     }
-                    Err(_) => {
-                        let token = navigate_token.make_dummy_token(&url_expr.span);
-                        _errors.push(ParseError::new(token, VALID_URL.to_string()));
-                    }
+                    Err(_) => _errors.push_error(&url_expr.span, String::from(VALID_URL)),
                 };
             }
         }
 
-        let span = navigate_token.span.to(&url_expr.span);
+        let span = navigate_token.1.start..url_expr.span.end;
         let arguments = HashMap::from([(URL_ARGKEY, Args::Expr(url_expr))]);
 
         let test_step = Action::new(span, Method::WEB_DRIVER(WEB_DRIVER::NAVIGATE), arguments);
@@ -66,12 +56,12 @@ impl WebDriverAction for Driver {
     #[pop_token(close_token)]
     fn CLOSE(
         _testcase: &mut TestCase,
-        _token_stack: &mut Vec<Token>,
+        _token_stack: &mut Vec<Self::Token>,
         _tl_stack: &mut Vec<TranslatorStack>,
-        _errors: &mut Vec<ParseError<Token>>,
+        _errors: &mut Vec<ParseError>,
     ) -> () {
         let action = Action::new(
-            close_token.span,
+            close_token.1,
             Method::WEB_DRIVER(WEB_DRIVER::CLOSE),
             HashMap::new(),
         );

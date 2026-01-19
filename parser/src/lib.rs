@@ -1,16 +1,16 @@
 use error_handler::ErrorManager;
-use keywords::TokenType;
-use lexer::{Lexer, Tokenizer};
+// use lexer::{Lexer, Tokenizer};
+use logos::{Lexer, Logos};
 use parser::Parser;
 use std::fmt;
 use std::path::PathBuf;
-use token::Token;
 
+use crate::keywords::NTokenType;
 use crate::program::Program;
 
 pub mod error_handler;
 pub mod keywords;
-pub mod lexer;
+// pub mod lexer;
 pub mod parser;
 pub mod program;
 pub mod token;
@@ -48,16 +48,12 @@ impl CompilationContext {
     }
 }
 
-fn source_code_to_tokens(source_code: String, ctx: &mut CompilationContext) -> Vec<Token> {
-    Tokenizer::new(source_code, ctx).tokenize()
+pub fn source_code_to_lexer<'a>(source_code: &'a str) -> Lexer<'a, NTokenType> {
+    NTokenType::lexer(source_code)
 }
 
-pub fn source_code_to_lexer(source_code: String, ctx: &mut CompilationContext) -> Lexer {
-    let tokens = source_code_to_tokens(source_code, ctx);
-    Lexer::from_tokens(tokens)
-}
-
-pub fn parse(source: String, ctx: &mut CompilationContext) {
-    let mut lexer = source_code_to_lexer(source, ctx);
-    Parser::new(&mut lexer, ctx).parse();
+pub fn parse<'a>(source: &'a str, ctx: &mut CompilationContext) {
+    let lexer = source_code_to_lexer(source);
+    println!("{:#?}", lexer.clone().collect::<Vec<_>>());
+    Parser::new(lexer, ctx).parse();
 }
