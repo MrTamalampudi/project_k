@@ -4,7 +4,7 @@ use manodae::token::TokenKind;
 
 #[allow(non_camel_case_types)]
 #[derive(EnumToString, Logos, Debug, Clone, PartialEq)]
-#[logos(skip r" ")]
+#[logos(skip r"[ \n]")]
 #[logos(skip r"//.*\n")]
 pub enum NTokenType {
     #[token("#testcase")]
@@ -192,9 +192,6 @@ pub enum NTokenType {
 
     #[regex(r"[a-zA-Z_][a-zA-Z0-9_]*", |lex| lex.slice().to_string())]
     IDENTIFIER(String),
-
-    #[token("\n")]
-    NEWLINE,
 
     EOF,
 }
