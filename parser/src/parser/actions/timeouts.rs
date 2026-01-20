@@ -33,7 +33,7 @@ impl TimeoutsAction for Timeouts {
         }
 
         if let ExpKind::Lit(Literal::Number(secs)) = expr.kind {
-            if secs < 0.0 {
+            if secs < 1.0 {
                 _errors.push_error(&expr.span, NEGATIVE_TIME.to_string());
                 return;
             }
