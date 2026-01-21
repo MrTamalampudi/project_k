@@ -10,7 +10,6 @@ use crate::parser::actions::{
 };
 use crate::parser::translator_stack::{TLVec, TranslatorStack};
 use crate::program::Program;
-use crate::token::Token;
 use ast::Body;
 use ast::TestCase;
 use class::{

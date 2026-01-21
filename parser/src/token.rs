@@ -1,6 +1,5 @@
 use crate::keywords::NTokenType;
 use logos::Span;
-use manodae::token::TokenKind;
 
 #[derive(Debug, Clone, PartialEq)]
 #[allow(unused)]

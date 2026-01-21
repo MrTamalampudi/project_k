@@ -5,9 +5,9 @@ use thirtyfour::By;
 use crate::{
     Engine,
     errors::{
-        ARRAY_EVAL, EXPECT_LITERAL, ExpressionEvalResult, INT_OVERFLOW, INVALID_ADD_OP,
-        INVALID_AND_OP, INVALID_EQ_OP, INVALID_INPUT, INVALID_LOC_EXPR, INVALID_OR_OP,
-        INVALID_SUB_OP, INVALID_UNARY_OP,
+        ARRAY_EVAL, EXPECT_LITERAL, ExpressionEvalResult, INVALID_ADD_OP, INVALID_AND_OP,
+        INVALID_EQ_OP, INVALID_INPUT, INVALID_LOC_EXPR, INVALID_OR_OP, INVALID_SUB_OP,
+        INVALID_UNARY_OP,
     },
 };
 use ast::{
