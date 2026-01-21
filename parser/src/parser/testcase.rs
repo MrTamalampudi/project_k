@@ -4,19 +4,12 @@ use std::time::Instant;
 use super::Parser;
 use crate::error_handler::{parse_error_to_error_info, ErrorInfo};
 use crate::keywords::NTokenType;
-use crate::parser::actions::{
-    BinaryExpression, ControlFlow, Custom, Driver, Element, Getter, LiteralExpression, Navigation,
-    Shared, Timeouts, UnaryExpression,
-};
+use crate::parser::actions::*;
 use crate::parser::translator_stack::{TLVec, TranslatorStack};
 use crate::program::Program;
 use ast::Body;
 use ast::TestCase;
-use class::{
-    BinaryExpressionAction, ControlFlowAction, CustomAction, ElementAction, GetterAction,
-    LiteralExpressionAction, NavigationAction, TimeoutsAction, UnaryExpressionAction,
-    WebDriverAction,
-};
+use class::*;
 use log::debug;
 use manodae::prelude::*;
 
@@ -119,6 +112,20 @@ pub fn parser_slr(parser: &mut Parser) {
 
         ASSERT -> Assert Expression
         { |ast,token_stack,tl_stack,errors| Custom::ASSERT(ast,token_stack,tl_stack,errors) };
+
+        // ### Alert ###
+        AlertActions -> ACCEPT
+        | DISMISS
+        | ALERT_SENDKEYS ;
+
+        ACCEPT -> Accept Alert
+        { |ast,token_stack,tl_stack,errors| Alert::ACCEPT(ast,token_stack,tl_stack,errors) };
+
+        DISMISS -> Dismiss Alert
+        { |ast,token_stack,tl_stack,errors| Alert::DISMISS(ast,token_stack,tl_stack,errors) };
+
+        ALERT_SENDKEYS -> Enter Expression In Alert
+        { |ast,token_stack,tl_stack,errors| Alert::SEND_KEYS(ast,token_stack,tl_stack,errors) };
 
         ControlFlow -> IfStmt
         | WhileStmt
@@ -278,6 +285,8 @@ pub fn parser_slr(parser: &mut Parser) {
         Assert              -> [NTokenType::ASSERT];
         Enter               -> [NTokenType::ENTER];
         Close               -> [NTokenType::CLOSE];
+        Accept              -> [NTokenType::ACCEPT];
+        Dismiss             -> [NTokenType::DISMISS];
 
         //Nouns
         Attribute           -> [NTokenType::ATTRIBUTE];
@@ -289,6 +298,7 @@ pub fn parser_slr(parser: &mut Parser) {
         Text                -> [NTokenType::TEXT];
         Tag                 -> [NTokenType::TAG];
         Name                -> [NTokenType::NAME];
+        Alert               -> [NTokenType::ALERT];
 
         //Prepositions
         From                -> [NTokenType::FROM];

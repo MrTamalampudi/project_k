@@ -1,3 +1,4 @@
+mod alert;
 mod binary_expr;
 mod control_flow;
 mod custom;
@@ -10,6 +11,7 @@ mod shared;
 mod timeouts;
 mod unary_expr;
 
+pub(super) use alert::Alert;
 pub(super) use binary_expr::BinaryExpression;
 pub(super) use control_flow::ControlFlow;
 pub(super) use custom::Custom;
@@ -38,9 +40,9 @@ macro_rules! pop_expr {
 #[macro_export]
 macro_rules! a_types {
     () => {
-        type AST = TestCase;
+        type AST = ast::TestCase;
         type Token = (crate::keywords::NTokenType, std::ops::Range<usize>);
-        type TranslatorStack = TranslatorStack;
-        type Error = ParseError;
+        type TranslatorStack = crate::parser::translator_stack::TranslatorStack;
+        type Error = manodae::error::ParseError;
     };
 }

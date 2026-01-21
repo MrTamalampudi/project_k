@@ -44,6 +44,12 @@ pub enum NTokenType {
     #[token("close")]
     CLOSE,
 
+    #[token("accept")]
+    ACCEPT,
+
+    #[token("dismiss")]
+    DISMISS,
+
     // Nouns
     #[token("attribute")]
     ATTRIBUTE,
@@ -71,6 +77,9 @@ pub enum NTokenType {
 
     #[token("name")]
     NAME,
+
+    #[token("alert")]
+    ALERT,
 
     // Prepositions
     #[token("from")]

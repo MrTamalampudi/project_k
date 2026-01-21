@@ -14,6 +14,7 @@ use webdriver_manager::{WebdriverManager, chrome::ChromeManager};
 use ast::{Body, TestCase, Teststep};
 use class::Method;
 
+mod alert;
 mod control_flow;
 mod custom;
 mod element;
@@ -82,6 +83,7 @@ impl<'a> Engine<'a> {
                     Method::NAVIGATION(_) => self.navigation(&teststep).await?,
                     Method::TIMEOUTS(_) => self.timeouts(&teststep).await?,
                     Method::CUSTOM(_) => self.custom(&teststep).await?,
+                    Method::ALERT(_) => self.alert(&teststep).await?,
                     _ => {}
                 },
                 Teststep::VarDecl(_) => self.VAR_DECLARATION(&teststep).await?,

@@ -68,6 +68,7 @@ class_macro!(
             GET_CURRENT_URL
             // GET_PAGE_SOURCE,
             // GET_WINDOW_HANDLE
+            // GET_TEXT
         }
     },
     {
@@ -101,7 +102,6 @@ class_macro!(
         ALERT {
             ACCEPT,
             DISMISS,
-            GET_TEXT,
             SEND_KEYS
         }
     },
