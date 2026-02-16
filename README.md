@@ -590,3 +590,310 @@ get tag name from element Expression
 tag = get tag name from element "//*[@id='container']"
 assert tag == "div"
 ```
+
+## Teststeps
+
+## Web Driver
+
+#### Navigate
+Load a new web page in the current browser window.
+
+```title="Syntax"
+navigate Expression
+```
+
+```title="Example"
+#testcase
+
+navigate "https://google.com"
+```
+
+#### Close
+Close the current window, quitting the browser if it's the last window currently open.
+
+```title="Example"
+#testcase
+
+navigate "https://google.com"
+close
+```
+
+## Navigation
+
+#### Back
+Move back a single "item" in the browser's history.
+
+```title="Example" linenums="1"
+#testcase
+
+navigate "https://google.com"
+back
+```
+
+#### Forward
+Move a single "item" forward in the browser's history.
+
+```title="Example" linenums="1"
+#testcase
+
+navigate "https://google.com"
+forward
+```
+
+#### Refresh
+Refresh the current page
+
+```title="Example"
+#testcase
+
+navigate "https://google.com"
+refresh
+```
+
+## Element Actions
+
+#### Click
+Clicks the element identified by the given expression.
+
+```title="Syntax"
+click Expression
+```
+
+```title="Example"
+#testcase
+
+navigate "https://google.com"
+click "//button[@id='submit']"
+```
+
+#### Sendkeys
+Simulates typing into an element, which may set its value.
+
+```title="Syntax"
+enter Expression in element Expression
+```
+
+```title="Example"
+#testcase
+
+navigate "https://google.com"
+enter "hello world" in element "//input[@name='search']"
+```
+
+## Custom Actions
+
+#### Variable Declaration
+Assigns a value to a variable for later use.
+
+```title="Syntax"
+Ident = Expression
+```
+
+```title="Example"
+#testcase
+
+myVar = "hello"
+count = 10
+url = "https://google.com"
+navigate url
+```
+
+#### Assert
+Validates that an expression evaluates to true.
+
+Here the expression must return a boolean value otherwise you'll get an error
+
+```title="Syntax"
+assert Expression
+```
+
+```title="Example"
+#testcase
+
+navigate "https://google.com"
+title = get title
+assert title == "Google"
+```
+
+## Alert Actions
+
+#### Accept Alert
+Accepts the currently displayed alert dialog.
+
+```title="Syntax"
+accept alert
+```
+
+```title="Example"
+#testcase
+
+navigate "https://example.com"
+click "//button[@id='show-alert']"
+accept alert
+```
+
+#### Dismiss Alert
+Dismisses the currently displayed alert dialog.
+
+```title="Syntax"
+dismiss alert
+```
+
+```title="Example"
+#testcase
+
+navigate "https://example.com"
+click "//button[@id='show-alert']"
+dismiss alert
+```
+
+#### Send Keys to Alert
+Sends text input to an alert prompt dialog.
+
+```title="Syntax"
+enter Expression in alert
+```
+
+```title="Example"
+#testcase
+
+navigate "https://example.com"
+click "//button[@id='show-prompt']"
+enter "my input" in alert
+accept alert
+```
+
+## Getters
+
+#### Get Title
+Returns the title of the current page.
+
+```title="Syntax"
+get title
+```
+
+```title="Example"
+#testcase
+
+navigate "https://google.com"
+pageTitle = get title
+assert pageTitle == "Google"
+```
+
+#### Get Current URL
+Returns the URL of the current page.
+
+```title="Syntax"
+get current url
+```
+
+```title="Example"
+#testcase
+
+navigate "https://google.com"
+currentUrl = get current url
+assert currentUrl == "https://www.google.com/"
+```
+
+#### Get Attribute
+Returns the value of a specified attribute from an element.
+
+```title="Syntax"
+get attribute Expression from element Expression
+```
+
+```title="Example"
+#testcase
+
+navigate "https://example.com"
+hrefValue = get attribute "href" from element "//a[@id='link']"
+```
+
+#### Is Displayed
+Checks whether an element is displayed on the page.
+
+```title="Syntax"
+is element Expression displayed
+```
+
+```title="Example"
+#testcase
+
+navigate "https://example.com"
+isVisible = is element "//div[@id='content']" displayed
+assert isVisible == true
+```
+
+#### Is Enabled
+Checks whether an element is enabled.
+
+```title="Syntax"
+is element Expression enabled
+```
+
+```title="Example"
+#testcase
+
+navigate "https://example.com"
+isEnabled = is element "//button[@id='submit']" enabled
+assert isEnabled == true
+```
+
+#### Is Selected
+Checks whether an element (such as a checkbox or radio button) is selected.
+
+```title="Syntax"
+is element Expression selected
+```
+
+```title="Example"
+#testcase
+
+navigate "https://example.com"
+isChecked = is element "//input[@type='checkbox']" selected
+assert isChecked == false
+```
+
+#### Get Text
+Returns the visible text content of an element.
+
+```title="Syntax"
+get text from element Expression
+```
+
+```title="Example"
+#testcase
+
+navigate "https://example.com"
+buttonText = get text from element "//button[@id='submit']"
+assert buttonText == "Submit"
+```
+
+#### Get CSS Value
+Returns the value of a specified CSS property from an element.
+
+```title="Syntax"
+get css value Expression from element Expression
+```
+
+```title="Example"
+#testcase
+
+navigate "https://example.com"
+bgColor = get css value "background-color" from element "//div[@id='header']"
+```
+
+#### Get Tag Name
+Returns the tag name of an element.
+
+```title="Syntax"
+get tag name from element Expression
+```
+
+```title="Example"
+#testcase
+
+navigate "https://example.com"
+tagName = get tag name from element "//div[@id='content']"
+assert tagName == "div"
+```
